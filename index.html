@@ -1527,24 +1527,23 @@ Planview</div>
   <div class="topbar">
     <div>
       <div class="topbar-title">Live Intel</div>
-      <div class="topbar-crumb">AI-powered · Real-time Nike news from live web sources</div>
+      <div class="topbar-crumb">Real-time Nike news from Google News, Yahoo Finance & industry sources</div>
     </div>
     <div class="topbar-right">
-      <div id="intel-last-updated" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);background:var(--tag-bg);padding:5px 10px;border-radius:20px;">Not yet loaded</div>
-      <button id="intel-refresh-btn" onclick="fetchLiveIntel()" style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#fff;background:var(--pv-red);border:none;padding:7px 16px;border-radius:20px;cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;">
-        <svg id="intel-refresh-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        Refresh Feed
-      </button>
+      <a href="news.html" target="_blank" style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#fff;background:var(--pv-red);border:none;padding:7px 16px;border-radius:20px;cursor:pointer;text-decoration:none;font-family:'DM Sans',sans-serif;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Open Live Feed
+      </a>
+      <div class="date-pill">Live · no key needed</div>
     </div>
   </div>
-
   <div class="content">
     <div class="section-kicker">Section 6</div>
     <div class="section-heading">Live Intelligence Feed</div>
-    <div class="section-lead">Real-time Nike news pulled from live web sources via AI. Covers business performance, leadership changes, product launches, technology, and competitive moves — filtered for sales relevance. Refreshes on demand.</div>
+    <div class="section-lead">Real-time Nike news pulled from Google News, Yahoo Finance, and industry RSS feeds — no API key or proxy required. Auto-categorised by topic. Click any headline to read the full article.</div>
 
-    <!-- Pinned deal intel — always shown, never replaced -->
-    <div class="card" style="border-left:3px solid var(--pv-red);">
+    <!-- Pinned deal intel -->
+    <div class="card" style="border-left:3px solid var(--pv-red);margin-bottom:16px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--pv-red);">📌 Pinned — Deal Intelligence</div>
         <div style="font-size:10px;color:var(--muted);background:var(--tag-bg);padding:2px 7px;border-radius:4px;">Static · from CRM & CPO briefing</div>
@@ -1558,60 +1557,38 @@ Planview</div>
           <span class="intel-tag it-rfp">Active RFP</span>
         </div>
       </div>
-      <div class="intel-item" style="border-color:var(--border)">
+      <div class="intel-item" style="border-color:var(--border);border-bottom:none;">
         <div class="intel-date">Apr</div>
         <div>
           <div class="intel-source">CPO Intel · Louise Allen / John</div>
           <div class="intel-headline">Ankit Puranik confirmed — Director, Software Engineering, reports to Venky. Anthropic-certified.</div>
-          <div class="intel-body">Ankit is building AI agents with Claude LLMs internally. Anthropic-certified March 2026. 6 years at Accenture (who built the RFP). Most actionable target in the account. Lead with AI + speed-to-market, not a product pitch. Unknown VP sits between Ankit and Venky — identify before outreach.</div>
+          <div class="intel-body">Building AI agents with Claude LLMs internally. Anthropic-certified March 2026. 6 years at Accenture (who built the RFP). Most actionable target. Lead with AI + speed-to-market. Unknown VP sits between Ankit and Venky — identify before outreach.</div>
           <span class="intel-tag it-intel">Priority Contact</span>
         </div>
       </div>
     </div>
 
-    <!-- Live feed container -->
-    <div id="intel-feed-container">
-      <!-- Initial state -->
-      <div id="intel-initial-state" class="card" style="text-align:center;padding:48px 24px;">
-        <div style="font-size:32px;margin-bottom:12px;">📡</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:var(--text);margin-bottom:8px;">Feed not yet loaded</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:20px;max-width:420px;margin-left:auto;margin-right:auto;">Click <strong>Refresh Feed</strong> above to pull live Nike news from the web — earnings, leadership changes, product launches, and competitive moves, filtered for sales relevance.</div>
-        <button onclick="fetchLiveIntel()" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#fff;background:var(--pv-red);border:none;padding:10px 24px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          Load Live Intel Now
-        </button>
-      </div>
-
-      <!-- Loading state (hidden by default) -->
-      <div id="intel-loading-state" style="display:none;">
-        <div class="card" style="padding:32px 24px;">
-          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
-            <div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--pv-red);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--text);" id="intel-loading-msg">Searching for latest Nike news…</div>
-              <div style="font-size:11px;color:var(--muted);">Querying live web sources via AI</div>
-            </div>
-          </div>
-          <!-- Skeleton items -->
-          <div style="display:flex;flex-direction:column;gap:14px;">
-            <div class="skel-item"></div>
-            <div class="skel-item"></div>
-            <div class="skel-item"></div>
-            <div class="skel-item"></div>
-          </div>
+    <!-- Live feed preview iframe -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="background:#fafaf8;padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:7px;height:7px;border-radius:50%;background:#4CAF50;animation:pulse-green 2s ease-in-out infinite;"></div>
+          <span style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Live Feed Preview</span>
+          <span style="font-size:10px;color:var(--muted);">Google News · Yahoo Finance · RSS</span>
         </div>
+        <a href="news.html" target="_blank" style="font-size:11px;font-weight:600;color:var(--pv-red);text-decoration:none;display:flex;align-items:center;gap:4px;">Open full feed ↗</a>
       </div>
-
-      <!-- Results (hidden by default) -->
-      <div id="intel-results" style="display:none;"></div>
-
-      <!-- Error state (hidden by default) -->
-      <div id="intel-error-state" style="display:none;">
-        <div class="card" style="border-left:3px solid var(--danger);padding:20px 24px;">
-          <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:4px;">Feed failed to load</div>
-          <div style="font-size:12px;color:var(--muted);" id="intel-error-msg">Unknown error</div>
-          <button onclick="fetchLiveIntel()" style="margin-top:12px;font-size:12px;font-weight:600;color:var(--pv-red);background:none;border:1px solid var(--pv-red);padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;">Try again</button>
+      <div style="position:relative;height:520px;">
+        <div id="iframe-loading" style="position:absolute;inset:0;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:2;">
+          <div style="width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--pv-red);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+          <div style="font-size:12px;color:var(--muted);">Loading live feed…</div>
         </div>
+        <iframe
+          src="news.html"
+          style="width:100%;height:100%;border:none;display:block;"
+          title="Nike Live Intelligence Feed"
+          onload="document.getElementById('iframe-loading').style.display='none';"
+        ></iframe>
       </div>
     </div>
 
@@ -1619,353 +1596,8 @@ Planview</div>
 </div>
 
 <style>
-.skel-item {
-  height: 72px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, var(--tag-bg) 25%, #e8e7e3 50%, var(--tag-bg) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-}
-@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-.live-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  margin-bottom: 12px;
-  overflow: hidden;
-}
-.live-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 18px 10px;
-  border-bottom: 1px solid var(--border);
-  background: #fafaf8;
-}
-.live-card-category {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.live-card-count {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-}
-.live-item {
-  display: grid;
-  grid-template-columns: 52px 1fr;
-  gap: 12px;
-  padding: 13px 18px;
-  border-bottom: 1px solid var(--border);
-  transition: background 0.12s;
-}
-.live-item:last-child { border-bottom: none; }
-.live-item:hover { background: #fafaf8; }
-.live-date {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  padding-top: 2px;
-  text-align: right;
-  line-height: 1.4;
-}
-.live-source {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 2px;
-}
-.live-headline {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 4px;
-  line-height: 1.4;
-}
-.live-body {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.65;
-  margin-bottom: 6px;
-}
-.live-so-what {
-  font-size: 11px;
-  color: var(--pv-red);
-  font-weight: 600;
-  padding-top: 5px;
-  border-top: 1px solid var(--border);
-  margin-top: 5px;
-}
-.live-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
-.live-tag {
-  font-size: 9px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 4px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.lt-earnings  { background: rgba(198,146,20,0.1);  color: var(--accent-gold); }
-.lt-product   { background: rgba(45,106,79,0.1);   color: var(--ok); }
-.lt-leadership{ background: rgba(250,84,0,0.1);    color: var(--accent-orange); }
-.lt-tech      { background: rgba(21,101,192,0.1);  color: #1565C0; }
-.lt-compete   { background: rgba(200,16,46,0.1);   color: var(--danger); }
-.lt-market    { background: rgba(100,100,100,0.1); color: #555; }
-.lt-china     { background: rgba(198,146,20,0.12); color: #8a6000; }
-.live-link {
-  font-size: 10px;
-  color: var(--muted);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  margin-top: 4px;
-  opacity: 0.7;
-  transition: opacity 0.15s;
-}
-.live-link:hover { opacity: 1; color: var(--pv-red); }
-
-/* Refresh button spin animation */
-.spinning { animation: spin 0.8s linear infinite; }
+@keyframes pulse-green { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
 </style>
-
-<script>
-// ── Live Intel Feed ─────────────────────────────────────────────────────────
-
-const INTEL_SYSTEM_PROMPT = `You are an expert B2B sales intelligence analyst for Planview, a portfolio management software company. Your job is to monitor Nike, Inc. (NKE) and surface the latest news, business developments, leadership changes, financial updates, product launches, and technology news — all filtered through the lens of what matters for a software sales opportunity.
-
-Planview is pursuing Nike on:
-1. Release & Verify (R&V) — active RFP for release orchestration platform, replacing XL Release
-2. Strategic Portfolio Management (SPM) — helping COO Venkatesh Alagirisamy integrate technology across Nike's value chain
-3. Product Development (PD) — governance for Nike's innovation pipeline across 3 brands / 5 sports
-4. Digital Product Development (DPD/EAP) — agile planning for NIKE.com and Nike App engineering teams
-
-Key context: Elliott Hill is CEO running a "Win Now" turnaround. New COO Venky has an explicit mandate to integrate technology end-to-end. Nike issued a release orchestration RFP in March 2026. The 2026 FIFA World Cup is a hard delivery deadline.
-
-Use the web_search tool to find the latest news about Nike. Search for:
-- "Nike Inc news 2026"
-- "Nike earnings 2026"  
-- "Nike technology leadership 2026"
-- "Nike Elliott Hill 2026"
-- "Nike NKE stock news"
-- "Nike World Cup 2026"
-- "Nike supply chain operations 2026"
-
-Return a JSON object with this exact structure — no markdown, no preamble, just the raw JSON:
-{
-  "fetched_at": "ISO timestamp",
-  "categories": [
-    {
-      "id": "earnings_finance",
-      "label": "Earnings & Finance",
-      "color": "lt-earnings",
-      "items": [
-        {
-          "date": "Apr 2026",
-          "source": "Source name",
-          "headline": "Concise headline under 90 chars",
-          "body": "2-3 sentence summary of what happened",
-          "so_what": "One sentence on why this matters for Planview's deal",
-          "tags": ["lt-earnings"],
-          "url": "https://source-url.com or empty string"
-        }
-      ]
-    }
-  ]
-}
-
-Categories to populate (include all that have items, skip empty ones):
-- earnings_finance (label: "Earnings & Finance", color: lt-earnings)
-- leadership_org (label: "Leadership & Org Changes", color: lt-leadership)  
-- product_innovation (label: "Product & Innovation", color: lt-product)
-- technology_ops (label: "Technology & Operations", color: lt-tech)
-- competitive_market (label: "Competitive & Market", color: lt-compete)
-- china_geo (label: "China & Geography", color: lt-china)
-
-Include 3-8 items total across all categories. Each item MUST have a "so_what" field — that's the most important field for the sales team. Be specific and tie it to Planview's products or the active deal.
-
-Only include news from the last 90 days where possible. If a story is older but highly relevant, include it with an accurate date.`;
-
-let intelFetchController = null;
-
-async function fetchLiveIntel() {
-  // Cancel any in-flight request
-  if (intelFetchController) intelFetchController.abort();
-  intelFetchController = new AbortController();
-
-  // UI state: loading
-  setIntelState('loading');
-  setRefreshBtnSpinning(true);
-
-  const loadingMsgs = [
-    'Searching for latest Nike news…',
-    'Scanning earnings, leadership & product updates…',
-    'Filtering for sales-relevant signals…',
-    'Synthesizing intelligence…'
-  ];
-  let msgIdx = 0;
-  const msgInterval = setInterval(() => {
-    msgIdx = (msgIdx + 1) % loadingMsgs.length;
-    const el = document.getElementById('intel-loading-msg');
-    if (el) el.textContent = loadingMsgs[msgIdx];
-  }, 2200);
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      signal: intelFetchController.signal,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        system: INTEL_SYSTEM_PROMPT,
-        messages: [{
-          role: 'user',
-          content: 'Search the web for the latest Nike news right now and return the structured JSON intelligence feed. Today is ' + new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'}) + '. Focus on the most recent and sales-relevant developments.'
-        }]
-      })
-    });
-
-    clearInterval(msgInterval);
-
-    if (!response.ok) {
-      throw new Error(`API error ${response.status}: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    // Extract text from response (may include tool use blocks)
-    let rawText = '';
-    if (data.content) {
-      for (const block of data.content) {
-        if (block.type === 'text') rawText += block.text;
-      }
-    }
-
-    // Parse JSON — strip any markdown fences
-    const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
-    // Find the JSON object
-    const jsonStart = cleaned.indexOf('{');
-    const jsonEnd = cleaned.lastIndexOf('}');
-    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON found in response');
-    
-    const parsed = JSON.parse(cleaned.slice(jsonStart, jsonEnd + 1));
-    renderIntelFeed(parsed);
-    setIntelState('results');
-
-    // Update timestamp
-    const now = new Date();
-    document.getElementById('intel-last-updated').textContent =
-      'Updated ' + now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}) +
-      ' · ' + now.toLocaleDateString('en-US', {month:'short', day:'numeric'});
-
-  } catch (err) {
-    clearInterval(msgInterval);
-    if (err.name === 'AbortError') return; // user triggered new fetch
-    console.error('Intel fetch error:', err);
-    document.getElementById('intel-error-msg').textContent = err.message || 'Failed to load feed.';
-    setIntelState('error');
-  } finally {
-    setRefreshBtnSpinning(false);
-  }
-}
-
-function setIntelState(state) {
-  document.getElementById('intel-initial-state').style.display  = state === 'initial'  ? '' : 'none';
-  document.getElementById('intel-loading-state').style.display  = state === 'loading'  ? '' : 'none';
-  document.getElementById('intel-results').style.display        = state === 'results'  ? '' : 'none';
-  document.getElementById('intel-error-state').style.display    = state === 'error'    ? '' : 'none';
-}
-
-function setRefreshBtnSpinning(on) {
-  const icon = document.getElementById('intel-refresh-icon');
-  if (icon) icon.classList.toggle('spinning', on);
-  const btn = document.getElementById('intel-refresh-btn');
-  if (btn) btn.disabled = on;
-}
-
-function renderIntelFeed(data) {
-  const container = document.getElementById('intel-results');
-  if (!container) return;
-
-  if (!data.categories || data.categories.length === 0) {
-    container.innerHTML = '<div class="card" style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">No intelligence items returned. Try refreshing.</div>';
-    return;
-  }
-
-  let html = '';
-
-  // Summary bar
-  const totalItems = data.categories.reduce((acc, cat) => acc + (cat.items || []).length, 0);
-  html += `
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-      <div style="font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);padding:5px 12px;border-radius:20px;">
-        <strong style="color:var(--text)">${totalItems}</strong> stories · ${data.categories.length} categories
-      </div>
-      ${data.categories.map(cat => `
-        <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;" class="${cat.color || 'lt-market'}">
-          ${escHtml(cat.label)} <span style="opacity:0.7">(${(cat.items||[]).length})</span>
-        </div>
-      `).join('')}
-    </div>`;
-
-  // Category cards
-  for (const cat of data.categories) {
-    if (!cat.items || cat.items.length === 0) continue;
-    html += `
-      <div class="live-card">
-        <div class="live-card-header">
-          <span class="live-card-category ${cat.color || 'lt-market'}">${escHtml(cat.label)}</span>
-          <span class="live-card-count">${cat.items.length} item${cat.items.length !== 1 ? 's' : ''}</span>
-        </div>`;
-
-    for (const item of cat.items) {
-      const tags = (item.tags || [cat.color || 'lt-market']);
-      html += `
-        <div class="live-item">
-          <div class="live-date">${escHtml(item.date || '')}</div>
-          <div>
-            <div class="live-source">${escHtml(item.source || '')}</div>
-            <div class="live-headline">${escHtml(item.headline || '')}</div>
-            <div class="live-body">${escHtml(item.body || '')}</div>
-            ${item.so_what ? `<div class="live-so-what">▶ ${escHtml(item.so_what)}</div>` : ''}
-            <div class="live-tags">
-              ${tags.map(t => `<span class="live-tag ${escHtml(t)}">${tagLabel(t)}</span>`).join('')}
-            </div>
-            ${item.url ? `<a class="live-link" href="${escHtml(item.url)}" target="_blank" rel="noopener">↗ Source</a>` : ''}
-          </div>
-        </div>`;
-    }
-    html += `</div>`;
-  }
-
-  container.innerHTML = html;
-}
-
-function escHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
-}
-
-function tagLabel(cls) {
-  const map = {
-    'lt-earnings':'Finance','lt-product':'Product','lt-leadership':'Leadership',
-    'lt-tech':'Tech','lt-compete':'Competitive','lt-market':'Market','lt-china':'China'
-  };
-  return map[cls] || cls.replace('lt-','');
-}
-</script>
 
 <!-- ═══════════════ SECTION 7: ORG CHART ═══════════════ -->
 <div id="s7" class="section">
