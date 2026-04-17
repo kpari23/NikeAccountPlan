@@ -1527,152 +1527,445 @@ Planview</div>
   <div class="topbar">
     <div>
       <div class="topbar-title">Live Intel</div>
-      <div class="topbar-crumb">RFP Updates · Market Intelligence · Org Changes</div>
+      <div class="topbar-crumb">AI-powered · Real-time Nike news from live web sources</div>
     </div>
     <div class="topbar-right">
-      <div class="date-pill">Apr 17, 2026</div>
+      <div id="intel-last-updated" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);background:var(--tag-bg);padding:5px 10px;border-radius:20px;">Not yet loaded</div>
+      <button id="intel-refresh-btn" onclick="fetchLiveIntel()" style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#fff;background:var(--pv-red);border:none;padding:7px 16px;border-radius:20px;cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;">
+        <svg id="intel-refresh-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Refresh Feed
+      </button>
     </div>
   </div>
+
   <div class="content">
-
     <div class="section-kicker">Section 6</div>
-    <div class="section-heading">Intelligence Feed</div>
-    <div class="section-lead">Latest developments on the RFP, Nike's business, and organizational intelligence. Updated as new information surfaces.</div>
+    <div class="section-heading">Live Intelligence Feed</div>
+    <div class="section-lead">Real-time Nike news pulled from live web sources via AI. Covers business performance, leadership changes, product launches, technology, and competitive moves — filtered for sales relevance. Refreshes on demand.</div>
 
-    <div class="card">
-      <div class="card-title" style="margin-bottom:14px">RFP & Deal Intelligence</div>
-
-      <div class="intel-item">
+    <!-- Pinned deal intel — always shown, never replaced -->
+    <div class="card" style="border-left:3px solid var(--pv-red);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--pv-red);">📌 Pinned — Deal Intelligence</div>
+        <div style="font-size:10px;color:var(--muted);background:var(--tag-bg);padding:2px 7px;border-radius:4px;">Static · from CRM & CPO briefing</div>
+      </div>
+      <div class="intel-item" style="border-color:var(--border)">
         <div class="intel-date">Apr 13</div>
         <div>
-          <div class="intel-source">Deal Update · Salesforce</div>
-          <div class="intel-headline">Nike silent post-submission — Kush followed up April 13</div>
-          <div class="intel-body">RFP submitted March 30. Nike indicated they would follow up with questions by April 6 — none received. Kush followed up to gauge status. No response yet. Deal still live in Stage 1.</div>
-          <span class="intel-tag it-rfp">RFP</span>
+          <div class="intel-source">Salesforce · Deal Update</div>
+          <div class="intel-headline">Nike silent post-RFP submission — follow-up sent April 13</div>
+          <div class="intel-body">RFP submitted March 30. Nike said they'd follow up with questions by April 6 — nothing received. Kush followed up April 13. No response yet. Stage 1 / Discover. Accenture built the RFP, not Nike internally.</div>
+          <span class="intel-tag it-rfp">Active RFP</span>
         </div>
       </div>
-
-      <div class="intel-item">
+      <div class="intel-item" style="border-color:var(--border)">
         <div class="intel-date">Apr</div>
         <div>
-          <div class="intel-source">CPO Intelligence · Louise Allen Meeting</div>
-          <div class="intel-headline">RFP was built by Accenture, not Nike — critical finding</div>
-          <div class="intel-body">Louise Allen (PV CPO) met with John (ex-Nike senior executive). Key reveal: the RFP criteria were shaped by Accenture, not Nike procurement. Ankit Puranik (Director, Software Engineering) spent 6 years at Accenture — potential internal bridge. Accenture's Nike engagement lead is unknown and a priority to identify.</div>
-          <span class="intel-tag it-intel">CPO Intel</span>
-          <span class="intel-tag it-rfp">RFP</span>
-        </div>
-      </div>
-
-      <div class="intel-item">
-        <div class="intel-date">Apr</div>
-        <div>
-          <div class="intel-source">CPO Intelligence</div>
-          <div class="intel-headline">Ankit Puranik identified — Director, Software Engineering reporting to Venky</div>
-          <div class="intel-body">Reports directly to the COO. Anthropic-certified (Claude 101 + AI Fluency, March 2026). Building AI agents with Claude LLMs internally. Drove 25% time-to-market improvement at Whirlpool, 50% faster mobile delivery. This is the most actionable target in the account. Lead with AI/speed-to-market. Do not cold pitch the RFP.</div>
-          <span class="intel-tag it-intel">New Contact</span>
-          <span class="intel-tag it-rfp">Priority</span>
-        </div>
-      </div>
-
-      <div class="intel-item">
-        <div class="intel-date">Apr</div>
-        <div>
-          <div class="intel-source">Org Intelligence</div>
-          <div class="intel-headline">New unidentified role sits between Ankit and Venky</div>
-          <div class="intel-body">John flagged a brand new position between Ankit Puranik and the COO. Identity unknown — could be a VP of Engineering, Chief of Staff to the COO, or VP of Digital Transformation. Must identify before reaching out to Ankit to avoid a gatekeeper surprise. Best candidate based on research: Dan Bay (VP, Global Technology Innovation).</div>
-          <span class="intel-tag it-intel">Org Intel</span>
-        </div>
-      </div>
-
-      <div class="intel-item">
-        <div class="intel-date">Jan 2026</div>
-        <div>
-          <div class="intel-source">Nike Org Change · LinkedIn Confirmed</div>
-          <div class="intel-headline">Rajeev Aikkara promoted to VP of Technology — January 2026</div>
-          <div class="intel-body">Previous role: VP Global Technology focused on Planning, Manufacturing and Supply Chain (inside Venky's org). Promoted January 2026. Clare Sabatucci (Nike innovation) commented on his announcement confirming a working relationship. Directly relevant to both R&V and Hub/DPD. Worth pursuing in parallel with Ankit outreach.</div>
-          <span class="intel-tag it-intel">New VP</span>
-          <span class="intel-tag it-rfp">Warm Path</span>
+          <div class="intel-source">CPO Intel · Louise Allen / John</div>
+          <div class="intel-headline">Ankit Puranik confirmed — Director, Software Engineering, reports to Venky. Anthropic-certified.</div>
+          <div class="intel-body">Ankit is building AI agents with Claude LLMs internally. Anthropic-certified March 2026. 6 years at Accenture (who built the RFP). Most actionable target in the account. Lead with AI + speed-to-market, not a product pitch. Unknown VP sits between Ankit and Venky — identify before outreach.</div>
+          <span class="intel-tag it-intel">Priority Contact</span>
         </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title" style="margin-bottom:14px">Nike Business Intelligence — Q2 FY26 & Recent</div>
+    <!-- Live feed container -->
+    <div id="intel-feed-container">
+      <!-- Initial state -->
+      <div id="intel-initial-state" class="card" style="text-align:center;padding:48px 24px;">
+        <div style="font-size:32px;margin-bottom:12px;">📡</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:var(--text);margin-bottom:8px;">Feed not yet loaded</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px;max-width:420px;margin-left:auto;margin-right:auto;">Click <strong>Refresh Feed</strong> above to pull live Nike news from the web — earnings, leadership changes, product launches, and competitive moves, filtered for sales relevance.</div>
+        <button onclick="fetchLiveIntel()" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#fff;background:var(--pv-red);border:none;padding:10px 24px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Load Live Intel Now
+        </button>
+      </div>
 
-      <div class="intel-item">
-        <div class="intel-date">Dec 18</div>
-        <div>
-          <div class="intel-source">Q2 FY26 Earnings · Elliott Hill</div>
-          <div class="intel-headline">Venkatesh Alagirisamy named COO with explicit tech integration mandate</div>
-          <div class="intel-body">"He and his team will look end-to-end to ensure technology is fully integrated across the company in how we create, plan, make, deliver and sell our world-class innovations." — Elliott Hill. CTO role eliminated simultaneously. Venky absorbed all technology authority.</div>
-          <span class="intel-tag it-ceo">CEO Mandate</span>
+      <!-- Loading state (hidden by default) -->
+      <div id="intel-loading-state" style="display:none;">
+        <div class="card" style="padding:32px 24px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--pv-red);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);" id="intel-loading-msg">Searching for latest Nike news…</div>
+              <div style="font-size:11px;color:var(--muted);">Querying live web sources via AI</div>
+            </div>
+          </div>
+          <!-- Skeleton items -->
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="skel-item"></div>
+            <div class="skel-item"></div>
+            <div class="skel-item"></div>
+            <div class="skel-item"></div>
+          </div>
         </div>
       </div>
 
-      <div class="intel-item">
-        <div class="intel-date">Dec 18</div>
-        <div>
-          <div class="intel-source">Q2 FY26 Earnings</div>
-          <div class="intel-headline">All geography GMs now report directly to Elliott Hill</div>
-          <div class="intel-body">Hill restructured the leadership team so all geo GMs (Tom Peddie - NA, Angela Dong - China, Carl Grebert - EMEA, Cathy Sparks - APLA) report directly to him. "I'm confident this change will result in us accelerating our Win Now actions by allowing our geography GMs to more closely shape our strategy, drive faster decisions and influence investments."</div>
-          <span class="intel-tag it-ceo">Org Change</span>
+      <!-- Results (hidden by default) -->
+      <div id="intel-results" style="display:none;"></div>
+
+      <!-- Error state (hidden by default) -->
+      <div id="intel-error-state" style="display:none;">
+        <div class="card" style="border-left:3px solid var(--danger);padding:20px 24px;">
+          <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:4px;">Feed failed to load</div>
+          <div style="font-size:12px;color:var(--muted);" id="intel-error-msg">Unknown error</div>
+          <button onclick="fetchLiveIntel()" style="margin-top:12px;font-size:12px;font-weight:600;color:var(--pv-red);background:none;border:1px solid var(--pv-red);padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;">Try again</button>
         </div>
-      </div>
-
-      <div class="intel-item">
-        <div class="intel-date">Dec 18</div>
-        <div>
-          <div class="intel-source">Q2 FY26 Earnings · Matt Friend</div>
-          <div class="intel-headline">Matt Friend absorbs NIKE Direct and Sales — expands beyond CFO role</div>
-          <div class="intel-body">In addition to EVP/CFO responsibilities, Friend now owns NIKE Direct and Sales. NIKE.com posted its best-ever Black Friday (Jordan Black Cat launch). Digital repositioned as premium channel. Gross margin down 300bps to 40.6% due to tariffs + China inventory write-off.</div>
-          <span class="intel-tag it-ceo">Org Change</span>
-          <span class="intel-tag it-market">Finance</span>
-        </div>
-      </div>
-
-      <div class="intel-item">
-        <div class="intel-date">Mar 2026</div>
-        <div>
-          <div class="intel-source">Nike Innovation</div>
-          <div class="intel-headline">Aero-FIT launches on national team kits — World Cup pipeline live</div>
-          <div class="intel-body">Nike's new apparel platform Aero-FIT is now worn by athletes in national team kits across 13+ countries. Football order book +40% vs. 2022. 100+ Nike Direct doors and 1,400 partner doors refreshed for World Cup. This is the biggest delivery deadline in Nike's turnaround calendar.</div>
-          <span class="intel-tag it-market">Product Launch</span>
-        </div>
-      </div>
-
-      <div class="intel-item">
-        <div class="intel-date">Oct 2025</div>
-        <div>
-          <div class="intel-source">Nike Innovation · NSRL</div>
-          <div class="intel-headline">Nike Mind launched — neuroscience-based footwear platform</div>
-          <div class="intel-body">Nike's first neuroscience-based footwear, designed to "help athletes feel calm." Announced alongside 3 other new innovation platforms (Therma-FIT Air, Structure Plus, Aero-FIT). Clare Sabatucci posted about Nike Mind publicly. This is the Sport Offense innovation pipeline made visible to consumers.</div>
-          <span class="intel-tag it-market">Innovation</span>
-        </div>
-      </div>
-
-      <div class="intel-item">
-        <div class="intel-date">Sep 2025</div>
-        <div>
-          <div class="intel-source">Nike Org Restructure</div>
-          <div class="intel-headline">~1,000 designers merged into single innovation unit under Phil McCartney</div>
-          <div class="intel-body">Nike, Jordan, and Converse R&D designers merged into one unified Sport Offense innovation organization. "A new day in Innovation, Design and Product." Creates the governance challenge Planview IdeaPlace + PD solves: three brands, five sports, one pipeline, no unified stage-gate process.</div>
-          <span class="intel-tag it-ceo">Org Change</span>
-          <span class="intel-tag it-rfp">PD Opportunity</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="card">
-      <div class="card-title" style="margin-bottom:14px">Q3 FY26 Earnings — Watch Signals (March 31, 2026)</div>
-      <div style="background:var(--warn-bg);border:1px solid rgba(198,146,20,0.2);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text);line-height:1.7">
-        <strong>Q3 guidance from Matt Friend:</strong> Revenues expected down low single digits. Modest growth in North America. China and Converse similar to Q2 (still declining). Gross margin down 175–225bps (would be positive excluding tariff impact). SG&A up low single digits from sport offense investments.<br><br>
-        <strong>What to watch for SPM angle:</strong> If China numbers worsen, the scenario modeling argument gets sharper — "how do you reallocate investment in real time when a geography stalls?" If North America continues leading, Running's +20% becomes the "how do you scale this across all sports" question for PD/IdeaPlace.
       </div>
     </div>
 
   </div>
 </div>
+
+<style>
+.skel-item {
+  height: 72px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--tag-bg) 25%, #e8e7e3 50%, var(--tag-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+.live-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.live-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px 10px;
+  border-bottom: 1px solid var(--border);
+  background: #fafaf8;
+}
+.live-card-category {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.live-card-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+.live-item {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 12px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.live-item:last-child { border-bottom: none; }
+.live-item:hover { background: #fafaf8; }
+.live-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  padding-top: 2px;
+  text-align: right;
+  line-height: 1.4;
+}
+.live-source {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.live-headline {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+.live-body {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 6px;
+}
+.live-so-what {
+  font-size: 11px;
+  color: var(--pv-red);
+  font-weight: 600;
+  padding-top: 5px;
+  border-top: 1px solid var(--border);
+  margin-top: 5px;
+}
+.live-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+.live-tag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.lt-earnings  { background: rgba(198,146,20,0.1);  color: var(--accent-gold); }
+.lt-product   { background: rgba(45,106,79,0.1);   color: var(--ok); }
+.lt-leadership{ background: rgba(250,84,0,0.1);    color: var(--accent-orange); }
+.lt-tech      { background: rgba(21,101,192,0.1);  color: #1565C0; }
+.lt-compete   { background: rgba(200,16,46,0.1);   color: var(--danger); }
+.lt-market    { background: rgba(100,100,100,0.1); color: #555; }
+.lt-china     { background: rgba(198,146,20,0.12); color: #8a6000; }
+.live-link {
+  font-size: 10px;
+  color: var(--muted);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.live-link:hover { opacity: 1; color: var(--pv-red); }
+
+/* Refresh button spin animation */
+.spinning { animation: spin 0.8s linear infinite; }
+</style>
+
+<script>
+// ── Live Intel Feed ─────────────────────────────────────────────────────────
+
+const INTEL_SYSTEM_PROMPT = `You are an expert B2B sales intelligence analyst for Planview, a portfolio management software company. Your job is to monitor Nike, Inc. (NKE) and surface the latest news, business developments, leadership changes, financial updates, product launches, and technology news — all filtered through the lens of what matters for a software sales opportunity.
+
+Planview is pursuing Nike on:
+1. Release & Verify (R&V) — active RFP for release orchestration platform, replacing XL Release
+2. Strategic Portfolio Management (SPM) — helping COO Venkatesh Alagirisamy integrate technology across Nike's value chain
+3. Product Development (PD) — governance for Nike's innovation pipeline across 3 brands / 5 sports
+4. Digital Product Development (DPD/EAP) — agile planning for NIKE.com and Nike App engineering teams
+
+Key context: Elliott Hill is CEO running a "Win Now" turnaround. New COO Venky has an explicit mandate to integrate technology end-to-end. Nike issued a release orchestration RFP in March 2026. The 2026 FIFA World Cup is a hard delivery deadline.
+
+Use the web_search tool to find the latest news about Nike. Search for:
+- "Nike Inc news 2026"
+- "Nike earnings 2026"  
+- "Nike technology leadership 2026"
+- "Nike Elliott Hill 2026"
+- "Nike NKE stock news"
+- "Nike World Cup 2026"
+- "Nike supply chain operations 2026"
+
+Return a JSON object with this exact structure — no markdown, no preamble, just the raw JSON:
+{
+  "fetched_at": "ISO timestamp",
+  "categories": [
+    {
+      "id": "earnings_finance",
+      "label": "Earnings & Finance",
+      "color": "lt-earnings",
+      "items": [
+        {
+          "date": "Apr 2026",
+          "source": "Source name",
+          "headline": "Concise headline under 90 chars",
+          "body": "2-3 sentence summary of what happened",
+          "so_what": "One sentence on why this matters for Planview's deal",
+          "tags": ["lt-earnings"],
+          "url": "https://source-url.com or empty string"
+        }
+      ]
+    }
+  ]
+}
+
+Categories to populate (include all that have items, skip empty ones):
+- earnings_finance (label: "Earnings & Finance", color: lt-earnings)
+- leadership_org (label: "Leadership & Org Changes", color: lt-leadership)  
+- product_innovation (label: "Product & Innovation", color: lt-product)
+- technology_ops (label: "Technology & Operations", color: lt-tech)
+- competitive_market (label: "Competitive & Market", color: lt-compete)
+- china_geo (label: "China & Geography", color: lt-china)
+
+Include 3-8 items total across all categories. Each item MUST have a "so_what" field — that's the most important field for the sales team. Be specific and tie it to Planview's products or the active deal.
+
+Only include news from the last 90 days where possible. If a story is older but highly relevant, include it with an accurate date.`;
+
+let intelFetchController = null;
+
+async function fetchLiveIntel() {
+  // Cancel any in-flight request
+  if (intelFetchController) intelFetchController.abort();
+  intelFetchController = new AbortController();
+
+  // UI state: loading
+  setIntelState('loading');
+  setRefreshBtnSpinning(true);
+
+  const loadingMsgs = [
+    'Searching for latest Nike news…',
+    'Scanning earnings, leadership & product updates…',
+    'Filtering for sales-relevant signals…',
+    'Synthesizing intelligence…'
+  ];
+  let msgIdx = 0;
+  const msgInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % loadingMsgs.length;
+    const el = document.getElementById('intel-loading-msg');
+    if (el) el.textContent = loadingMsgs[msgIdx];
+  }, 2200);
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: intelFetchController.signal,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        system: INTEL_SYSTEM_PROMPT,
+        messages: [{
+          role: 'user',
+          content: 'Search the web for the latest Nike news right now and return the structured JSON intelligence feed. Today is ' + new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'}) + '. Focus on the most recent and sales-relevant developments.'
+        }]
+      })
+    });
+
+    clearInterval(msgInterval);
+
+    if (!response.ok) {
+      throw new Error(`API error ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Extract text from response (may include tool use blocks)
+    let rawText = '';
+    if (data.content) {
+      for (const block of data.content) {
+        if (block.type === 'text') rawText += block.text;
+      }
+    }
+
+    // Parse JSON — strip any markdown fences
+    const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    // Find the JSON object
+    const jsonStart = cleaned.indexOf('{');
+    const jsonEnd = cleaned.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON found in response');
+    
+    const parsed = JSON.parse(cleaned.slice(jsonStart, jsonEnd + 1));
+    renderIntelFeed(parsed);
+    setIntelState('results');
+
+    // Update timestamp
+    const now = new Date();
+    document.getElementById('intel-last-updated').textContent =
+      'Updated ' + now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}) +
+      ' · ' + now.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+
+  } catch (err) {
+    clearInterval(msgInterval);
+    if (err.name === 'AbortError') return; // user triggered new fetch
+    console.error('Intel fetch error:', err);
+    document.getElementById('intel-error-msg').textContent = err.message || 'Failed to load feed.';
+    setIntelState('error');
+  } finally {
+    setRefreshBtnSpinning(false);
+  }
+}
+
+function setIntelState(state) {
+  document.getElementById('intel-initial-state').style.display  = state === 'initial'  ? '' : 'none';
+  document.getElementById('intel-loading-state').style.display  = state === 'loading'  ? '' : 'none';
+  document.getElementById('intel-results').style.display        = state === 'results'  ? '' : 'none';
+  document.getElementById('intel-error-state').style.display    = state === 'error'    ? '' : 'none';
+}
+
+function setRefreshBtnSpinning(on) {
+  const icon = document.getElementById('intel-refresh-icon');
+  if (icon) icon.classList.toggle('spinning', on);
+  const btn = document.getElementById('intel-refresh-btn');
+  if (btn) btn.disabled = on;
+}
+
+function renderIntelFeed(data) {
+  const container = document.getElementById('intel-results');
+  if (!container) return;
+
+  if (!data.categories || data.categories.length === 0) {
+    container.innerHTML = '<div class="card" style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">No intelligence items returned. Try refreshing.</div>';
+    return;
+  }
+
+  let html = '';
+
+  // Summary bar
+  const totalItems = data.categories.reduce((acc, cat) => acc + (cat.items || []).length, 0);
+  html += `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+      <div style="font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);padding:5px 12px;border-radius:20px;">
+        <strong style="color:var(--text)">${totalItems}</strong> stories · ${data.categories.length} categories
+      </div>
+      ${data.categories.map(cat => `
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;" class="${cat.color || 'lt-market'}">
+          ${escHtml(cat.label)} <span style="opacity:0.7">(${(cat.items||[]).length})</span>
+        </div>
+      `).join('')}
+    </div>`;
+
+  // Category cards
+  for (const cat of data.categories) {
+    if (!cat.items || cat.items.length === 0) continue;
+    html += `
+      <div class="live-card">
+        <div class="live-card-header">
+          <span class="live-card-category ${cat.color || 'lt-market'}">${escHtml(cat.label)}</span>
+          <span class="live-card-count">${cat.items.length} item${cat.items.length !== 1 ? 's' : ''}</span>
+        </div>`;
+
+    for (const item of cat.items) {
+      const tags = (item.tags || [cat.color || 'lt-market']);
+      html += `
+        <div class="live-item">
+          <div class="live-date">${escHtml(item.date || '')}</div>
+          <div>
+            <div class="live-source">${escHtml(item.source || '')}</div>
+            <div class="live-headline">${escHtml(item.headline || '')}</div>
+            <div class="live-body">${escHtml(item.body || '')}</div>
+            ${item.so_what ? `<div class="live-so-what">▶ ${escHtml(item.so_what)}</div>` : ''}
+            <div class="live-tags">
+              ${tags.map(t => `<span class="live-tag ${escHtml(t)}">${tagLabel(t)}</span>`).join('')}
+            </div>
+            ${item.url ? `<a class="live-link" href="${escHtml(item.url)}" target="_blank" rel="noopener">↗ Source</a>` : ''}
+          </div>
+        </div>`;
+    }
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function tagLabel(cls) {
+  const map = {
+    'lt-earnings':'Finance','lt-product':'Product','lt-leadership':'Leadership',
+    'lt-tech':'Tech','lt-compete':'Competitive','lt-market':'Market','lt-china':'China'
+  };
+  return map[cls] || cls.replace('lt-','');
+}
+</script>
 
 <!-- ═══════════════ SECTION 7: ORG CHART ═══════════════ -->
 <div id="s7" class="section">
