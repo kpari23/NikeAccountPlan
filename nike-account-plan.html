@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nike, Inc. — Planview Account Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --sw: #111111;
+  --bg: #F4F3F0;
+  --card: #FFFFFF;
+  --pv-red: #C8102E;
+  --pv-dark: #1A1A1A;
+  --accent-orange: #FA5400;
+  --accent-gold: #C69214;
+  --text: #1A1A1A;
+  --muted: #6B6B6B;
+  --border: #E2E0DC;
+  --tag-bg: #EDECE9;
+  --danger: #C8102E;
+  --warn: #C69214;
+  --ok: #2D6A4F;
+  --ok-bg: #E8F5EE;
+  --warn-bg: #FFF8E6;
+  --danger-bg: #FEF0F0;
+  --sidebar: 240px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar);
+  height: 100vh;
+  background: var(--pv-dark);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 100;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-header {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.pv-logo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  color: var(--pv-red);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.account-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.swoosh {
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.swoosh svg { width: 22px; height: 22px; }
+.account-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #fff;
+  line-height: 1.1;
+}
+.account-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.04em;
+}
+.sidebar-meta {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.meta-label { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 0.08em; text-transform: uppercase; }
+.meta-val { font-size: 11px; color: rgba(255,255,255,0.7); font-family: 'DM Mono', monospace; }
+.stage-badge {
+  margin-top: 10px;
+  display: inline-block;
+  background: rgba(200,16,46,0.2);
+  border: 1px solid rgba(200,16,46,0.4);
+  color: #ff6b6b;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.acv-block {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(250,84,0,0.1);
+  border: 1px solid rgba(250,84,0,0.2);
+  border-radius: 6px;
+}
+.acv-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; }
+.acv-val { font-size: 20px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--accent-orange); line-height: 1.2; }
+.acv-sub { font-size: 10px; color: rgba(255,255,255,0.35); }
+nav { padding: 16px 0; flex: 1; }
+.nav-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  padding: 8px 20px 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 20px;
+  cursor: pointer;
+  text-decoration: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.04); }
+.nav-item.active { color: #fff; border-left-color: var(--pv-red); background: rgba(200,16,46,0.08); }
+.nav-icon { font-size: 13px; width: 16px; text-align: center; }
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+  line-height: 1.6;
+}
+.sf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0,161,224,0.15);
+  border: 1px solid rgba(0,161,224,0.3);
+  color: #4FC3F7;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* ── Main ── */
+main {
+  margin-left: var(--sidebar);
+  flex: 1;
+  overflow-x: hidden;
+}
+
+/* ── Sections ── */
+.section { display: none; min-height: 100vh; }
+.section.active { display: block; }
+
+/* ── Top bar ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  background: rgba(244,243,240,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 50;
+}
+.topbar-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  text-transform: uppercase;
+}
+.topbar-crumb { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.owner-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px 5px 7px;
+}
+.owner-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--pv-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+}
+.owner-name { font-size: 11px; font-weight: 500; color: var(--text); }
+.date-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--tag-bg);
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+/* ── Content container ── */
+.content { padding: 36px 40px 60px; max-width: 1000px; }
+
+/* ── Section heading ── */
+.section-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--pv-red);
+  margin-bottom: 4px;
+}
+.section-heading {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 28px;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.1;
+}
+.section-lead {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 680px;
+  margin-bottom: 28px;
+  line-height: 1.7;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.card-sm { padding: 14px 18px; }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.card-rule { width: 100%; height: 1px; background: var(--border); margin: 14px 0; }
+
+/* ── Stat grid ── */
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.stat-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label { font-size: 11px; color: var(--muted); font-weight: 500; }
+.stat-context { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.stat.red .stat-val { color: var(--danger); }
+.stat.orange .stat-val { color: var(--accent-orange); }
+.stat.gold .stat-val { color: var(--accent-gold); }
+.stat.green .stat-val { color: var(--ok); }
+
+/* ── Initiative cards ── */
+.init-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.init-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.init-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.init-card.red::before { background: var(--danger); }
+.init-card.orange::before { background: var(--accent-orange); }
+.init-card.gold::before { background: var(--accent-gold); }
+.init-card.green::before { background: var(--ok); }
+.init-card.blue::before { background: #1565C0; }
+.init-type {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.init-card.red .init-type { color: var(--danger); }
+.init-card.orange .init-type { color: var(--accent-orange); }
+.init-card.gold .init-type { color: var(--accent-gold); }
+.init-card.green .init-type { color: var(--ok); }
+.init-card.blue .init-type { color: #1565C0; }
+.init-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.init-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* ── Risk pills ── */
+.risk-row { display: flex; flex-direction: column; gap: 10px; }
+.risk-item {
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.risk-item.high { background: var(--danger-bg); border: 1px solid rgba(200,16,46,0.15); }
+.risk-item.medium { background: var(--warn-bg); border: 1px solid rgba(198,146,20,0.2); }
+.risk-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.risk-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; }
+.risk-item.high .risk-label { color: var(--danger); }
+.risk-item.medium .risk-label { color: var(--accent-gold); }
+.risk-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.risk-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* ── Stakeholder cards ── */
+.stake-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stake-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  position: relative;
+}
+.stake-tier {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.tier-1 { color: var(--danger); }
+.tier-2 { color: var(--accent-orange); }
+.tier-3 { color: var(--accent-gold); }
+.stake-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.stake-title-role { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.stake-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+.tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--tag-bg);
+  color: var(--muted);
+}
+.tag.pv { background: rgba(200,16,46,0.1); color: var(--danger); }
+.tag.active { background: rgba(45,106,79,0.1); color: var(--ok); }
+.tag.target { background: rgba(250,84,0,0.1); color: var(--accent-orange); }
+.tag.intel { background: rgba(21,101,192,0.1); color: #1565C0; }
+.tag.sfdc { background: rgba(0,161,224,0.1); color: #0288D1; }
+.stake-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.stake-email {
+  margin-top: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--pv-red);
+  text-decoration: none;
+}
+.stake-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+/* ── CRM section ── */
+.crm-header {
+  background: var(--pv-dark);
+  color: white;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.crm-icon { font-size: 20px; }
+.crm-header-text { flex: 1; }
+.crm-headline { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; color: #fff; }
+.crm-subline { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+.opp-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 100px 90px;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+.opp-row:last-child { border-bottom: none; }
+.opp-name { font-size: 12px; font-weight: 500; color: var(--text); }
+.opp-stage { font-size: 11px; color: var(--muted); }
+.opp-acv { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; color: var(--text); }
+.opp-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-align: right; }
+.opp-header { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+/* ── MEDDPICC ── */
+.meddpicc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.med-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+.med-letter {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 24px;
+  color: var(--pv-red);
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.med-word {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.med-content { font-size: 12px; color: var(--text); line-height: 1.6; }
+.med-item.validated .med-letter { color: var(--ok); }
+.med-item.partial .med-letter { color: var(--accent-gold); }
+.med-item.unknown .med-letter { color: var(--muted); }
+
+/* ── Value hypothesis ── */
+.value-statement {
+  background: var(--pv-dark);
+  color: white;
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.value-statement::after {
+  content: '◆';
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 64px;
+  color: rgba(200,16,46,0.12);
+  font-family: 'Barlow Condensed', sans-serif;
+}
+.vs-label { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--pv-red); margin-bottom: 10px; }
+.vs-text { font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.9); line-height: 1.6; max-width: 640px; }
+.product-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+.product-tile {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 12px;
+  text-align: center;
+}
+.pt-icon { font-size: 20px; margin-bottom: 6px; }
+.pt-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; color: var(--text); margin-bottom: 3px; }
+.pt-sub { font-size: 10px; color: var(--muted); }
+.pt-entry { font-size: 10px; color: var(--pv-red); font-weight: 600; margin-top: 6px; }
+
+/* ── Outreach ── */
+.outreach-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.outreach-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.outreach-header:hover { background: #fafaf8; }
+.oh-left { display: flex; align-items: center; gap: 12px; }
+.oh-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: white;
+  flex-shrink: 0;
+}
+.oh-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.oh-title { font-size: 11px; color: var(--muted); }
+.oh-right { display: flex; align-items: center; gap: 8px; }
+.chevron {
+  font-size: 10px;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+.outreach-body {
+  display: none;
+  padding: 0 18px 16px;
+}
+.outreach-body.open { display: block; }
+.chevron.open { transform: rotate(180deg); }
+.email-preview {
+  background: var(--tag-bg);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 4px;
+}
+.ep-subject {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ep-subject::before { content: '✉'; font-size: 11px; color: var(--muted); }
+.ep-body { font-size: 12px; color: var(--muted); line-height: 1.7; white-space: pre-line; }
+.ep-hook {
+  font-size: 11px;
+  color: var(--pv-red);
+  font-weight: 600;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Intel / News ── */
+.intel-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 12px;
+}
+.intel-item:last-child { border-bottom: none; }
+.intel-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  padding-top: 3px;
+  text-align: right;
+}
+.intel-source { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.intel-headline { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; line-height: 1.4; }
+.intel-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.intel-tag { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; margin-right: 4px; margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+.it-rfp { background: rgba(200,16,46,0.1); color: var(--danger); }
+.it-ceo { background: rgba(250,84,0,0.1); color: var(--accent-orange); }
+.it-intel { background: rgba(21,101,192,0.1); color: #1565C0; }
+.it-market { background: rgba(45,106,79,0.1); color: var(--ok); }
+
+/* ── Quote callout ── */
+.quote-block {
+  border-left: 3px solid var(--pv-red);
+  background: var(--card);
+  padding: 16px 20px;
+  border-radius: 0 8px 8px 0;
+  margin: 16px 0;
+}
+.quote-text { font-size: 14px; font-style: italic; color: var(--text); line-height: 1.7; margin-bottom: 6px; }
+.quote-attr { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+/* ── Summary table ── */
+.summary-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.summary-table th { text-align: left; padding: 8px 10px; background: var(--tag-bg); color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.summary-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+.summary-table tr:last-child td { border-bottom: none; }
+.summary-table tr:hover td { background: #fafaf8; }
+
+/* ── Two col ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+
+/* ── Next steps ── */
+.step-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.step-item:last-child { border-bottom: none; }
+.step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--pv-red);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.step-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.step-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.step-due {
+  margin-left: auto;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-top: 4px;
+}
+.step-due.urgent { color: var(--danger); font-weight: 700; }
+
+@media (max-width: 900px) {
+  :root { --sidebar: 0px; }
+  .sidebar { display: none; }
+  .stat-row { grid-template-columns: 1fr 1fr; }
+  .init-grid { grid-template-columns: 1fr; }
+  .stake-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .meddpicc-grid { grid-template-columns: 1fr; }
+  .product-row { grid-template-columns: 1fr 1fr; }
+  .content { padding: 24px 20px 40px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="pv-logo">Planview</div>
+    <div class="account-brand">
+      <div class="swoosh">
+        <svg viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 32C7 32 55 6 88 6C93 6 96 8 92 14C88 20 60 24 30 22C10 21 0 28 7 32Z" fill="#111111"/>
+        </svg>
+      </div>
+      <div>
+        <div class="account-name">Nike, Inc.</div>
+        <div class="account-sub">NASDAQ: NKE · Beaverton, OR</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-meta">
+    <div class="meta-row">
+      <span class="meta-label">AE</span>
+      <span class="meta-val">Kush Parikh</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">BDR</span>
+      <span class="meta-val">Cole McCormack</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">ABM</span>
+      <span class="meta-val">Lisa Amos</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">RVP</span>
+      <span class="meta-val">Anthony C.</span>
+    </div>
+    <div class="stage-badge">● Stage 1 — Discover</div>
+    <div class="acv-block">
+      <div class="acv-label">Est. ACV</div>
+      <div class="acv-val">$1.25M</div>
+      <div class="acv-sub">Active RFP · Close Oct 2026</div>
+    </div>
+    <div class="sf-badge" style="margin-top:10px">⬤ Salesforce</div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.35)">OPP-01444527 · Last activity Apr 13</div>
+  </div>
+
+  <nav>
+    <div class="nav-section-label">Account</div>
+    <a class="nav-item active" onclick="showSection('s1',this)"><span class="nav-icon">📊</span> Business Context</a>
+    <a class="nav-item" onclick="showSection('s2',this)"><span class="nav-icon">👤</span> Stakeholders</a>
+    <a class="nav-item" onclick="showSection('s3',this)"><span class="nav-icon">🗂</span> CRM & Opportunity</a>
+    <div class="nav-section-label" style="margin-top:8px">Strategy</div>
+    <a class="nav-item" onclick="showSection('s4',this)"><span class="nav-icon">💡</span> Value Hypothesis</a>
+    <a class="nav-item" onclick="showSection('s5',this)"><span class="nav-icon">✉</span> Outreach Playbook</a>
+    <a class="nav-item" onclick="showSection('s6',this)"><span class="nav-icon">📰</span> Live Intel</a>
+    <a class="nav-item" onclick="showSection('s7',this)"><span class="nav-icon">🏢</span> Org Chart</a>
+  </nav>
+
+  <div class="sidebar-footer">
+    Planview · Nike Account Plan<br>
+    Owner: Kush Parikh · April 2026<br>
+    Confidential
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+
+<!-- ═══════════════ SECTION 1: BUSINESS CONTEXT ═══════════════ -->
+<div id="s1" class="section active">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Business Context</div>
+      <div class="topbar-crumb">Nike, Inc. — Strategic Overview & Risk Profile</div>
+    </div>
+    <div class="topbar-right">
+      <div class="owner-pill">
+        <div class="owner-avatar">KP</div>
+        <span class="owner-name">Kush Parikh</span>
+      </div>
+      <div class="date-pill">April 2026</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="section-kicker">Section 1</div>
+    <div class="section-heading">The Business Nike Is Running Right Now</div>
+    <div class="section-lead">Nike is executing the most consequential turnaround in consumer sport history under CEO Elliott Hill — who was brought back from retirement by the board in October 2024. The financial data shows the depth of the reset. The strategic mandate shows the urgency.</div>
+
+    <div class="stat-row">
+      <div class="stat red"><div class="stat-val">–10%</div><div class="stat-label">Revenue YoY</div><div class="stat-context">$51.4B → $46.3B FY25</div></div>
+      <div class="stat red"><div class="stat-val">–44%</div><div class="stat-label">Net Income</div><div class="stat-context">To $3.2B in FY25</div></div>
+      <div class="stat red"><div class="stat-val">–50%+</div><div class="stat-label">Stock Decline</div><div class="stat-context">Since 2021 peak</div></div>
+      <div class="stat gold"><div class="stat-val">+20%</div><div class="stat-label">Running Growth</div><div class="stat-context">2 consecutive quarters</div></div>
+    </div>
+
+    <div class="quote-block">
+      <div class="quote-text">"We're moving at different speeds. The create–plan–make–deliver–sell chain is not connected, making it impossible to reallocate resources quickly when a geography or brand underperforms."</div>
+      <div class="quote-attr">— Elliott Hill, President & CEO, Q2 FY26 Earnings</div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:14px">Win Now — The 5-Part Turnaround Mandate</div>
+      <div class="init-grid">
+        <div class="init-card red">
+          <div class="init-type">Brand</div>
+          <div class="init-title">Sports-Led Innovation</div>
+          <div class="init-body">3 brands × 5 sports × 4 geographies. Nike, Jordan, and Converse unified under Phil McCartney's new Sport Offense. Running at +20%, Football kits +40% order book vs. 2022.</div>
+        </div>
+        <div class="init-card orange">
+          <div class="init-type">Geographic</div>
+          <div class="init-title">Geography Recovery</div>
+          <div class="init-body">North America leading (+9% revenue). All geo GMs now report directly to CEO. China on "longest reset road." EMEA activated sport offense Dec 1.</div>
+        </div>
+        <div class="init-card gold">
+          <div class="init-type">Finance</div>
+          <div class="init-title">Operational Efficiency</div>
+          <div class="init-body">Path back to double-digit EBIT margins. Gross margin dropped 190bps to 42.7%. Tariff headwind: $1.5B annualized. Disciplined cost management underway.</div>
+        </div>
+        <div class="init-card blue">
+          <div class="init-type">COO Mandate</div>
+          <div class="init-title">Technology Integration</div>
+          <div class="init-body">Venkatesh Alagirisamy appointed COO to "integrate technology end-to-end across create, plan, make, deliver, sell." Former CTO role eliminated — Venky absorbed all of it.</div>
+        </div>
+        <div class="init-card green">
+          <div class="init-type">Channel</div>
+          <div class="init-title">Distribution Rebalancing</div>
+          <div class="init-body">Wholesale +8% this quarter. NIKE.com repositioned as premium after best-ever Black Friday. CFO Matt Friend now owns NIKE Direct + Sales.</div>
+        </div>
+        <div class="init-card orange">
+          <div class="init-type">Product</div>
+          <div class="init-title">2026 World Cup Delivery</div>
+          <div class="init-body">Aero-FIT national team kits already shipping. Football order book +40% vs. 2022. 100+ Nike Direct doors + 1,400 partner doors refreshed. Hard pipeline deadline.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">Business Risks & Pain Points</div>
+      <div class="risk-row">
+        <div class="risk-item high">
+          <div class="risk-icon">⚠️</div>
+          <div>
+            <div class="risk-label">High Risk</div>
+            <div class="risk-title">Fragmented create–plan–make–deliver–sell chain</div>
+            <div class="risk-body">Elliott Hill said it publicly: "we're moving at different speeds." No unified portfolio visibility across 3 brands, 5 sports, 4 geographies. Resource reallocation decisions happen without real-time data. This is the operational problem Planview is built to solve.</div>
+          </div>
+        </div>
+        <div class="risk-item high">
+          <div class="risk-icon">🔴</div>
+          <div>
+            <div class="risk-label">High Risk — Active RFP</div>
+            <div class="risk-title">Release orchestration platform replacement</div>
+            <div class="risk-body">Nike issued an RFP March 10 to replace XL Release (digital.ai). 31 functional requirements. 3,000 named users. September 1 go-live tied to holiday peak. Planview R&V submitted March 30. Awaiting shortlist decision.</div>
+          </div>
+        </div>
+        <div class="risk-item medium">
+          <div class="risk-icon">📉</div>
+          <div>
+            <div class="risk-label">Medium Risk</div>
+            <div class="risk-title">China recovery slower than expected</div>
+            <div class="risk-body">Revenue down 16% in Q2. Digital down 36%. Nike has become "a lifestyle brand competing on price in China." Leadership extended the reset timeline. CFO needs real-time scenario modeling to model recovery investment options.</div>
+          </div>
+        </div>
+        <div class="risk-item medium">
+          <div class="risk-icon">🌐</div>
+          <div>
+            <div class="risk-label">Medium Risk</div>
+            <div class="risk-title">Tariff headwind threatening margin recovery path</div>
+            <div class="risk-body">$1.5B annualized incremental product costs from U.S. tariffs. 320bps gross margin headwind (reduced to ~120bps net). Double-digit EBIT margins require surgical reallocation and real-time portfolio trade-off capability.</div>
+          </div>
+        </div>
+        <div class="risk-item medium">
+          <div class="risk-icon">🏗</div>
+          <div>
+            <div class="risk-label">Medium Risk</div>
+            <div class="risk-title">Innovation pipeline must scale from Running to all sports</div>
+            <div class="risk-body">Running's 20%+ growth must be replicated across Football, Basketball, Training, and Sportswear simultaneously. Nearly 1,000 designers merged into one innovation org. No unified stage-gate governance process exists for the new structure.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">Nike Technology Landscape</div>
+      <table class="summary-table">
+        <thead><tr><th>System</th><th>Role</th><th>Planview Relevance</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>XL Release (digital.ai)</strong></td><td>Current release orchestration platform</td><td>Direct replacement target — active RFP</td><td><span class="tag" style="background:rgba(200,16,46,0.1);color:var(--danger)">RFP Open</span></td></tr>
+          <tr><td><strong>SAP / SAP ChaRM</strong></td><td>Enterprise ERP + change management</td><td>Hub native connector — required by RFP</td><td><span class="tag active">Active</span></td></tr>
+          <tr><td><strong>Jenkins / Autosys</strong></td><td>CI/CD pipeline + batch scheduling</td><td>Hub integration — all 31 RFP requirements</td><td><span class="tag active">Active</span></td></tr>
+          <tr><td><strong>Jira / ServiceNow</strong></td><td>Issue tracking / ITSM</td><td>AgilePlace sync + Hub connectors</td><td><span class="tag active">Active</span></td></tr>
+          <tr><td><strong>Okta / LDAP</strong></td><td>Identity + directory services</td><td>Auth preservation critical to RFP win</td><td><span class="tag active">Active</span></td></tr>
+          <tr><td><strong>PagerDuty / Slack</strong></td><td>Incident management / comms</td><td>Hub integration — bidirectional status</td><td><span class="tag active">Active</span></td></tr>
+          <tr><td><strong>AWS S3</strong></td><td>Current XL Release hosting</td><td>Cloud deployment — implementation scope</td><td><span class="tag active">Active</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 2: STAKEHOLDERS ═══════════════ -->
+<div id="s2" class="section">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Stakeholders</div>
+      <div class="topbar-crumb">Buying Map, Org Intelligence & Outreach Targets</div>
+    </div>
+    <div class="topbar-right">
+      <div class="owner-pill"><div class="owner-avatar">KP</div><span class="owner-name">Kush Parikh</span></div>
+      <div class="date-pill">April 2026</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="section-kicker">Section 2</div>
+    <div class="section-heading">The Buying Map</div>
+    <div class="section-lead">Sourced from Salesforce CRM, ABX brief, CPO intelligence (John / ex-Nike), and LinkedIn research. Tier rankings reflect budget authority and RFP influence — not just seniority.</div>
+
+    <div class="card-title" style="margin-bottom:12px;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Tier 1 — Economic Buyers</div>
+    <div class="stake-grid" style="margin-bottom:16px">
+      <div class="stake-card">
+        <div class="stake-tier tier-1">⬤ Tier 1 — Economic Buyer</div>
+        <div class="stake-name">Venkatesh Alagirisamy</div>
+        <div class="stake-title-role">Chief Operating Officer (new)</div>
+        <div class="stake-tags">
+          <span class="tag pv">SPM · DPD</span>
+          <span class="tag target">Primary Target</span>
+        </div>
+        <div class="stake-body">Appointed by Hill specifically to integrate technology end-to-end across create–plan–make–deliver–sell. Former CSCO. Absorbed all technology responsibility when the CTO role was eliminated. His public mandate is Planview's value proposition. All technology now reports to him. Reach via Ankit Puranik (reports to Venky directly).</div>
+      </div>
+      <div class="stake-card">
+        <div class="stake-tier tier-1">⬤ Tier 1 — Economic Buyer</div>
+        <div class="stake-name">Matt Friend</div>
+        <div class="stake-title-role">EVP & Chief Financial Officer</div>
+        <div class="stake-tags">
+          <span class="tag pv">SPM · Financial</span>
+          <span class="tag target">Budget Owner</span>
+        </div>
+        <div class="stake-body">Controls budget and owns margin recovery mandate. Now also owns NIKE Direct and Sales (restructured). Path back to double-digit EBIT is his accountability. Needs real-time portfolio visibility to make surgical reallocation decisions. Connection via Sunny (CapGemini) in progress.</div>
+      </div>
+      <div class="stake-card">
+        <div class="stake-tier tier-1">⬤ Tier 1 — Product Champion</div>
+        <div class="stake-name">Phil McCartney</div>
+        <div class="stake-title-role">Chief Innovation, Design & Product</div>
+        <div class="stake-tags">
+          <span class="tag pv">PD · IdeaPlace</span>
+          <span class="tag target">Innovation Lead</span>
+        </div>
+        <div class="stake-body">Merged ~1,000 designers from Nike, Jordan, and Converse into a single Sport Offense innovation unit. Owns the pipeline from NSRL → design → go-to-market. Running's 20%+ growth is his proof point. Now needs to scale that engine across Football, Basketball, Training, and Converse simultaneously.</div>
+      </div>
+      <div class="stake-card">
+        <div class="stake-tier" style="color:#1565C0">⬤ New Role — Unidentified</div>
+        <div class="stake-name">Unknown VP / Sr. Director</div>
+        <div class="stake-title-role">Between Ankit Puranik & Venky — brand new position</div>
+        <div class="stake-tags">
+          <span class="tag intel">Intel Needed</span>
+          <span class="tag" style="background:rgba(255,152,0,0.1);color:#E65100">Potential Gatekeeper</span>
+        </div>
+        <div class="stake-body">Flagged by John (ex-Nike, CPO contact) as a brand new position between Ankit Puranik (Director, Software Engineering) and the COO. Could be a VP of Engineering, Chief of Staff to the COO, or VP of Digital Transformation. Must identify before escalating to Venky. Possible candidate: Dan Bay (VP, Global Technology Innovation).</div>
+      </div>
+    </div>
+
+    <div class="card-title" style="margin-bottom:12px;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Tier 2 — Technical Champions & RFP Contacts</div>
+    <div class="stake-grid" style="margin-bottom:16px">
+      <div class="stake-card">
+        <div class="stake-tier tier-2">⬤ Tier 2 — Technical Champion</div>
+        <div class="stake-name">Ankit Puranik</div>
+        <div class="stake-title-role">Director, Software Engineering (Legal & Resilience Technology)</div>
+        <div class="stake-tags">
+          <span class="tag pv">R&V · Hub</span>
+          <span class="tag target">Priority Outreach</span>
+          <span class="tag intel">Claude/AI User</span>
+        </div>
+        <div class="stake-body">Reports directly to Venky. Deep in cloud, AI, and data engineering — has already built AI agents using Claude LLMs internally. Anthropic-certified (Claude 101 + AI Fluency, March 2026). Drove 25% time-to-market improvement at Whirlpool. 6 years at Accenture (who built Nike's RFP). He's the most actionable target in the account. Lead with AI/speed-to-market, not a product pitch.</div>
+      </div>
+      <div class="stake-card">
+        <div class="stake-tier tier-2">⬤ Tier 2 — Active RFP Contact</div>
+        <div class="stake-name">Madhura Indurkar</div>
+        <div class="stake-title-role">Sourcing Manager, Technology Procurement</div>
+        <div class="stake-tags">
+          <span class="tag sfdc">In Salesforce CRM</span>
+          <span class="tag pv">R&V RFP</span>
+          <span class="tag active">Active Contact</span>
+        </div>
+        <div class="stake-body">Primary RFP contact. Sourcing Manager in Technology Procurement. Submitted Contact Us form Jan 11, 2026 — the inbound that created this opportunity. Located in Oregon (Nike HQ). Currently in Outreach sequence. She governs the vendor process through Coupa. Not the decision-maker, but controls access.</div>
+        <a class="stake-email" href="mailto:madhura.indurkar@nike.com">madhura.indurkar@nike.com</a>
+      </div>
+      <div class="stake-card">
+        <div class="stake-tier tier-2">⬤ Tier 2 — Technical Champion</div>
+        <div class="stake-name">Dir. Release Engineering</div>
+        <div class="stake-title-role">Hypothesized RFP Author (RESE Team)</div>
+        <div class="stake-tags">
+          <span class="tag pv">R&V</span>
+          <span class="tag intel">Name TBD</span>
+        </div>
+        <div class="stake-body">RESE (Resilience & Enterprise Systems Engineering) owns the current XL Release deployment. Two RESE team members spend ~25% of their capacity maintaining XL Release — the core pain point. They defined the 31 RFP requirements. Will be involved in technical evaluation. Name not yet identified.</div>
+      </div>
+      <div class="stake-card">
+        <div class="stake-tier tier-2">⬤ Tier 2 — Technology Champion</div>
+        <div class="stake-name">Rajeev Aikkara</div>
+        <div class="stake-title-role">VP of Technology (promoted Jan 2026)</div>
+        <div class="stake-tags">
+          <span class="tag intel">Intel Confirmed</span>
+          <span class="tag target">Warm Path</span>
+        </div>
+        <div class="stake-body">Promoted to VP of Technology in January 2026. Previous role: VP Global Technology focused on Planning, Manufacturing and Supply Chain — directly inside Venky's org. Clare Sabatucci (Nike innovation) commented on his promotion, confirming a working relationship. Likely sits in Venky's technology chain. Relevant to both R&V and the broader Hub/DPD conversation.</div>
+      </div>
+    </div>
+
+    <div class="card-title" style="margin-bottom:12px;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Innovation Org — Longer Play</div>
+    <div class="stake-grid" style="margin-bottom:16px">
+      <div class="stake-card">
+        <div class="stake-tier tier-3">◆ Innovation — PD / IdeaPlace</div>
+        <div class="stake-name">Clare Sabatucci</div>
+        <div class="stake-title-role">Lead Innovation @ Nike — Technology, Product, Sport</div>
+        <div class="stake-tags">
+          <span class="tag pv">IdeaPlace · PD</span>
+        </div>
+        <div class="stake-body">Practitioner-level innovation lead in Phil McCartney's org. Publicly tied to Nike Mind launch (neuroscience-based footwear). Evangelizes NSRL. Connected to the innovation pipeline from concept to go-to-market. Best hook: unified innovation pipeline governance across the 3-brand sport offense.</div>
+      </div>
+      <div class="stake-card">
+        <div class="stake-tier tier-3">◆ Innovation — Services Delivery</div>
+        <div class="stake-name">Alex Mestas</div>
+        <div class="stake-title-role">Director of Services, Advanced Innovation</div>
+        <div class="stake-tags">
+          <span class="tag pv">PD · ProjectPlace</span>
+        </div>
+        <div class="stake-body">Operationalizes innovation from lab to scaled service. Led NSRL Form from Redondo Beach prototype to live deployments in Tokyo, London, and LA. Former Nike Entrepreneur in Residence (co-founded Easykicks). Best hook: taking services from one flagship to global scale across all sports simultaneously.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Exec Alignment Map (from Salesforce)</div>
+        <div class="sf-badge">⬤ Salesforce</div>
+      </div>
+      <table class="summary-table">
+        <thead><tr><th>Planview Person</th><th>Nike Person</th><th>Relationship</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Kush Parikh (AE)</td><td>Madhura Indurkar (Procurement)</td><td>Active RFP contact</td><td><span class="tag active">Active</span></td></tr>
+          <tr><td>Louise Allen (CPO)</td><td>John (ex-Nike senior exec)</td><td>CPO personal contact — activation held</td><td><span class="tag" style="background:rgba(198,146,20,0.1);color:var(--accent-gold)">Hold</span></td></tr>
+          <tr><td>Sunny (via CapGemini)</td><td>Matt Friend (CFO)</td><td>In-progress connection</td><td><span class="tag" style="background:rgba(21,101,192,0.1);color:#1565C0">In Progress</span></td></tr>
+          <tr><td>Prashant</td><td>Accenture / CapGemini at Nike</td><td>Accenture built the RFP — key intelligence path</td><td><span class="tag" style="background:rgba(21,101,192,0.1);color:#1565C0">In Progress</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 3: CRM & OPPORTUNITY ═══════════════ -->
+<div id="s3" class="section">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">CRM & Opportunity</div>
+      <div class="topbar-crumb">Salesforce History · Active Opportunity · MEDDPICC</div>
+    </div>
+    <div class="topbar-right">
+      <div class="sf-badge">⬤ Live Salesforce</div>
+      <div class="date-pill">OPP-01444527</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="section-kicker">Section 3</div>
+    <div class="section-heading">CRM History & Active Opportunity</div>
+    <div class="section-lead">Data pulled live from Salesforce. Nike has prior relationship history across multiple past opportunities. The active RFP is the primary door-opener — but CRM history shows a decade of touchpoints.</div>
+
+    <div class="crm-header">
+      <div class="crm-icon">☁</div>
+      <div class="crm-header-text">
+        <div class="crm-headline">Active Opportunity: Nike Inc. — Release Orchestration RFP</div>
+        <div class="crm-subline">OPP-01444527 · Stage 1 Discover · Est. ACV $1,250,000 · Owner: Kush Parikh · Last activity Apr 13, 2026</div>
+      </div>
+      <div class="sf-badge">Salesforce</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card card-sm">
+        <div class="card-title" style="margin-bottom:10px">Opportunity Details</div>
+        <table class="summary-table">
+          <tbody>
+            <tr><td style="color:var(--muted)">Stage</td><td><strong>Stage 1 — Discover</strong></td></tr>
+            <tr><td style="color:var(--muted)">Est. ACV</td><td><strong>$1,250,000</strong></td></tr>
+            <tr><td style="color:var(--muted)">Close Date</td><td>Oct 30, 2026</td></tr>
+            <tr><td style="color:var(--muted)">Type</td><td>New Logo</td></tr>
+            <tr><td style="color:var(--muted)">Solution</td><td>VSM · Release & Verify</td></tr>
+            <tr><td style="color:var(--muted)">Primary Contact</td><td>Madhura Indurkar</td></tr>
+            <tr><td style="color:var(--muted)">Created</td><td>Jan 16, 2026</td></tr>
+            <tr><td style="color:var(--muted)">Last Activity</td><td>Apr 13, 2026</td></tr>
+            <tr><td style="color:var(--muted)">Probability</td><td>10% (Stage 1)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card card-sm">
+        <div class="card-title" style="margin-bottom:10px">Past Nike Opportunities (CRM)</div>
+        <div>
+          <div class="opp-row" style="border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px">
+            <span class="opp-header">Opportunity</span><span class="opp-header">Solution</span><span class="opp-header">Status</span><span class="opp-header" style="text-align:right">Year</span>
+          </div>
+          <div class="opp-row"><span class="opp-name">Release Orchestration RFP</span><span class="opp-stage">R&V</span><span class="opp-acv" style="color:var(--ok)">Active</span><span class="opp-date">2026</span></div>
+          <div class="opp-row"><span class="opp-name">Nike Inc. - PLA</span><span class="opp-stage">AgilePlace</span><span class="opp-acv">Historical</span><span class="opp-date">Prior</span></div>
+          <div class="opp-row"><span class="opp-name">Nike - Hub (ServiceNow:MSPS)</span><span class="opp-stage">Hub</span><span class="opp-acv">Historical</span><span class="opp-date">Prior</span></div>
+          <div class="opp-row"><span class="opp-name">Nike - IT PPM</span><span class="opp-stage">PPM</span><span class="opp-acv">Historical</span><span class="opp-date">Prior</span></div>
+          <div class="opp-row"><span class="opp-name">Nike - Supply Chain Portfolio</span><span class="opp-stage">Portfolios</span><span class="opp-acv">Historical</span><span class="opp-date">Prior</span></div>
+          <div class="opp-row"><span class="opp-name">Nike - T&M (Jira:ServiceNow)</span><span class="opp-stage">Hub</span><span class="opp-acv">Historical</span><span class="opp-date">Prior</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">MEDDPICC — Active RFP</div>
+        <div class="sf-badge">⬤ Salesforce</div>
+      </div>
+      <div class="meddpicc-grid">
+        <div class="med-item validated">
+          <div class="med-letter">M</div>
+          <div class="med-word">Metrics</div>
+          <div class="med-content">Deploy at current XL Release levels by September 1. Year-one success = operational continuity + reduced RESE team overhead. Secondary: 25% of 2 FTE hours currently wasted on maintenance.</div>
+        </div>
+        <div class="med-item partial">
+          <div class="med-letter">E</div>
+          <div class="med-word">Economic Buyer</div>
+          <div class="med-content">Venkatesh Alagirisamy (COO) — hypothesized based on mandate alignment. Matt Friend (CFO) controls budget. Neither confirmed. Madhura Indurkar is procurement — not the economic buyer.</div>
+        </div>
+        <div class="med-item validated">
+          <div class="med-letter">D</div>
+          <div class="med-word">Decision Criteria</div>
+          <div class="med-content">Full integration parity with XL Release on day one. September go-live feasibility. LDAP/auth model preservation. Extensibility for future tools. Commercial competitiveness as secondary.</div>
+        </div>
+        <div class="med-item partial">
+          <div class="med-letter">D</div>
+          <div class="med-word">Decision Process</div>
+          <div class="med-content">Cross-functional review via Coupa. Nike follow-up was expected April 6 — not received. Kush followed up April 13. Committee composition, scoring criteria, shortlist timing not disclosed.</div>
+        </div>
+        <div class="med-item validated">
+          <div class="med-letter">I</div>
+          <div class="med-word">Identify Pain</div>
+          <div class="med-content">RESE team spends 25% of 2 FTEs maintaining XL Release. Zero-touch deployments across 190 countries currently impossible. Fragmented toolchain (SAP, Jenkins, PagerDuty) with no unified orchestration layer.</div>
+        </div>
+        <div class="med-item partial">
+          <div class="med-letter">C</div>
+          <div class="med-word">Champion</div>
+          <div class="med-content">No confirmed internal champion. Governance & Risk Lead (RFP contact) best candidate. Ankit Puranik (Director, Software Engineering) is the most actionable path to a real champion — not yet activated.</div>
+        </div>
+        <div class="med-item validated">
+          <div class="med-letter">C</div>
+          <div class="med-word">Compelling Event</div>
+          <div class="med-content">September 1 go-live is a hard deadline — holiday peak window. Timeline credibility is a make-or-break factor in vendor selection. 2–3 months parallel run required means contract must close May/June.</div>
+        </div>
+        <div class="med-item partial">
+          <div class="med-letter">P</div>
+          <div class="med-word">Procurement Process</div>
+          <div class="med-content">Coupa RFP event. Nike indicated follow-up by April 6 — none received. Procurement involved in final selection. No confirmed committee or commercial negotiation owner. Accenture may be shaping vendor criteria from outside.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px">Next Steps — Logged in Salesforce</div>
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Await Nike shortlist decision / respond to RFP questions</div>
+          <div class="step-body">Nike said they would follow up by April 6. Kush followed up April 13. Keep Madhura Indurkar in Outreach sequence. Be ready to respond to technical questions same-day.</div>
+        </div>
+        <div class="step-due urgent">ASAP</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Identify the new role between Ankit Puranik and Venky</div>
+          <div class="step-body">Brand new position — could be a gatekeeper or champion. Candidates: Dan Bay (VP, Global Technology Innovation), or a new Chief of Staff / VP of Digital Transformation. Identify before reaching out to Ankit.</div>
+        </div>
+        <div class="step-due urgent">This Week</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Draft outreach to Ankit Puranik — AI/Claude hook</div>
+          <div class="step-body">Ankit is Anthropic-certified (Claude 101 + AI Fluency, March 2026). He's already using LLMs to build AI agents at Nike. Lead with AI-connected engineering velocity, not a product pitch. Best hook: "How does your AI agent layer connect to the portfolio and release orchestration layer?"</div>
+        </div>
+        <div class="step-due">This Week</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-title">Identify Accenture's Nike engagement lead</div>
+          <div class="step-body">Accenture built the RFP — not Nike. They are likely shaping vendor criteria and access. Ankit Puranik spent 6 years at Accenture — potential bridge. Prashant has CapGemini/Accenture connections at Nike. This is an exec business ask.</div>
+        </div>
+        <div class="step-due">Exec Ask</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <div>
+          <div class="step-title">Activate John (ex-Nike) once targets confirmed</div>
+          <div class="step-body">Louise Allen's contact. Don't burn early. Hold for a final text into confirmed targets once Ankit outreach is drafted and the new VP role is identified.</div>
+        </div>
+        <div class="step-due">When Ready</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 4: VALUE HYPOTHESIS ═══════════════ -->
+<div id="s4" class="section">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Value Hypothesis</div>
+      <div class="topbar-crumb">Planview Products → Nike Problems → Win Thesis</div>
+    </div>
+    <div class="topbar-right">
+      <div class="owner-pill"><div class="owner-avatar">KP</div><span class="owner-name">Kush Parikh</span></div>
+      <div class="date-pill">April 2026</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="section-kicker">Section 4</div>
+    <div class="section-heading">Why Planview. Why Now.</div>
+    <div class="section-lead">Nike's COO mandate reads like Planview's product catalogue. The R&V RFP is the door-opener. The full opportunity is an operating model for Win Now itself.</div>
+
+    <div class="value-statement">
+      <div class="vs-label">Core Value Proposition</div>
+      <div class="vs-text">Planview gives Nike's COO, CFO, and Chief Innovation Officer a single operating model — from strategy to release — to execute Win Now at the speed and scale the 2026 World Cup demands, without the coordination overhead that has already cost Nike a year of growth.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">Four Entry Points — Planview Products Mapped to Nike Pain</div>
+
+      <div style="border-left:3px solid var(--danger);padding-left:16px;margin-bottom:20px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:var(--text);margin-bottom:2px">R&V — Release & Verify <span style="font-size:11px;color:var(--danger);font-weight:600;background:rgba(200,16,46,0.1);padding:2px 7px;border-radius:4px;margin-left:6px">ACTIVE RFP · Door Opener</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Planview Hub (Plutora)</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7">Nike issued an RFP on March 10, 2026 for a next-gen Release Orchestration Platform — 31 functional requirements spanning real-time communications, tool integrations, status dashboards, and audit trails. Planview R&V meets all 31. The RFP win is the wedge into a multi-solution platform deal. CEO Hill declared technology integration a CEO-level priority, not just IT's agenda. Winning R&V establishes credibility with the COO's technology organization and opens the door to SPM, PD, and DPD conversations.</div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;background:rgba(200,16,46,0.07);color:var(--danger);padding:3px 8px;border-radius:4px;font-weight:500">Panasonic: new traceability in &lt;30 days</span>
+          <span style="font-size:11px;background:rgba(200,16,46,0.07);color:var(--danger);padding:3px 8px;border-radius:4px;font-weight:500">CGI: 7,500 days developer capacity saved/yr</span>
+          <span style="font-size:11px;background:rgba(200,16,46,0.07);color:var(--danger);padding:3px 8px;border-radius:4px;font-weight:500">60+ no-code integrations</span>
+        </div>
+      </div>
+
+      <div style="border-left:3px solid var(--accent-orange);padding-left:16px;margin-bottom:20px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:var(--text);margin-bottom:2px">SPM — Strategic Portfolio Management <span style="font-size:11px;color:var(--accent-orange);font-weight:600;background:rgba(250,84,0,0.1);padding:2px 7px;border-radius:4px;margin-left:6px">Strategic Anchor · Greenfield</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Planview Portfolios + Advisor</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7">Nike's turnaround is fundamentally a portfolio management problem. No real-time view across 3 brands × 5 sports × 4 geographies. Investment prioritization is opaque. Scenario modeling for geo recovery is impossible today. Gross margin down 190bps — path to double-digit EBIT requires surgical reallocation, not guesswork. <strong>The Adidas proof point is nuclear</strong> — Nike's #1 competitor already uses Planview SPM for portfolio visibility and investment prioritization across brands and geographies.</div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;background:rgba(250,84,0,0.07);color:var(--accent-orange);padding:3px 8px;border-radius:4px;font-weight:500">Adidas: uses Planview SPM (Nike's #1 competitor)</span>
+          <span style="font-size:11px;background:rgba(250,84,0,0.07);color:var(--accent-orange);padding:3px 8px;border-radius:4px;font-weight:500">Santander: 25% faster decisions, 80% better allocations</span>
+          <span style="font-size:11px;background:rgba(250,84,0,0.07);color:var(--accent-orange);padding:3px 8px;border-radius:4px;font-weight:500">Gartner Magic Quadrant Leader</span>
+        </div>
+      </div>
+
+      <div style="border-left:3px solid var(--accent-gold);padding-left:16px;margin-bottom:20px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:var(--text);margin-bottom:2px">PD — Product Development <span style="font-size:11px;color:var(--accent-gold);font-weight:600;background:rgba(198,146,20,0.1);padding:2px 7px;border-radius:4px;margin-left:6px">Greenfield</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Planview IdeaPlace + ProjectPlace</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7">Nike's Sport Offense demands a relentless flow of innovative product — Running's 20%+ growth only continues if the pipeline keeps moving. Nearly 1,000 designers merged into one org. No structured stage-gate process governs NSRL → design → seasonal launch across all 3 brands simultaneously. Phil McCartney needs to see the entire R&D pipeline across Running, Football, Basketball, and Training at once.</div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;background:rgba(198,146,20,0.1);color:var(--accent-gold);padding:3px 8px;border-radius:4px;font-weight:500">Abbott Nutrition: 60% → 98% on-time launches</span>
+          <span style="font-size:11px;background:rgba(198,146,20,0.1);color:var(--accent-gold);padding:3px 8px;border-radius:4px;font-weight:500">+22% project throughput, –32% cycle times</span>
+        </div>
+      </div>
+
+      <div style="border-left:3px solid #1565C0;padding-left:16px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:var(--text);margin-bottom:2px">DPD — Digital Product Development <span style="font-size:11px;color:#1565C0;font-weight:600;background:rgba(21,101,192,0.1);padding:2px 7px;border-radius:4px;margin-left:6px">Greenfield</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Planview AgilePlace (EAP)</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7">NIKE.com repositioned as a premium channel after best-ever Black Friday. CFO Matt Friend now owns NIKE Direct. Large engineering investment rebuilding digital experience at scale. NIKE.com squads, Nike App teams, and connected fitness teams all building in parallel with no enterprise-level visibility. Jira Align is the most likely incumbent — it forces 100% Agile, has broken financial management, and can't connect to SAP/ChaRM. Planview EAP bridges planning, delivery, and release.</div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;background:rgba(21,101,192,0.1);color:#1565C0;padding:3px 8px;border-radius:4px;font-weight:500">Huntington Bank: 32% revenue increase in 2 years</span>
+          <span style="font-size:11px;background:rgba(21,101,192,0.1);color:#1565C0;padding:3px 8px;border-radius:4px;font-weight:500">Adidas: uses Planview EAP across all business domains</span>
+          <span style="font-size:11px;background:rgba(21,101,192,0.1);color:#1565C0;padding:3px 8px;border-radius:4px;font-weight:500">Beats Jira Align on SAP, hybrid methods, financial mgmt</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">Product → Persona Map</div>
+      <table class="summary-table">
+        <thead><tr><th>Planview Product</th><th>Nike Persona</th><th>Primary Hook</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Portfolios + Advisor</strong></td><td>Venky (COO) + Matt Friend (CFO)</td><td>Portfolio visibility, scenario modeling, EBIT recovery path, China reallocation decisions</td></tr>
+          <tr><td><strong>IdeaPlace</strong></td><td>Phil McCartney + NSRL</td><td>NSRL → stage gate → funded portfolio, kill criteria, sport-specific innovation challenges</td></tr>
+          <tr><td><strong>ProjectPlace</strong></td><td>Sport Offense leads, Alex Mestas</td><td>Seasonal launch milestone governance — Aero-FIT, World Cup, Nike Mind</td></tr>
+          <tr><td><strong>AgilePlace (EAP)</strong></td><td>Rajeev Aikkara, VP Engineering, Digital teams</td><td>NIKE.com squads, sport offense agile delivery, OKR framework, flow metrics</td></tr>
+          <tr><td><strong>Hub (R&V)</strong></td><td>Ankit Puranik, RESE Team, Madhura (Procurement)</td><td>All 31 RFP requirements + COO tech integration mandate</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">What Makes Us Different — vs. Competition</div>
+      <div class="risk-row">
+        <div class="risk-item" style="background:#F4F3F0;border-color:var(--border)">
+          <div class="risk-icon">1️⃣</div>
+          <div>
+            <div class="risk-title">End-to-end — strategy to release — no other vendor matches it</div>
+            <div class="risk-body">SPM + PD + DPD + R&V in one connected platform. ServiceNow SPM lacks NPD analytics depth and doesn't touch toolchain integration. Workfront does project execution but has no SPM or Hub equivalent. Jira Align only connects to Jira and Azure DevOps — Planview connects to 300+ tool versions.</div>
+          </div>
+        </div>
+        <div class="risk-item" style="background:#F4F3F0;border-color:var(--border)">
+          <div class="risk-icon">2️⃣</div>
+          <div>
+            <div class="risk-title">Nike's 31 RFP requirements map precisely to R&V's core architecture</div>
+            <div class="risk-body">Nike effectively wrote the RFP in Planview's language. SAP, ChaRM, Jenkins, Autosys, PagerDuty — all native. LDAP/auth model preservation is a solved problem. 60+ pre-built connectors vs. Jira Align's 2.</div>
+          </div>
+        </div>
+        <div class="risk-item" style="background:#F4F3F0;border-color:var(--border)">
+          <div class="risk-icon">3️⃣</div>
+          <div>
+            <div class="risk-title">Positioned to the COO's mandate — not just IT's agenda</div>
+            <div class="risk-body">Shifts who owns the budget decision from Engineering to the C-suite. Venky's mandate is literally "integrate technology across create, plan, make, deliver, sell." That's Planview's platform in a sentence.</div>
+          </div>
+        </div>
+        <div class="risk-item" style="background:#F4F3F0;border-color:var(--border)">
+          <div class="risk-icon">4️⃣</div>
+          <div>
+            <div class="risk-title">2026 World Cup creates a hard deadline — and urgency that favors us</div>
+            <div class="risk-body">Pipeline governance tied directly to Nike's biggest comeback moment. Football order book +40% vs. 2022. Every product that misses the shelf is margin that doesn't come back. The window doesn't move.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 5: OUTREACH PLAYBOOK ═══════════════ -->
+<div id="s5" class="section">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Outreach Playbook</div>
+      <div class="topbar-crumb">Personalized Emails & Talk Tracks for Each Stakeholder</div>
+    </div>
+    <div class="topbar-right">
+      <div class="owner-pill"><div class="owner-avatar">KP</div><span class="owner-name">Kush Parikh</span></div>
+      <div class="date-pill">April 2026</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="section-kicker">Section 5</div>
+    <div class="section-heading">Outreach Playbook</div>
+    <div class="section-lead">Every message is built on confirmed intelligence — Salesforce CRM, Q2 FY26 earnings, 10-K, CPO meeting notes, and LinkedIn research. No generic AI copy. Each hook is a specific, real thing.</div>
+
+    <!-- Outreach 1: Ankit -->
+    <div class="outreach-item">
+      <div class="outreach-header" onclick="toggleOutreach(this)">
+        <div class="oh-left">
+          <div class="oh-avatar" style="background:#1565C0">AP</div>
+          <div>
+            <div class="oh-name">Ankit Puranik</div>
+            <div class="oh-title">Director, Software Engineering (Legal & Resilience Technology) — Reports to Venky</div>
+          </div>
+        </div>
+        <div class="oh-right">
+          <span class="tag intel">Priority #1</span>
+          <span class="tag pv">R&V · Hub</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="outreach-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)"><strong>Why this works:</strong> Ankit is Anthropic-certified (Claude 101 + AI Fluency, March 2026). He's already building AI agents using Claude LLMs at Nike. He spent 6 years at Accenture — who built the RFP. He drove 25% time-to-market improvement at Whirlpool. Do not pitch features. Lead with the AI layer connecting to release orchestration.</div>
+        <div class="email-preview">
+          <div class="ep-subject">Re: AI agents and the release layer — a question</div>
+          <div class="ep-body">Ankit —
+
+You got your Anthropic certifications in March. Given that you're already building AI agents with Claude at Nike, I'm curious about a specific problem: how does the AI layer you're building connect to the release orchestration layer below it?
+
+That's the gap we see with teams doing what you're doing — the agents are smart, but the deployment infrastructure beneath them wasn't designed for AI-paced delivery cycles.
+
+I'm at Planview. We build the release orchestration layer that was designed for exactly this problem — and there's a reason Nike's release team reached out to us earlier this year. Would 20 minutes to compare notes be worth it?
+
+Kush Parikh
+Planview</div>
+          <div class="ep-hook">Hook: His Anthropic certs + AI agents at Nike + the RFP connection without naming it directly</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outreach 2: Venkatesh -->
+    <div class="outreach-item">
+      <div class="outreach-header" onclick="toggleOutreach(this)">
+        <div class="oh-left">
+          <div class="oh-avatar" style="background:var(--pv-red)">VA</div>
+          <div>
+            <div class="oh-name">Venkatesh Alagirisamy</div>
+            <div class="oh-title">Chief Operating Officer — Tier 1 Economic Buyer</div>
+          </div>
+        </div>
+        <div class="oh-right">
+          <span class="tag pv">SPM · R&V</span>
+          <span class="tag" style="background:rgba(198,146,20,0.1);color:var(--accent-gold)">Via Ankit First</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="outreach-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)"><strong>Approach note:</strong> Don't go direct to Venky cold. Approach through Ankit or the new VP role once warmer. This email is for when you have a path in. The subject line works because it mirrors his public mandate verbatim.</div>
+        <div class="email-preview">
+          <div class="ep-subject">Create → Plan → Make → Deliver → Sell: the platform for that mandate</div>
+          <div class="ep-body">Venkatesh —
+
+Elliott Hill gave you a mandate that is unlike any other COO appointment I've seen: integrate technology end-to-end across create, plan, make, deliver, sell.
+
+That's a sentence most organizations would spend years figuring out how to operationalize. Planview is the platform built specifically for it — connecting strategic investment decisions across brands and geographies, to product development pipelines, to release orchestration at scale.
+
+We're already in conversation with your team on the release orchestration side. I'd like 20 minutes to show you how it connects upward into the full operating model.
+
+Kush Parikh
+Planview</div>
+          <div class="ep-hook">Hook: His public mandate — word for word. Shows you've done the work, not sent a template.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outreach 3: Matt Friend -->
+    <div class="outreach-item">
+      <div class="outreach-header" onclick="toggleOutreach(this)">
+        <div class="oh-left">
+          <div class="oh-avatar" style="background:var(--accent-orange)">MF</div>
+          <div>
+            <div class="oh-name">Matt Friend</div>
+            <div class="oh-title">EVP & CFO — Also owns NIKE Direct and Sales</div>
+          </div>
+        </div>
+        <div class="oh-right">
+          <span class="tag pv">SPM · Financial</span>
+          <span class="tag intel">Via Sunny / CapGemini</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="outreach-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)"><strong>Context:</strong> Matt Friend now owns both the CFO seat and NIKE Direct. He said on earnings: "We can't recover margin on a portfolio we can't see." That's the line to use back at him. Connection via Sunny (CapGemini) is in progress.</div>
+        <div class="email-preview">
+          <div class="ep-subject">Recovering margin on a portfolio you can see</div>
+          <div class="ep-body">Matt —
+
+You said on the Q2 call that the path back to double-digit EBIT requires a portfolio you can actually see — where capital is going, what's generating return, and what needs to be reallocated when a geography stalls.
+
+Three brands. Five sports. Four geographies recovering at different speeds. That's not a spreadsheet problem. It's a portfolio visibility and scenario modeling problem.
+
+Planview is the platform that gives the COO and CFO a single, real-time view of investment allocation across the entire portfolio — with the scenario modeling capability to ask "what happens if China recovery takes another two quarters?" and get a resource-feasible answer in hours, not weeks.
+
+We're already talking to your team on the technology side. I'd like 20 minutes to show you the financial visibility piece.
+
+Kush Parikh
+Planview</div>
+          <div class="ep-hook">Hook: His own words from the Q2 earnings call about margin recovery and portfolio visibility</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outreach 4: Clare Sabatucci -->
+    <div class="outreach-item">
+      <div class="outreach-header" onclick="toggleOutreach(this)">
+        <div class="oh-left">
+          <div class="oh-avatar" style="background:var(--accent-gold)">CS</div>
+          <div>
+            <div class="oh-name">Clare Sabatucci</div>
+            <div class="oh-title">Lead Innovation — Technology, Product, Sport</div>
+          </div>
+        </div>
+        <div class="oh-right">
+          <span class="tag pv">IdeaPlace · PD</span>
+          <span class="tag">Innovation Org</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="outreach-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)"><strong>Context:</strong> Six months ago, Phil McCartney merged ~1,000 designers from Nike, Jordan, and Converse into a single innovation engine. Clare lives inside that pipeline every day. Hook on the structural reality she woke up to after the merger.</div>
+        <div class="email-preview">
+          <div class="ep-subject">1,000 designers. One pipeline.</div>
+          <div class="ep-body">Clare —
+
+Six months ago Nike merged nearly 1,000 designers from Nike, Jordan, and Converse into a single innovation engine. Phil McCartney called it "a new day in Innovation, Design and Product."
+
+That's an extraordinary bet. And the pressure it creates is real — Aero-FIT, Nike Mind, Structure Plus, NikeSKIMS, the World Cup kits — all moving through one shared pipeline simultaneously, across three brands and four geographies, with Running already up 20% and everyone watching to see if the rest of the sport offense catches up.
+
+The question nobody talks about publicly: how do you govern that? How do ideas get prioritized, funded, and handed off to delivery without the pipeline becoming a bottleneck?
+
+I'm at Planview. That's exactly what we do for innovation orgs running this kind of complexity. Happy to share what we're seeing across similar portfolios — 20 minutes?
+
+Kush Parikh
+Planview</div>
+          <div class="ep-hook">Hook: The designer merger she lived through. The products she's responsible for. A question that treats her as an insider.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outreach 5: Alex Mestas -->
+    <div class="outreach-item">
+      <div class="outreach-header" onclick="toggleOutreach(this)">
+        <div class="oh-left">
+          <div class="oh-avatar" style="background:var(--ok)">AM</div>
+          <div>
+            <div class="oh-name">Alex Mestas</div>
+            <div class="oh-title">Director of Services, Advanced Innovation</div>
+          </div>
+        </div>
+        <div class="oh-right">
+          <span class="tag pv">PD · ProjectPlace</span>
+          <span class="tag">Innovation Ops</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="outreach-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)"><strong>Context:</strong> Alex spent his entire Nike career turning innovation concepts into delivered services — Easykicks, Adventure Club, NSRL Field Services. NSRL Form started as a prototype in a Redondo Beach parking lot, now live in Tokyo, London, and LA. He's the operationalization person.</div>
+        <div class="email-preview">
+          <div class="ep-subject">From Redondo Beach to Harajuku — and what comes next</div>
+          <div class="ep-body">Alex —
+
+NSRL Form started as a prototype in a parking lot in Redondo Beach in 2022. Now it's live in Tokyo, London, and LA, capturing 1.6 million data points per runner — with plans to expand to basketball, football, and gear.
+
+That arc — from garage to global service — is exactly the kind of thing that looks clean from the outside and is brutal to operationalize from the inside. Especially when you're trying to scale it while the sport offense is simultaneously pushing Aero-FIT, Nike Mind, and the World Cup build-out through the same innovation pipeline.
+
+I'm at Planview. We work with teams doing what you're doing — taking innovation concepts from lab to scaled service, managing cross-functional delivery across sport categories, and keeping leadership visibility intact as the complexity multiplies.
+
+Worth 20 minutes to compare notes?
+
+Kush Parikh
+Planview</div>
+          <div class="ep-hook">Hook: The Redondo Beach detail. "Brutal to operationalize from the inside" — his language as the operationalization person.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 6: LIVE INTEL ═══════════════ -->
+<div id="s6" class="section">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Live Intel</div>
+      <div class="topbar-crumb">RFP Updates · Market Intelligence · Org Changes</div>
+    </div>
+    <div class="topbar-right">
+      <div class="date-pill">Apr 17, 2026</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="section-kicker">Section 6</div>
+    <div class="section-heading">Intelligence Feed</div>
+    <div class="section-lead">Latest developments on the RFP, Nike's business, and organizational intelligence. Updated as new information surfaces.</div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">RFP & Deal Intelligence</div>
+
+      <div class="intel-item">
+        <div class="intel-date">Apr 13</div>
+        <div>
+          <div class="intel-source">Deal Update · Salesforce</div>
+          <div class="intel-headline">Nike silent post-submission — Kush followed up April 13</div>
+          <div class="intel-body">RFP submitted March 30. Nike indicated they would follow up with questions by April 6 — none received. Kush followed up to gauge status. No response yet. Deal still live in Stage 1.</div>
+          <span class="intel-tag it-rfp">RFP</span>
+        </div>
+      </div>
+
+      <div class="intel-item">
+        <div class="intel-date">Apr</div>
+        <div>
+          <div class="intel-source">CPO Intelligence · Louise Allen Meeting</div>
+          <div class="intel-headline">RFP was built by Accenture, not Nike — critical finding</div>
+          <div class="intel-body">Louise Allen (PV CPO) met with John (ex-Nike senior executive). Key reveal: the RFP criteria were shaped by Accenture, not Nike procurement. Ankit Puranik (Director, Software Engineering) spent 6 years at Accenture — potential internal bridge. Accenture's Nike engagement lead is unknown and a priority to identify.</div>
+          <span class="intel-tag it-intel">CPO Intel</span>
+          <span class="intel-tag it-rfp">RFP</span>
+        </div>
+      </div>
+
+      <div class="intel-item">
+        <div class="intel-date">Apr</div>
+        <div>
+          <div class="intel-source">CPO Intelligence</div>
+          <div class="intel-headline">Ankit Puranik identified — Director, Software Engineering reporting to Venky</div>
+          <div class="intel-body">Reports directly to the COO. Anthropic-certified (Claude 101 + AI Fluency, March 2026). Building AI agents with Claude LLMs internally. Drove 25% time-to-market improvement at Whirlpool, 50% faster mobile delivery. This is the most actionable target in the account. Lead with AI/speed-to-market. Do not cold pitch the RFP.</div>
+          <span class="intel-tag it-intel">New Contact</span>
+          <span class="intel-tag it-rfp">Priority</span>
+        </div>
+      </div>
+
+      <div class="intel-item">
+        <div class="intel-date">Apr</div>
+        <div>
+          <div class="intel-source">Org Intelligence</div>
+          <div class="intel-headline">New unidentified role sits between Ankit and Venky</div>
+          <div class="intel-body">John flagged a brand new position between Ankit Puranik and the COO. Identity unknown — could be a VP of Engineering, Chief of Staff to the COO, or VP of Digital Transformation. Must identify before reaching out to Ankit to avoid a gatekeeper surprise. Best candidate based on research: Dan Bay (VP, Global Technology Innovation).</div>
+          <span class="intel-tag it-intel">Org Intel</span>
+        </div>
+      </div>
+
+      <div class="intel-item">
+        <div class="intel-date">Jan 2026</div>
+        <div>
+          <div class="intel-source">Nike Org Change · LinkedIn Confirmed</div>
+          <div class="intel-headline">Rajeev Aikkara promoted to VP of Technology — January 2026</div>
+          <div class="intel-body">Previous role: VP Global Technology focused on Planning, Manufacturing and Supply Chain (inside Venky's org). Promoted January 2026. Clare Sabatucci (Nike innovation) commented on his announcement confirming a working relationship. Directly relevant to both R&V and Hub/DPD. Worth pursuing in parallel with Ankit outreach.</div>
+          <span class="intel-tag it-intel">New VP</span>
+          <span class="intel-tag it-rfp">Warm Path</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">Nike Business Intelligence — Q2 FY26 & Recent</div>
+
+      <div class="intel-item">
+        <div class="intel-date">Dec 18</div>
+        <div>
+          <div class="intel-source">Q2 FY26 Earnings · Elliott Hill</div>
+          <div class="intel-headline">Venkatesh Alagirisamy named COO with explicit tech integration mandate</div>
+          <div class="intel-body">"He and his team will look end-to-end to ensure technology is fully integrated across the company in how we create, plan, make, deliver and sell our world-class innovations." — Elliott Hill. CTO role eliminated simultaneously. Venky absorbed all technology authority.</div>
+          <span class="intel-tag it-ceo">CEO Mandate</span>
+        </div>
+      </div>
+
+      <div class="intel-item">
+        <div class="intel-date">Dec 18</div>
+        <div>
+          <div class="intel-source">Q2 FY26 Earnings</div>
+          <div class="intel-headline">All geography GMs now report directly to Elliott Hill</div>
+          <div class="intel-body">Hill restructured the leadership team so all geo GMs (Tom Peddie - NA, Angela Dong - China, Carl Grebert - EMEA, Cathy Sparks - APLA) report directly to him. "I'm confident this change will result in us accelerating our Win Now actions by allowing our geography GMs to more closely shape our strategy, drive faster decisions and influence investments."</div>
+          <span class="intel-tag it-ceo">Org Change</span>
+        </div>
+      </div>
+
+      <div class="intel-item">
+        <div class="intel-date">Dec 18</div>
+        <div>
+          <div class="intel-source">Q2 FY26 Earnings · Matt Friend</div>
+          <div class="intel-headline">Matt Friend absorbs NIKE Direct and Sales — expands beyond CFO role</div>
+          <div class="intel-body">In addition to EVP/CFO responsibilities, Friend now owns NIKE Direct and Sales. NIKE.com posted its best-ever Black Friday (Jordan Black Cat launch). Digital repositioned as premium channel. Gross margin down 300bps to 40.6% due to tariffs + China inventory write-off.</div>
+          <span class="intel-tag it-ceo">Org Change</span>
+          <span class="intel-tag it-market">Finance</span>
+        </div>
+      </div>
+
+      <div class="intel-item">
+        <div class="intel-date">Mar 2026</div>
+        <div>
+          <div class="intel-source">Nike Innovation</div>
+          <div class="intel-headline">Aero-FIT launches on national team kits — World Cup pipeline live</div>
+          <div class="intel-body">Nike's new apparel platform Aero-FIT is now worn by athletes in national team kits across 13+ countries. Football order book +40% vs. 2022. 100+ Nike Direct doors and 1,400 partner doors refreshed for World Cup. This is the biggest delivery deadline in Nike's turnaround calendar.</div>
+          <span class="intel-tag it-market">Product Launch</span>
+        </div>
+      </div>
+
+      <div class="intel-item">
+        <div class="intel-date">Oct 2025</div>
+        <div>
+          <div class="intel-source">Nike Innovation · NSRL</div>
+          <div class="intel-headline">Nike Mind launched — neuroscience-based footwear platform</div>
+          <div class="intel-body">Nike's first neuroscience-based footwear, designed to "help athletes feel calm." Announced alongside 3 other new innovation platforms (Therma-FIT Air, Structure Plus, Aero-FIT). Clare Sabatucci posted about Nike Mind publicly. This is the Sport Offense innovation pipeline made visible to consumers.</div>
+          <span class="intel-tag it-market">Innovation</span>
+        </div>
+      </div>
+
+      <div class="intel-item">
+        <div class="intel-date">Sep 2025</div>
+        <div>
+          <div class="intel-source">Nike Org Restructure</div>
+          <div class="intel-headline">~1,000 designers merged into single innovation unit under Phil McCartney</div>
+          <div class="intel-body">Nike, Jordan, and Converse R&D designers merged into one unified Sport Offense innovation organization. "A new day in Innovation, Design and Product." Creates the governance challenge Planview IdeaPlace + PD solves: three brands, five sports, one pipeline, no unified stage-gate process.</div>
+          <span class="intel-tag it-ceo">Org Change</span>
+          <span class="intel-tag it-rfp">PD Opportunity</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">Q3 FY26 Earnings — Watch Signals (March 31, 2026)</div>
+      <div style="background:var(--warn-bg);border:1px solid rgba(198,146,20,0.2);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text);line-height:1.7">
+        <strong>Q3 guidance from Matt Friend:</strong> Revenues expected down low single digits. Modest growth in North America. China and Converse similar to Q2 (still declining). Gross margin down 175–225bps (would be positive excluding tariff impact). SG&A up low single digits from sport offense investments.<br><br>
+        <strong>What to watch for SPM angle:</strong> If China numbers worsen, the scenario modeling argument gets sharper — "how do you reallocate investment in real time when a geography stalls?" If North America continues leading, Running's +20% becomes the "how do you scale this across all sports" question for PD/IdeaPlace.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 7: ORG CHART ═══════════════ -->
+<div id="s7" class="section">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Org Chart</div>
+      <div class="topbar-crumb">Nike, Inc. — Interactive Organization Chart · 64 Leads Overlaid</div>
+    </div>
+    <div class="topbar-right">
+      <a href="https://kpari23.github.io/NikeOrgChart/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--pv-red);text-decoration:none;background:rgba(200,16,46,0.07);border:1px solid rgba(200,16,46,0.2);padding:5px 12px;border-radius:20px;transition:all 0.15s" onmouseover="this.style.background='rgba(200,16,46,0.14)'" onmouseout="this.style.background='rgba(200,16,46,0.07)'">
+        <span>↗</span> Open full screen
+      </a>
+      <div class="date-pill">April 2026</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;height:calc(100vh - 57px);">
+
+    <!-- Context strip -->
+    <div style="padding:14px 40px 0;flex-shrink:0;">
+      <div style="display:flex;gap:10px;align-items:stretch;margin-bottom:14px;">
+        <div style="background:var(--pv-dark);border-radius:10px;padding:12px 18px;flex:1;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:20px;">👥</span>
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:#fff;">64 Leads Overlaid</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);">Sourced from Salesforce CRM + LeadIQ</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;flex:1;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:20px;">🔴</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text);">New CIO — Andy Caine</div>
+            <div style="font-size:11px;color:var(--muted);">Replaced Tony Bignell, effective Apr 12, 2026</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;flex:1;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:20px;">⚠️</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text);">Unknown VP between Ankit & Venky</div>
+            <div style="font-size:11px;color:var(--muted);">New role — identity not yet confirmed</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;flex:1;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:20px;">📋</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text);">Sub-function lines illustrative</div>
+            <div style="font-size:11px;color:var(--muted);">Based on publicly available information</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Iframe -->
+    <div style="flex:1;padding:0 40px 24px;min-height:0;">
+      <div style="height:100%;border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,0.08);position:relative;">
+        <!-- Loading state -->
+        <div id="org-loading" style="position:absolute;inset:0;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:10;border-radius:12px;">
+          <div style="width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--pv-red);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+          <div style="font-size:13px;color:var(--muted);font-weight:500;">Loading org chart…</div>
+        </div>
+        <iframe
+          id="org-iframe"
+          src="https://kpari23.github.io/NikeOrgChart/"
+          style="width:100%;height:100%;border:none;display:block;border-radius:12px;"
+          title="Nike Org Chart"
+          onload="document.getElementById('org-loading').style.display='none';"
+        ></iframe>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</main>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+/* Make org chart section use full viewport height minus topbar */
+#s7 { min-height: unset; height: 100vh; overflow: hidden; }
+</style>
+
+<script>
+function showSection(id, link) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  link.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function toggleOutreach(header) {
+  const body = header.nextElementSibling;
+  const chev = header.querySelector('.chevron');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+</script>
+</body>
+</html>
