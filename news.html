@@ -307,97 +307,70 @@ function formatDate(dateStr) {
   } catch(e) { return dateStr; }
 }
 
-// ── RSS sources ─────────────────────────────────────────────────────────────
-// All fetched via allorigins.win which returns proper CORS headers
+// ── RSS feeds ────────────────────────────────────────────────────────────────
 const FEEDS = [
+  { label: 'Google News', url: 'https://news.google.com/rss/search?q=Nike+Inc+NKE&hl=en-US&gl=US&ceid=US:en' },
+  { label: 'Google News', url: 'https://news.google.com/rss/search?q=Nike+earnings+2026&hl=en-US&gl=US&ceid=US:en' },
+  { label: 'Google News', url: 'https://news.google.com/rss/search?q=Nike+Elliott+Hill+COO&hl=en-US&gl=US&ceid=US:en' },
+  { label: 'Yahoo Finance', url: 'https://feeds.finance.yahoo.com/rss/2.0/headline?s=NKE&region=US&lang=en-US' },
+];
+
+// ── Proxy waterfall — tries each in order until one succeeds ────────────────
+// Each proxy has a different response format; handlers normalise to {xmlStr}
+const PROXIES = [
   {
-    label: 'Google News',
-    url: 'https://news.google.com/rss/search?q=Nike+Inc+NKE&hl=en-US&gl=US&ceid=US:en',
+    // rss2json — returns JSON directly, no XML parsing needed for basic fields
+    // Falls back to raw XML path below if needed
+    name: 'rss2json',
+    build: url => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=30`,
+    parse: async (res, sourceName) => {
+      const data = await res.json();
+      if (data.status !== 'ok' || !data.items) throw new Error('rss2json bad response');
+      return data.items.map(it => ({
+        title:    (it.title || '').trim(),
+        link:     it.link || it.guid || '#',
+        snippet:  stripHtml(it.description || it.content || '').trim().slice(0, 220),
+        pubDate:  it.pubDate || '',
+        source:   it.author || data.feed?.title || sourceName,
+        category: classifyItem(it.title || '', it.description || ''),
+      })).filter(i => i.title.length > 5);
+    },
   },
   {
-    label: 'Google News',
-    url: 'https://news.google.com/rss/search?q=Nike+earnings+stock&hl=en-US&gl=US&ceid=US:en',
+    // allorigins — returns {contents: "<xml>..."}
+    name: 'allorigins',
+    build: url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    parse: async (res, sourceName) => {
+      const data = await res.json();
+      return parseXML(data.contents || '', sourceName);
+    },
   },
   {
-    label: 'Google News',
-    url: 'https://news.google.com/rss/search?q=Nike+CEO+Elliott+Hill&hl=en-US&gl=US&ceid=US:en',
+    // corsproxy.io — returns raw XML with CORS headers
+    name: 'corsproxy.io',
+    build: url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    parse: async (res, sourceName) => {
+      const text = await res.text();
+      return parseXML(text, sourceName);
+    },
   },
   {
-    label: 'Yahoo Finance',
-    url: 'https://feeds.finance.yahoo.com/rss/2.0/headline?s=NKE&region=US&lang=en-US',
+    // thingproxy — another reliable fallback
+    name: 'thingproxy',
+    build: url => `https://thingproxy.freeboard.io/fetch/${url}`,
+    parse: async (res, sourceName) => {
+      const text = await res.text();
+      return parseXML(text, sourceName);
+    },
   },
 ];
 
-const CORS_PROXY = 'https://api.allorigins.win/get?url=';
-
-// ── State ───────────────────────────────────────────────────────────────────
-let allItems = [];
-let currentFilter = 'all';
-
-// ── Main load ───────────────────────────────────────────────────────────────
-async function loadFeed(force = false) {
-  const btn = document.getElementById('refresh-btn');
-  const icon = document.getElementById('refresh-icon');
-  btn.disabled = true;
-  icon.classList.add('spinning');
-
-  showState('loading');
-  document.getElementById('last-updated').textContent = 'Fetching…';
-
-  const seen = new Set();
-  const results = [];
-
-  // Fetch all feeds in parallel
-  const fetches = FEEDS.map(feed =>
-    fetchRSS(feed.url, feed.label).catch(() => [])
-  );
-  const feedResults = await Promise.all(fetches);
-
-  for (const items of feedResults) {
-    for (const item of items) {
-      const key = item.title.trim().toLowerCase().slice(0, 60);
-      if (!seen.has(key)) {
-        seen.add(key);
-        results.push(item);
-      }
-    }
-  }
-
-  // Sort by date descending
-  results.sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
-
-  allItems = results.slice(0, 60); // cap at 60 items
-
-  btn.disabled = false;
-  icon.classList.remove('spinning');
-
-  if (allItems.length === 0) {
-    showState('error');
-    document.getElementById('error-msg').textContent =
-      'No articles found. The RSS proxy may be rate-limited — try again in a moment.';
-    document.getElementById('last-updated').textContent = 'Failed';
-    return;
-  }
-
-  const now = new Date();
-  document.getElementById('last-updated').textContent =
-    'Updated ' + now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) +
-    ' · ' + now.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-
-  renderItems();
-}
-
-// ── Fetch & parse one RSS feed ───────────────────────────────────────────────
-async function fetchRSS(feedUrl, sourceName) {
-  const proxied = CORS_PROXY + encodeURIComponent(feedUrl);
-  const res = await fetch(proxied, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Proxy fetch failed');
-  const data = await res.json();
-  const xmlStr = data.contents;
+function parseXML(xmlStr, sourceName) {
+  if (!xmlStr || xmlStr.length < 50) throw new Error('Empty XML');
   const parser = new DOMParser();
   const doc = parser.parseFromString(xmlStr, 'text/xml');
   const items = Array.from(doc.querySelectorAll('item'));
-
+  if (items.length === 0) throw new Error('No items in XML');
   return items.map(item => {
     const title   = item.querySelector('title')?.textContent?.trim() || '';
     const link    = item.querySelector('link')?.textContent?.trim() ||
@@ -409,9 +382,72 @@ async function fetchRSS(feedUrl, sourceName) {
     const pubDate = item.querySelector('pubDate')?.textContent?.trim() ||
                     item.querySelector('published')?.textContent?.trim() || '';
     const rawSource = item.querySelector('source')?.textContent?.trim() || sourceName;
-
     return { title, link, snippet, pubDate, source: rawSource, category: classifyItem(title, snippet) };
   }).filter(i => i.title && i.title.length > 5);
+}
+
+// ── State ───────────────────────────────────────────────────────────────────
+let allItems = [];
+let currentFilter = 'all';
+
+// ── Try one feed through waterfall of proxies ────────────────────────────────
+async function fetchFeedWithFallback(feedUrl, sourceName) {
+  for (const proxy of PROXIES) {
+    try {
+      const proxyUrl = proxy.build(feedUrl);
+      const res = await fetch(proxyUrl, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
+      if (!res.ok) continue;
+      const items = await proxy.parse(res, sourceName);
+      if (items.length > 0) return items; // success
+    } catch (e) {
+      // try next proxy
+    }
+  }
+  return []; // all proxies failed for this feed
+}
+
+// ── Main load ────────────────────────────────────────────────────────────────
+async function loadFeed(force = false) {
+  const btn  = document.getElementById('refresh-btn');
+  const icon = document.getElementById('refresh-icon');
+  btn.disabled = true;
+  icon.classList.add('spinning');
+  showState('loading');
+  document.getElementById('last-updated').textContent = 'Fetching…';
+
+  const seen    = new Set();
+  const results = [];
+
+  const feedResults = await Promise.all(
+    FEEDS.map(f => fetchFeedWithFallback(f.url, f.label))
+  );
+
+  for (const items of feedResults) {
+    for (const item of items) {
+      const key = item.title.trim().toLowerCase().slice(0, 60);
+      if (!seen.has(key)) { seen.add(key); results.push(item); }
+    }
+  }
+
+  results.sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
+  allItems = results.slice(0, 60);
+
+  btn.disabled = false;
+  icon.classList.remove('spinning');
+
+  if (allItems.length === 0) {
+    showState('error');
+    document.getElementById('error-msg').textContent =
+      'All news proxies are currently unavailable. Please try again in a few minutes — this is usually temporary.';
+    document.getElementById('last-updated').textContent = 'Failed';
+    return;
+  }
+
+  const now = new Date();
+  document.getElementById('last-updated').textContent =
+    'Updated ' + now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}) +
+    ' · ' + now.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  renderItems();
 }
 
 function stripHtml(html) {
