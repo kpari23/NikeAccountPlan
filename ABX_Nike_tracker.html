@@ -249,8 +249,8 @@ const STORAGE_KEY='abx-nike-v1';
 // 3. Open the tracker, click Save — a Gist is created automatically
 // 4. The Gist ID will appear in the ⚙ modal — copy it into SHARED_GIST_ID below
 // 5. Re-upload this file — everyone on the team gets live sync with no setup
-const SHARED_TOKEN   = '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';  // paste your ghp_xxx token here
-const SHARED_GIST_ID = '9dd1b906a23f006c77ccea985d47ffbe';  // paste the Gist ID here after first save
+const SHARED_TOKEN   = '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';
+const SHARED_GIST_ID = '9dd1b906a23f006c77ccea985d47ffbe';
 
 // ── Gist config — uses hardcoded values first, falls back to localStorage ─────
 function getGistConfig(){
@@ -267,24 +267,28 @@ const GIST_FILENAME = 'abx-nike-tracker.json';
 
 async function saveToGist(data){
   const cfg = getGistConfig();
-  if(!cfg.token) return false;
+  if(!cfg.token) return { ok: false, error: 'No token configured' };
   const body = { files: { [GIST_FILENAME]: { content: JSON.stringify(data,null,2) } } };
-  if(cfg.gistId){
-    const r = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
-      method:'PATCH', headers:{'Authorization':'token '+cfg.token,'Content-Type':'application/json'},
-      body:JSON.stringify(body)
-    });
-    return r.ok;
-  } else {
-    // Create new gist
-    const r = await fetch('https://api.github.com/gists', {
-      method:'POST', headers:{'Authorization':'token '+cfg.token,'Content-Type':'application/json'},
-      body:JSON.stringify({...body, description:'ABX Nike Tracker', public:false})
-    });
-    if(!r.ok) return false;
-    const j = await r.json();
-    setGistConfig({...cfg, gistId: j.id});
-    return true;
+  try {
+    if(cfg.gistId){
+      const r = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
+        method:'PATCH', headers:{'Authorization':'token '+cfg.token,'Content-Type':'application/json'},
+        body:JSON.stringify(body)
+      });
+      if(!r.ok){ const j = await r.json().catch(()=>{}); return { ok:false, error:`GitHub ${r.status}: ${j?.message||r.statusText}` }; }
+      return { ok: true };
+    } else {
+      const r = await fetch('https://api.github.com/gists', {
+        method:'POST', headers:{'Authorization':'token '+cfg.token,'Content-Type':'application/json'},
+        body:JSON.stringify({...body, description:'ABX Nike Tracker', public:false})
+      });
+      if(!r.ok){ const j = await r.json().catch(()=>{}); return { ok:false, error:`GitHub ${r.status}: ${j?.message||r.statusText}` }; }
+      const j = await r.json();
+      setGistConfig({...cfg, gistId: j.id});
+      return { ok: true, newGistId: j.id };
+    }
+  } catch(e) {
+    return { ok: false, error: e.message };
   }
 }
 
@@ -605,15 +609,20 @@ async function saveAll(){
   const cfg = getGistConfig();
   if(cfg.token){
     try{
-      const ok = await saveToGist(data);
+      const result = await saveToGist(data);
       const newCfg = getGistConfig();
-      document.getElementById('last-saved').textContent =
-        (ok ? '☁ ' : '⚠ local only — ') +
-        new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-      toast(ok ? 'Saved to Gist ✓' : 'Gist save failed — saved locally');
+      if(result.ok){
+        const gistId = result.newGistId || newCfg.gistId;
+        document.getElementById('last-saved').textContent =
+          '☁ ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        toast(result.newGistId ? `Gist created ✓ — copy ID from ⚙` : 'Saved to Gist ✓');
+      } else {
+        document.getElementById('last-saved').textContent='⚠ local only';
+        toast('Gist failed: ' + result.error);
+      }
     }catch(e){
-      document.getElementById('last-saved').textContent='⚠ local only — '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-      toast('Gist error — saved locally');
+      document.getElementById('last-saved').textContent='⚠ local only';
+      toast('Gist error: ' + e.message);
     }
   } else {
     document.getElementById('last-saved').textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' (local only)';
