@@ -243,13 +243,22 @@ textarea.field-input{resize:vertical;min-height:60px;line-height:1.5}
 <script>
 const STORAGE_KEY='abx-nike-v1';
 
-// ── Persistent storage via GitHub Gist ───────────────────────────────────────
-// Data is saved to a GitHub Gist so it persists across devices and browsers.
-// Falls back to localStorage if no token is configured.
-// Setup: click the ⚙ button in the header to enter your GitHub token + Gist ID.
+// ── Shared credentials — fill these in once, works for the whole team ─────────
+// 1. Go to github.com/settings/tokens → Generate new token (classic) → tick "gist" only
+// 2. Paste the token below, leave SHARED_GIST_ID blank for now
+// 3. Open the tracker, click Save — a Gist is created automatically
+// 4. The Gist ID will appear in the ⚙ modal — copy it into SHARED_GIST_ID below
+// 5. Re-upload this file — everyone on the team gets live sync with no setup
+const SHARED_TOKEN   = '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';  // paste your ghp_xxx token here
+const SHARED_GIST_ID = '';  // paste the Gist ID here after first save
 
+// ── Gist config — uses hardcoded values first, falls back to localStorage ─────
 function getGistConfig(){
-  try{ return JSON.parse(localStorage.getItem('abx-gist-config')||'{}'); }catch(e){ return {}; }
+  const local = (() => { try{ return JSON.parse(localStorage.getItem('abx-gist-config')||'{}'); }catch(e){ return {}; } })();
+  return {
+    token:  SHARED_TOKEN  || local.token  || '',
+    gistId: SHARED_GIST_ID || local.gistId || '',
+  };
 }
 function setGistConfig(cfg){
   try{ localStorage.setItem('abx-gist-config', JSON.stringify(cfg)); }catch(e){}
@@ -293,6 +302,9 @@ async function loadFromGist(){
 
 function showGistSetup(){
   const cfg = getGistConfig();
+  // Pre-fill from constant if not already saved locally
+  const gistIdValue = cfg.gistId || SHARED_GIST_ID || '';
+  const isShared = !cfg.gistId && !!SHARED_GIST_ID;
   const existing = document.getElementById('gist-modal');
   if(existing) existing.remove();
   const m = document.createElement('div');
@@ -302,40 +314,52 @@ function showGistSetup(){
     <div style="background:#fff;border-radius:12px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,0.2)">
       <div style="background:#111;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
         <div>
-          <div style="font-size:13px;font-weight:700;color:#fff">Persistent Storage Setup</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">Saves data to GitHub Gist — accessible on any device</div>
+          <div style="font-size:13px;font-weight:700;color:#fff">Sync Setup</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">Saves tracker data to a shared GitHub Gist</div>
         </div>
         <button onclick="document.getElementById('gist-modal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer">×</button>
       </div>
       <div style="padding:20px">
-        <div style="background:#FFF8E6;border:1px solid rgba(198,146,20,0.25);border-radius:8px;padding:11px 14px;margin-bottom:16px;font-size:12px;color:#6b4c00;line-height:1.6">
-          <strong>One-time setup:</strong> Create a GitHub Personal Access Token at
-          <a href="https://github.com/settings/tokens" target="_blank" style="color:#FA5400">github.com/settings/tokens</a>
-          with <strong>gist</strong> scope only. Paste it below — your tracker data will sync to a private Gist automatically.
+        ${gistIdValue
+          ? `<div style="background:#E8F5EE;border:1px solid rgba(45,106,79,0.25);border-radius:8px;padding:11px 14px;margin-bottom:16px;font-size:12px;color:#1a4a2e;line-height:1.6">
+               <strong>✓ Gist ID is pre-configured.</strong> You just need to add your own GitHub token below — the tracker data is shared automatically.
+             </div>`
+          : `<div style="background:#FFF8E6;border:1px solid rgba(198,146,20,0.25);border-radius:8px;padding:11px 14px;margin-bottom:16px;font-size:12px;color:#6b4c00;line-height:1.6">
+               <strong>First-time setup (owner only):</strong> Click Save — a Gist ID will be generated. Copy it into the <code>SHARED_GIST_ID</code> constant at the top of the file and re-upload so teammates get it pre-filled.
+             </div>`
+        }
+        <label style="display:block;font-size:11px;font-weight:600;color:#888;margin-bottom:4px;letter-spacing:0.05em;text-transform:uppercase">Your GitHub Personal Access Token</label>
+        <div style="font-size:11px;color:#aaa;margin-bottom:6px;line-height:1.5">
+          Create one at <a href="https://github.com/settings/tokens" target="_blank" style="color:#FA5400">github.com/settings/tokens</a> → Generate new token (classic) → tick <strong>gist</strong> only.
         </div>
-        <label style="display:block;font-size:11px;font-weight:600;color:#888;margin-bottom:4px;letter-spacing:0.05em;text-transform:uppercase">GitHub Personal Access Token</label>
         <input id="gist-token-input" type="password" value="${cfg.token||''}" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-          style="width:100%;font-size:12px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:7px;font-family:monospace;margin-bottom:12px;outline:none"
+          style="width:100%;font-size:12px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:7px;font-family:monospace;margin-bottom:14px;outline:none"
           onfocus="this.style.borderColor='#FA5400'" onblur="this.style.borderColor='#e0e0e0'"/>
-        <label style="display:block;font-size:11px;font-weight:600;color:#888;margin-bottom:4px;letter-spacing:0.05em;text-transform:uppercase">Gist ID <span style="font-weight:400;text-transform:none">(leave blank to create new)</span></label>
-        <input id="gist-id-input" value="${cfg.gistId||''}" placeholder="Auto-created on first save"
-          style="width:100%;font-size:12px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:7px;font-family:monospace;margin-bottom:16px;outline:none"
-          onfocus="this.style.borderColor='#FA5400'" onblur="this.style.borderColor='#e0e0e0'"/>
+        ${gistIdValue
+          ? `<div style="background:#fafafa;border:1px solid #e0e0e0;border-radius:7px;padding:8px 10px;margin-bottom:14px;font-size:11px;color:#888;display:flex;align-items:center;justify-content:space-between;">
+               <span>Gist ID: <code style="color:#111">${gistIdValue.slice(0,12)}…</code>${isShared ? ' <span style="color:#2d6a4f;font-weight:600">(shared)</span>' : ''}</span>
+               <a href="https://gist.github.com/${gistIdValue}" target="_blank" style="color:#FA5400;font-size:11px;">view ↗</a>
+             </div>`
+          : `<label style="display:block;font-size:11px;font-weight:600;color:#888;margin-bottom:4px;letter-spacing:0.05em;text-transform:uppercase">Gist ID <span style="font-weight:400;text-transform:none">(auto-created on first save if blank)</span></label>
+             <input id="gist-id-input" value="" placeholder="Leave blank — will be created automatically"
+               style="width:100%;font-size:12px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:7px;font-family:monospace;margin-bottom:14px;outline:none"
+               onfocus="this.style.borderColor='#FA5400'" onblur="this.style.borderColor='#e0e0e0'"/>`
+        }
         <div style="display:flex;gap:8px">
           <button onclick="document.getElementById('gist-modal').remove()" style="flex:1;padding:9px;border:1px solid #e0e0e0;border-radius:8px;background:#fff;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit">Cancel</button>
-          <button onclick="saveGistConfig()" style="flex:2;padding:9px;border:none;border-radius:8px;background:#FA5400;font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit">Save & Enable Sync</button>
+          <button onclick="saveGistConfig('${gistIdValue}')" style="flex:2;padding:9px;border:none;border-radius:8px;background:#FA5400;font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit">Save & Enable Sync</button>
         </div>
-        ${cfg.gistId ? `<div style="margin-top:10px;text-align:center;font-size:11px;color:#888">Gist: <a href="https://gist.github.com/${cfg.gistId}" target="_blank" style="color:#FA5400">${cfg.gistId.slice(0,12)}…</a></div>` : ''}
       </div>
     </div>`;
   document.body.appendChild(m);
 }
 
-function saveGistConfig(){
+function saveGistConfig(prefilledGistId){
   const token = document.getElementById('gist-token-input').value.trim();
-  const gistId = document.getElementById('gist-id-input').value.trim();
+  const gistIdEl = document.getElementById('gist-id-input');
+  const gistId = prefilledGistId || (gistIdEl ? gistIdEl.value.trim() : '') || '';
   if(!token){ alert('Please enter a GitHub token.'); return; }
-  setGistConfig({ token, gistId: gistId || '' });
+  setGistConfig({ token, gistId });
   document.getElementById('gist-modal').remove();
   toast('Sync enabled — click Save to push your data');
 }
