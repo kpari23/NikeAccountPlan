@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ABX — Nike, Inc. Account Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#111;font-size:14px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:#fff;border:0.5px solid #e0e0e0;border-radius:12px;margin-bottom:1.25rem}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-dot{width:10px;height:10px;background:#FA5400;border-radius:50%;flex-shrink:0}
+.logo-text{font-size:12px;font-weight:600;color:#888;letter-spacing:0.1em}
+.account-name{font-size:20px;font-weight:600;color:#111}
+.meta{font-size:12px;color:#888;margin-top:2px}
+.save-btn{font-size:12px;padding:7px 16px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#111;cursor:pointer;transition:all 0.15s}
+.save-btn:hover{background:#f5f5f3;border-color:#999}
+.save-btn.saving{color:#FA5400;border-color:#FA5400}
+.nav{display:flex;gap:2px;background:#fff;border:0.5px solid #e0e0e0;border-radius:10px;padding:4px;margin-bottom:1.25rem;overflow-x:auto}
+.nav-tab{font-size:13px;padding:7px 16px;cursor:pointer;border:none;background:transparent;color:#888;border-radius:7px;white-space:nowrap;transition:all 0.15s;font-weight:500}
+.nav-tab:hover{color:#111;background:#f5f5f3}
+.nav-tab.active{color:#fff;background:#FA5400}
+.section{display:none}
+.section.active{display:block}
+.section-label{font-size:10px;font-weight:700;letter-spacing:0.12em;color:#888;text-transform:uppercase;margin-bottom:10px;padding-bottom:7px;border-bottom:2px solid #FA5400;display:inline-block}
+.card{background:#fff;border:0.5px solid #e0e0e0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.field-row{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:8px;margin-bottom:8px}
+.field-label{font-size:12px;color:#888}
+.field-input{font-size:13px;padding:5px 9px;border:0.5px solid #e0e0e0;border-radius:7px;background:#fafafa;color:#111;width:100%;font-family:inherit;transition:border-color 0.15s}
+.field-input:focus{outline:none;border-color:#FA5400;background:#fff}
+textarea.field-input{resize:vertical;min-height:60px;line-height:1.5}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;padding:7px 9px;background:#fafafa;color:#888;font-weight:600;border-bottom:0.5px solid #e0e0e0;font-size:11px;text-transform:uppercase;letter-spacing:0.05em}
+.tbl td{padding:6px 9px;border-bottom:0.5px solid #f0f0f0;vertical-align:top}
+.tbl td input,.tbl td select{width:100%;border:none;background:transparent;font-size:12px;color:#111;font-family:inherit;padding:2px 0}
+.tbl td textarea{width:100%;border:none;background:transparent;font-size:12px;color:#111;font-family:inherit;padding:2px 0;resize:vertical;min-height:52px;line-height:1.5}
+.tbl td input:focus,.tbl td select:focus,.tbl td textarea:focus{outline:none}
+.tbl tr:hover td{background:#fafafa}
+.add-row-btn{font-size:12px;color:#FA5400;background:none;border:none;cursor:pointer;padding:7px 0;margin-top:2px;font-weight:500}
+.add-row-btn:hover{opacity:0.75}
+.week-entry{border:0.5px solid #e0e0e0;border-radius:10px;margin-bottom:1rem;overflow:hidden;background:#fff}
+.week-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fafafa;cursor:pointer;border-bottom:0.5px solid #e0e0e0}
+.week-body{padding:1rem 1.25rem;display:none}
+.week-body.open{display:block}
+.chevron{font-size:10px;color:#aaa;transition:transform 0.2s}
+.chevron.open{transform:rotate(180deg)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ai-row{display:grid;grid-template-columns:32px 1fr 130px 100px 90px 110px 30px;align-items:center;gap:0;border-bottom:0.5px solid #f0f0f0;min-height:38px;transition:background 0.1s}
+.ai-row:last-child{border-bottom:none}
+.ai-row:hover{background:#fafafa}
+.ai-row input,.ai-row select{border:none;background:transparent;font-size:12px;color:#111;font-family:inherit;padding:6px 8px;width:100%}
+.ai-row input:focus,.ai-row select:focus{outline:none;background:#f5f5f3}
+.ai-header{display:grid;grid-template-columns:32px 1fr 130px 100px 90px 110px 30px;gap:0;border-bottom:0.5px solid #e0e0e0;background:#fafafa}
+.ai-header span{font-size:10px;font-weight:700;color:#aaa;padding:7px 8px;text-transform:uppercase;letter-spacing:0.06em}
+.cb-cell{display:flex;align-items:center;justify-content:center;padding:0 4px}
+.cb{width:14px;height:14px;accent-color:#FA5400;cursor:pointer}
+.done-text{text-decoration:line-through;color:#bbb!important}
+.due-asap{color:#E24B4A!important;font-weight:600}
+.due-soon{color:#c07800!important}
+.filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{font-size:11px;padding:5px 13px;border:0.5px solid #ddd;border-radius:100px;background:#fff;color:#888;cursor:pointer;font-weight:500;transition:all 0.15s}
+.filter-btn:hover{border-color:#aaa;color:#111}
+.filter-btn.active{background:#FA5400;color:#fff;border-color:#FA5400}
+.badge-count{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;border-radius:8px;background:rgba(250,84,0,0.12);color:#FA5400;font-size:10px;font-weight:700;margin-left:4px;padding:0 3px;vertical-align:middle}
+.filter-btn.active .badge-count{background:rgba(255,255,255,0.25);color:#fff}
+.status-sel{border:none;background:transparent;font-size:11px;font-family:inherit;cursor:pointer;padding:3px 5px;border-radius:5px;font-weight:500;width:100%}
+.s-done{background:#e6f4ea;color:#2d7a3a}
+.s-progress{background:#e8f0fe;color:#1a56b0}
+.s-not{background:#f0f0f0;color:#888}
+.role-sel{border:none;background:transparent;font-size:11px;color:#888;font-family:inherit;cursor:pointer;padding:4px 4px;width:100%}
+.action-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.action-tbl th{text-align:left;padding:6px 8px;background:#fafafa;color:#aaa;font-weight:600;border-bottom:0.5px solid #e0e0e0;font-size:10px;text-transform:uppercase;letter-spacing:0.05em}
+.action-tbl td{padding:6px 8px;border-bottom:0.5px solid #f0f0f0}
+.action-tbl td input{width:100%;border:none;background:transparent;font-size:12px;color:#111;font-family:inherit;padding:2px 0}
+.action-tbl tr:hover td{background:#fafafa}
+.toast{position:fixed;bottom:20px;right:20px;font-size:12px;padding:8px 16px;background:#111;color:#fff;border-radius:8px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;font-weight:500}
+.toast.show{opacity:1}
+@media(max-width:700px){
+  .ai-row,.ai-header{grid-template-columns:32px 1fr 80px 90px 30px}
+  .hide-sm{display:none}
+  .two-col{grid-template-columns:1fr}
+  .field-row{grid-template-columns:1fr;gap:2px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="logo-text">ABX</span>
+        <span class="account-name">Nike, Inc.</span>
+      </div>
+      <div class="meta">AE · BDR · Marketing &nbsp;·&nbsp; Last saved: <span id="last-saved">not yet saved</span></div>
+    </div>
+  </div>
+  <button class="save-btn" id="save-btn" onclick="saveAll()">Save</button>
+</div>
+
+<div class="nav">
+  <button class="nav-tab active" onclick="showTab(0,this)">Account Overview</button>
+  <button class="nav-tab" onclick="showTab(1,this)">Action Items</button>
+  <button class="nav-tab" onclick="showTab(2,this)">Org Chart</button>
+  <button class="nav-tab" onclick="showTab(3,this)">Meeting Notes</button>
+  <button class="nav-tab" onclick="showTab(4,this)">Reporting</button>
+</div>
+
+<!-- TAB 0: Account Overview -->
+<div id="tab-0" class="section active">
+  <div class="section-label">1.1 Account summary</div>
+  <div class="card">
+    <div class="two-col">
+      <div>
+        <div class="field-row"><span class="field-label">Account name</span><input class="field-input" id="f-name"/></div>
+        <div class="field-row"><span class="field-label">Account type</span><input class="field-input" id="f-type"/></div>
+        <div class="field-row"><span class="field-label">Industry</span><input class="field-input" id="f-industry"/></div>
+        <div class="field-row"><span class="field-label">Headquarters</span><input class="field-input" id="f-hq"/></div>
+        <div class="field-row"><span class="field-label">Website</span><input class="field-input" id="f-web"/></div>
+        <div class="field-row"><span class="field-label">Contract status</span><select class="field-input" id="f-status"><option>Prospect</option><option>Active</option><option>Renewal</option><option>Closed Lost</option></select></div>
+      </div>
+      <div>
+        <div class="field-row"><span class="field-label">AE</span><input class="field-input" id="f-ae"/></div>
+        <div class="field-row"><span class="field-label">BDR</span><input class="field-input" id="f-bdr"/></div>
+        <div class="field-row"><span class="field-label">ABM</span><input class="field-input" id="f-abm"/></div>
+        <div class="field-row"><span class="field-label">Content</span><input class="field-input" id="f-content"/></div>
+        <div class="field-row"><span class="field-label">RVP</span><input class="field-input" id="f-rvp"/></div>
+        <div class="field-row"><span class="field-label">Exec sponsor</span><input class="field-input" id="f-exec"/></div>
+        <div class="field-row"><span class="field-label">Renewal date</span><input class="field-input" type="date" id="f-renewal"/></div>
+      </div>
+    </div>
+    <div style="margin-top:12px"><span class="field-label" style="display:block;margin-bottom:5px">Account notes</span><textarea class="field-input" id="f-notes" placeholder="Brief description of the relationship, current stage, key context..."></textarea></div>
+    <div style="margin-top:10px"><span class="field-label" style="display:block;margin-bottom:5px">Partner opportunities</span><input class="field-input" id="f-partners"/></div>
+  </div>
+
+  <div class="section-label" style="margin-top:1.5rem">1.2 Target initiatives</div>
+  <div class="card">
+    <table class="tbl">
+      <thead><tr>
+        <th style="width:16%">Initiative</th>
+        <th style="width:38%">Notes</th>
+        <th style="width:36%">Solution alignment</th>
+        <th style="width:8%">Priority</th>
+        <th></th>
+      </tr></thead>
+      <tbody id="init-body"></tbody>
+    </table>
+    <button class="add-row-btn" onclick="addInitRow()">+ Add initiative</button>
+  </div>
+
+  <div class="section-label" style="margin-top:1.5rem">1.3 Open opportunities</div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Opp name</th><th>Stage</th><th>ARR</th><th>Primary contact</th><th>Close date</th><th>Owner</th><th></th></tr></thead>
+    <tbody id="opp-body"></tbody></table>
+    <button class="add-row-btn" onclick="addOppRow()">+ Add opportunity</button>
+  </div>
+</div>
+
+<!-- TAB 1: Action Items -->
+<div id="tab-1" class="section">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div>
+      <div class="section-label" style="margin-bottom:4px">Running action items</div>
+      <div style="font-size:12px;color:#888">Running list across all meetings. Tag by role and track status inline.</div>
+    </div>
+    <button class="add-row-btn" style="margin-top:0" onclick="addActionItem()">+ Add action</button>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All <span class="badge-count" id="cnt-all">0</span></button>
+    <button class="filter-btn" onclick="setFilter('open',this)">Open <span class="badge-count" id="cnt-open">0</span></button>
+    <button class="filter-btn" onclick="setFilter('done',this)">Done <span class="badge-count" id="cnt-done">0</span></button>
+    <button class="filter-btn" onclick="setFilter('Marketing',this)">Marketing <span class="badge-count" id="cnt-mkt">0</span></button>
+    <button class="filter-btn" onclick="setFilter('SDR',this)">SDR <span class="badge-count" id="cnt-sdr">0</span></button>
+    <button class="filter-btn" onclick="setFilter('AE',this)">AE <span class="badge-count" id="cnt-ae">0</span></button>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="ai-header">
+      <span></span><span>Action</span><span class="hide-sm">Owner</span><span>Due</span><span class="hide-sm">Role</span><span>Status</span><span></span>
+    </div>
+    <div id="action-items-list"></div>
+  </div>
+</div>
+
+<!-- TAB 2: Org Chart -->
+<div id="tab-2" class="section">
+  <div class="section-label">2.1 Buying groups</div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Buying group</th><th>Department</th><th>Influence</th><th>Primary contact</th><th></th></tr></thead>
+    <tbody id="bg-body"></tbody></table>
+    <button class="add-row-btn" onclick="addBgRow()">+ Add buying group</button>
+  </div>
+  <div class="section-label" style="margin-top:1.5rem">2.2 Org chart link</div>
+  <div class="card">
+    <div class="field-row"><span class="field-label">Chart URL</span><input class="field-input" id="f-orglink" placeholder="Lucidchart / Miro / Salesforce link"/></div>
+    <div style="margin-top:10px"><span class="field-label" style="display:block;margin-bottom:5px">Org notes</span><textarea class="field-input" id="f-orgnotes" placeholder="Notes on reporting lines, key decision-makers..."></textarea></div>
+  </div>
+  <div class="section-label" style="margin-top:1.5rem">2.3 Key personas</div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Name</th><th>Title</th><th>Buyer type</th><th>Sentiment</th><th>Notes</th><th></th></tr></thead>
+    <tbody id="persona-body"></tbody></table>
+    <button class="add-row-btn" onclick="addPersonaRow()">+ Add persona</button>
+  </div>
+</div>
+
+<!-- TAB 3: Meeting Notes -->
+<div id="tab-3" class="section">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <div class="section-label" style="margin-bottom:0">Weekly cadence</div>
+    <button class="add-row-btn" style="margin-top:0" onclick="addMeeting()">+ New meeting entry</button>
+  </div>
+  <div id="meetings-wrap"></div>
+</div>
+
+<!-- TAB 4: Reporting -->
+<div id="tab-4" class="section">
+  <div class="section-label">4.1 Goals & success criteria</div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Goal / metric</th><th>Target</th><th>Current</th><th>Owner</th><th>Status</th><th></th></tr></thead>
+    <tbody id="goal-body"></tbody></table>
+    <button class="add-row-btn" onclick="addGoalRow()">+ Add goal</button>
+  </div>
+  <div class="section-label" style="margin-top:1.5rem">4.2 Monthly reporting</div>
+  <div id="monthly-wrap"></div>
+  <button class="add-row-btn" onclick="addMonth()">+ Add month</button>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+const STORAGE_KEY='abx-nike-v1';
+let currentFilter='all';
+let actionItems=[];
+
+function showTab(i,el){
+  document.querySelectorAll('.section').forEach((s,j)=>{s.classList.toggle('active',j===i);s.style.display=j===i?'block':'none';});
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+document.querySelectorAll('.section').forEach((s,j)=>s.style.display=j===0?'block':'none');
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function delRow(btn){btn.closest('tr').remove();}
+function makeDelBtn(){return`<button onclick="delRow(this)" style="border:none;background:none;color:#bbb;cursor:pointer;font-size:15px;padding:0 2px">×</button>`;}
+
+function setFilter(f,el){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderActionItems();
+}
+
+function updateCounts(){
+  document.getElementById('cnt-all').textContent=actionItems.length;
+  document.getElementById('cnt-open').textContent=actionItems.filter(a=>a.status!=='Done').length;
+  document.getElementById('cnt-done').textContent=actionItems.filter(a=>a.status==='Done').length;
+  document.getElementById('cnt-mkt').textContent=actionItems.filter(a=>a.role==='Marketing').length;
+  document.getElementById('cnt-sdr').textContent=actionItems.filter(a=>a.role==='SDR').length;
+  document.getElementById('cnt-ae').textContent=actionItems.filter(a=>a.role==='AE').length;
+}
+
+function renderActionItems(){
+  updateCounts();
+  const list=document.getElementById('action-items-list');
+  list.innerHTML='';
+  const filtered=actionItems.filter(a=>{
+    if(currentFilter==='open') return a.status!=='Done';
+    if(currentFilter==='done') return a.status==='Done';
+    if(['Marketing','SDR','AE'].includes(currentFilter)) return a.role===currentFilter;
+    return true;
+  });
+  if(filtered.length===0){
+    list.innerHTML=`<div style="padding:24px;text-align:center;font-size:13px;color:#aaa">No action items${currentFilter!=='all'?' in this category':''}.</div>`;
+    return;
+  }
+  filtered.forEach(a=>{
+    const idx=actionItems.indexOf(a);
+    const isDone=a.status==='Done';
+    const dueClass=a.due==='ASAP'?'due-asap':['This week','Monday','Before next meeting'].includes(a.due)?'due-soon':'';
+    const sClass=a.status==='Done'?'s-done':a.status==='In progress'?'s-progress':'s-not';
+    const row=document.createElement('div');
+    row.className='ai-row';
+    row.innerHTML=`
+      <div class="cb-cell"><input type="checkbox" class="cb" ${isDone?'checked':''} onchange="toggleDone(${idx},this)"/></div>
+      <input value="${(a.action||'').replace(/"/g,'&quot;')}" class="${isDone?'done-text':''}" onchange="actionItems[${idx}].action=this.value" placeholder="Action item..."/>
+      <input value="${(a.owner||'').replace(/"/g,'&quot;')}" class="hide-sm ${isDone?'done-text':''}" onchange="actionItems[${idx}].owner=this.value" placeholder="Owner"/>
+      <input value="${(a.due||'').replace(/"/g,'&quot;')}" class="${dueClass} ${isDone?'done-text':''}" onchange="actionItems[${idx}].due=this.value;renderActionItems()" placeholder="Due"/>
+      <div class="cb-cell hide-sm" style="justify-content:flex-start;padding:0 2px">
+        <select class="role-sel" onchange="actionItems[${idx}].role=this.value;renderActionItems()">
+          <option value="">—</option>
+          ${['AE','SDR','Marketing','Shared'].map(r=>`<option value="${r}"${a.role===r?' selected':''}>${r}</option>`).join('')}
+        </select>
+      </div>
+      <div class="cb-cell" style="justify-content:flex-start;padding:0 2px">
+        <select class="status-sel ${sClass}" onchange="onStatusChange(${idx},this)">
+          ${['Not started','In progress','Done'].map(s=>`<option value="${s}"${a.status===s?' selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="cb-cell"><button onclick="deleteAction(${idx})" style="border:none;background:none;color:#bbb;cursor:pointer;font-size:15px">×</button></div>`;
+    list.appendChild(row);
+  });
+}
+
+function applyStatusStyle(sel,status){
+  sel.className='status-sel';
+  sel.classList.add(status==='Done'?'s-done':status==='In progress'?'s-progress':'s-not');
+}
+function onStatusChange(idx,sel){
+  actionItems[idx].status=sel.value;
+  actionItems[idx].done=sel.value==='Done';
+  applyStatusStyle(sel,sel.value);
+  renderActionItems();
+}
+function toggleDone(idx,cb){
+  actionItems[idx].done=cb.checked;
+  actionItems[idx].status=cb.checked?'Done':'Not started';
+  renderActionItems();
+}
+function deleteAction(idx){actionItems.splice(idx,1);renderActionItems();}
+function addActionItem(action='',owner='',due='',status='Not started',role=''){
+  actionItems.push({action,owner,due,status,done:status==='Done',role});
+  renderActionItems();
+}
+
+function addInitRow(init='',notes='',align='',pri='High'){
+  document.getElementById('init-body').insertAdjacentHTML('beforeend',
+    `<tr>
+      <td><input value="${init.replace(/"/g,'&quot;')}" placeholder="Initiative name"/></td>
+      <td><textarea placeholder="Context, background, what Nike is trying to achieve...">${notes}</textarea></td>
+      <td><textarea placeholder="How your solution maps to this initiative...">${align}</textarea></td>
+      <td><select>${['High','Medium','Low'].map(o=>`<option${o===pri?' selected':''}>${o}</option>`).join('')}</select></td>
+      <td>${makeDelBtn()}</td>
+    </tr>`);
+}
+
+function addOppRow(n='',s='Discovery',a='',c='',d='',o=''){
+  document.getElementById('opp-body').insertAdjacentHTML('beforeend',
+    `<tr><td><input value="${n}" placeholder="Opp name"/></td><td><select>${['Discovery','Qualification','Proposal','Negotiation','Closed Won','Closed Lost'].map(x=>`<option${x===s?' selected':''}>${x}</option>`).join('')}</select></td><td><input value="${a}" placeholder="$0"/></td><td><input value="${c}" placeholder="Contact"/></td><td><input type="date" value="${d}"/></td><td><input value="${o}" placeholder="AE"/></td><td>${makeDelBtn()}</td></tr>`);
+}
+function addBgRow(g='',d='',i='High',c=''){
+  document.getElementById('bg-body').insertAdjacentHTML('beforeend',
+    `<tr><td><input value="${g}" placeholder="Group"/></td><td><input value="${d}" placeholder="Department"/></td><td><select>${['High','Medium','Low'].map(o=>`<option${o===i?' selected':''}>${o}</option>`).join('')}</select></td><td><input value="${c}" placeholder="Name"/></td><td>${makeDelBtn()}</td></tr>`);
+}
+function addPersonaRow(n='',t='',b='Champion',s='Neutral',no=''){
+  document.getElementById('persona-body').insertAdjacentHTML('beforeend',
+    `<tr><td><input value="${n}" placeholder="First Last"/></td><td><input value="${t}" placeholder="Title"/></td><td><select>${['Economic Buyer','Champion','Technical Buyer','Influencer','End User','Blocker'].map(o=>`<option${o===b?' selected':''}>${o}</option>`).join('')}</select></td><td><select>${['Supportive','Neutral','Skeptical','Unknown'].map(o=>`<option${o===s?' selected':''}>${o}</option>`).join('')}</select></td><td><input value="${no}" placeholder="Notes"/></td><td>${makeDelBtn()}</td></tr>`);
+}
+function addGoalRow(g='',t='',c='',o='AE',s='On track'){
+  document.getElementById('goal-body').insertAdjacentHTML('beforeend',
+    `<tr><td><input value="${g}" placeholder="Goal"/></td><td><input value="${t}" placeholder="Target"/></td><td><input value="${c}" placeholder="Current"/></td><td><select>${['AE','BDR','Marketing'].map(x=>`<option${x===o?' selected':''}>${x}</option>`).join('')}</select></td><td><select>${['On track','At risk','Behind'].map(x=>`<option${x===s?' selected':''}>${x}</option>`).join('')}</select></td><td>${makeDelBtn()}</td></tr>`);
+}
+
+let mtgCounter=0;
+function addMeeting(data={}){
+  mtgCounter++;
+  const id='mtg-'+Date.now()+'-'+mtgCounter;
+  const label=data.dateLabel||(new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}));
+  const wrap=document.getElementById('meetings-wrap');
+  const div=document.createElement('div');
+  div.className='week-entry';div.dataset.mtgid=id;
+  div.innerHTML=`
+    <div class="week-header" onclick="toggleMtg('${id}')">
+      <span style="font-size:13px;font-weight:600;color:#111">Meeting #${mtgCounter}</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:#888" id="${id}-datelabel">${label}</span>
+        <button onclick="event.stopPropagation();this.closest('.week-entry').remove()" style="border:none;background:none;color:#bbb;cursor:pointer;font-size:15px;padding:0 2px">×</button>
+        <span class="chevron open" id="${id}-chev">▼</span>
+      </div>
+    </div>
+    <div class="week-body open" id="${id}-body">
+      <div class="two-col" style="margin-bottom:10px">
+        <div class="field-row"><span class="field-label">Date</span><input class="field-input" type="date" value="${data.date||''}" id="${id}-date" onchange="updateMtgDate('${id}',this.value)"/></div>
+        <div class="field-row"><span class="field-label">Meeting type</span><select class="field-input" id="${id}-type">${['Discovery','QBR','Check-in','Demo','Negotiation','Internal sync'].map(o=>`<option${o===(data.mtype||'')?' selected':''}>${o}</option>`).join('')}</select></div>
+      </div>
+      <div style="margin-bottom:10px"><span class="field-label" style="display:block;margin-bottom:5px">Attendees</span><input class="field-input" id="${id}-att" value="${data.att||''}" placeholder="AE, BDR, Marketing, Nike contacts..." style="width:100%"/></div>
+      <div style="margin-bottom:10px"><span class="field-label" style="display:block;margin-bottom:5px">Agenda</span><textarea class="field-input" id="${id}-agenda" placeholder="• Topic 1&#10;• Topic 2">${data.agenda||''}</textarea></div>
+      <div style="margin-bottom:10px"><span class="field-label" style="display:block;margin-bottom:5px">Key discussion points</span><textarea class="field-input" id="${id}-disc" placeholder="• Summary of what was discussed...">${data.disc||''}</textarea></div>
+      <div style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span class="field-label" style="font-weight:600">Action items</span>
+          <button class="add-row-btn" style="margin-top:0;font-size:11px" onclick="addMtgActionRow('${id}')">+ Add</button>
+        </div>
+        <table class="action-tbl">
+          <thead><tr><th>#</th><th>Action</th><th style="width:120px">Owner</th><th style="width:90px">Due</th><th style="width:24px"></th></tr></thead>
+          <tbody id="${id}-actions-body"></tbody>
+        </table>
+      </div>
+      <div class="field-row"><span class="field-label">Transcript / recording</span><input class="field-input" id="${id}-link" value="${data.link||''}" placeholder="Gong / Zoom / Chorus link"/></div>
+    </div>`;
+  wrap.prepend(div);
+  if(data.actions&&data.actions.length){
+    data.actions.forEach((a,i)=>addMtgActionRowData(id,i+1,a.action||'',a.owner||'',a.due||''));
+  }
+}
+function addMtgActionRowData(mtgId,num,action,owner,due){
+  const tbody=document.getElementById(mtgId+'-actions-body');
+  if(!tbody)return;
+  tbody.insertAdjacentHTML('beforeend',
+    `<tr><td style="color:#aaa;font-size:11px;width:24px;text-align:center">${num}</td><td><input value="${action.replace(/"/g,'&quot;')}"/></td><td><input value="${owner.replace(/"/g,'&quot;')}"/></td><td><input value="${due.replace(/"/g,'&quot;')}"/></td><td><button onclick="delRow(this)" style="border:none;background:none;color:#bbb;cursor:pointer;font-size:14px">×</button></td></tr>`);
+}
+function addMtgActionRow(mtgId){
+  const tbody=document.getElementById(mtgId+'-actions-body');
+  addMtgActionRowData(mtgId,tbody.querySelectorAll('tr').length+1,'','','');
+  addActionItem('','','','Not started','');
+}
+function toggleMtg(id){
+  const body=document.getElementById(id+'-body');
+  const chev=document.getElementById(id+'-chev');
+  body.classList.toggle('open');
+  chev.classList.toggle('open',body.classList.contains('open'));
+}
+function updateMtgDate(id,val){
+  if(!val)return;
+  const d=new Date(val+'T00:00:00');
+  document.getElementById(id+'-datelabel').textContent=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+
+let monthCounter=0;
+function addMonth(data={}){
+  monthCounter++;
+  const mid='month-'+Date.now()+'-'+monthCounter;
+  const label=data.label||(new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'}));
+  const div=document.createElement('div');
+  div.className='card';div.dataset.monthid=mid;
+  div.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <input class="field-input" id="${mid}-label" value="${label}" style="width:auto;font-weight:600"/>
+      <button onclick="this.closest('.card').remove()" style="border:none;background:none;color:#bbb;cursor:pointer;font-size:15px">×</button>
+    </div>
+    <div class="two-col" style="margin-bottom:10px">
+      <div><span class="field-label" style="display:block;margin-bottom:5px">Meetings held</span><input class="field-input" id="${mid}-meetings" value="${data.meetings||''}" placeholder="0"/></div>
+      <div><span class="field-label" style="display:block;margin-bottom:5px">Pipeline added</span><input class="field-input" id="${mid}-pipeline" value="${data.pipeline||''}" placeholder="$0"/></div>
+      <div><span class="field-label" style="display:block;margin-bottom:5px">Contacts engaged</span><input class="field-input" id="${mid}-contacts" value="${data.contacts||''}" placeholder="0"/></div>
+      <div><span class="field-label" style="display:block;margin-bottom:5px">Opp stage</span><input class="field-input" id="${mid}-stage" value="${data.stage||''}" placeholder="Stage X"/></div>
+    </div>
+    <div style="margin-bottom:10px"><span class="field-label" style="display:block;margin-bottom:5px">Monthly narrative</span><textarea class="field-input" id="${mid}-narrative" placeholder="Summarize the month's activity, wins, blockers...">${data.narrative||''}</textarea></div>
+    <div><span class="field-label" style="display:block;margin-bottom:5px">Next 30-day priorities</span><textarea class="field-input" id="${mid}-priorities" placeholder="• Priority 1&#10;• Priority 2">${data.priorities||''}</textarea></div>`;
+  document.getElementById('monthly-wrap').prepend(div);
+}
+
+function gv(id){return document.getElementById(id)?.value||'';}
+function sv(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
+function getTableRows(id,cols){
+  return Array.from(document.getElementById(id).querySelectorAll('tr')).map(tr=>{
+    const inp=tr.querySelectorAll('input,select,textarea');
+    const r={};cols.forEach((c,i)=>{if(inp[i])r[c]=inp[i].value;});
+    return r;
+  });
+}
+function getMtgActions(id){return Array.from(document.querySelectorAll('#'+id+'-actions-body tr')).map(tr=>{const i=tr.querySelectorAll('input');return{action:i[0]?.value||'',owner:i[1]?.value||'',due:i[2]?.value||''};});}
+function getMeetings(){return Array.from(document.getElementById('meetings-wrap').querySelectorAll('.week-entry')).map(el=>{const id=el.dataset.mtgid;return{dateLabel:document.getElementById(id+'-datelabel')?.textContent||'',date:document.getElementById(id+'-date')?.value||'',mtype:document.getElementById(id+'-type')?.value||'',att:document.getElementById(id+'-att')?.value||'',agenda:document.getElementById(id+'-agenda')?.value||'',disc:document.getElementById(id+'-disc')?.value||'',actions:getMtgActions(id),link:document.getElementById(id+'-link')?.value||''};});}
+function getMonths(){return Array.from(document.getElementById('monthly-wrap').querySelectorAll('.card')).map(el=>{const id=el.dataset.monthid;return{label:document.getElementById(id+'-label')?.value||'',meetings:document.getElementById(id+'-meetings')?.value||'',pipeline:document.getElementById(id+'-pipeline')?.value||'',contacts:document.getElementById(id+'-contacts')?.value||'',stage:document.getElementById(id+'-stage')?.value||'',narrative:document.getElementById(id+'-narrative')?.value||'',priorities:document.getElementById(id+'-priorities')?.value||''};});}
+
+function saveAll(){
+  const btn=document.getElementById('save-btn');
+  btn.textContent='Saving...';btn.classList.add('saving');
+  const data={
+    summary:{name:gv('f-name'),type:gv('f-type'),industry:gv('f-industry'),hq:gv('f-hq'),web:gv('f-web'),status:gv('f-status'),ae:gv('f-ae'),bdr:gv('f-bdr'),abm:gv('f-abm'),content:gv('f-content'),rvp:gv('f-rvp'),exec:gv('f-exec'),renewal:gv('f-renewal'),notes:gv('f-notes'),partners:gv('f-partners')},
+    orglink:gv('f-orglink'),orgnotes:gv('f-orgnotes'),
+    initiatives:getTableRows('init-body',['init','notes','align','pri']),
+    opps:getTableRows('opp-body',['name','stage','arr','contact','date','owner']),
+    buyingGroups:getTableRows('bg-body',['grp','dept','inf','contact']),
+    personas:getTableRows('persona-body',['name','title','btype','sentiment','notes']),
+    goals:getTableRows('goal-body',['goal','target','current','owner','status']),
+    meetings:getMeetings(),months:getMonths(),actionItems,
+    savedAt:new Date().toISOString()
+  };
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+    document.getElementById('last-saved').textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    toast('Saved ✓');
+  }catch(e){toast('Save failed — try clearing browser storage');}
+  btn.textContent='Save';btn.classList.remove('saving');
+}
+
+const WIN_NOW_NOTES="CEO Elliott Hill's turnaround strategy, launched 2025. Restructures Nike from digital-only/DTC and gender-based silos back into sport-specific categories (Running, Basketball, Football). Key pillars: reviving wholesale partnerships, demand creation spend $5B+ in FY2026 (up from $4.68B), performance innovation (Project Amplify, Air Max revamp), re-engaging NBA/NFL/WNBA partnerships. Q1 FY2026 revenue up 1% to $11.7B — early recovery signs with wholesale up 7% YoY.";
+const WIN_NOW_ALIGN="Release orchestration directly enables Win Now execution — coordinating product launches across sport categories, aligning wholesale partner readiness with marketing campaigns, and ensuring the right assortment reaches the right channel at the right time. Directly tied to the active Release Orchestration RFP (Sage 1, $1.25M).";
+
+const DEFAULT_ACTIONS=[
+  {action:"Finalize lead list / quasi-org chart combining lists from Jarvis, Kush, and Cole",owner:"Kush, Jarvis, Cole",due:"Monday",status:"Not started",done:false,role:"AE"},
+  {action:"Follow up with Nike on RFP submitted March 30",owner:"Kush",due:"ASAP",status:"Not started",done:false,role:"AE"},
+  {action:"Connect with Accenture contacts (Sunny & Prashant) working with Nike to get an in on the RFP",owner:"Kush / Sunny / Prashant",due:"Ongoing",status:"Not started",done:false,role:"AE"},
+  {action:"Validate Nike org chart (new COO/CIO structure) with Louise's contact John",owner:"Kush",due:"Next week",status:"Not started",done:false,role:"AE"},
+  {action:"Send Jarvis's existing Nike outbound SPM sequence to Lisa/Alec for review",owner:"Jarvis",due:"This week",status:"Not started",done:false,role:"SDR"},
+  {action:"Send target titles list (not full lead list) to Lisa so she can review the sequence with the right lens",owner:"Kush / Jarvis",due:"This week",status:"Not started",done:false,role:"SDR"},
+  {action:"Create messaging doc based on Win Now initiative — starting point for all outbound copy",owner:"Lisa (+ Michelle)",due:"Before next meeting",status:"Not started",done:false,role:"Marketing"},
+  {action:"Review and update Jarvis's existing sequence with refreshed messaging",owner:"Lisa / Alec",due:"Before next meeting",status:"Not started",done:false,role:"Marketing"},
+  {action:"Load leads into outreach sequence (inactive, ready to launch pending messaging approval)",owner:"Alec",due:"Before next meeting",status:"Not started",done:false,role:"SDR"},
+  {action:"Set up shared Claude dashboard for meeting updates / status visibility",owner:"Kush (+ Lisa to collaborate)",due:"After this call",status:"Not started",done:false,role:"AE"}
+];
+
+function loadAll(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw)throw new Error('no data');
+    const data=JSON.parse(raw);
+    const s=data.summary||{};
+    sv('f-name',s.name);sv('f-type',s.type);sv('f-industry',s.industry);sv('f-hq',s.hq);sv('f-web',s.web);sv('f-status',s.status);
+    sv('f-ae',s.ae);sv('f-bdr',s.bdr);sv('f-abm',s.abm);sv('f-content',s.content);sv('f-rvp',s.rvp);sv('f-exec',s.exec);
+    sv('f-renewal',s.renewal);sv('f-notes',s.notes);sv('f-partners',s.partners);
+    sv('f-orglink',data.orglink);sv('f-orgnotes',data.orgnotes);
+    const inits=data.initiatives||[];
+    const hasContent=inits.some(r=>r.init&&r.init.trim());
+    if(!hasContent) addInitRow('Win Now',WIN_NOW_NOTES,WIN_NOW_ALIGN,'High');
+    else inits.forEach(r=>addInitRow(r.init||'',r.notes||'',r.align||'',r.pri||'High'));
+    (data.opps||[]).forEach(r=>addOppRow(r.name,r.stage,r.arr,r.contact,r.date,r.owner));
+    (data.buyingGroups||[]).forEach(r=>addBgRow(r.grp,r.dept,r.inf,r.contact));
+    (data.personas||[]).forEach(r=>addPersonaRow(r.name,r.title,r.btype,r.sentiment,r.notes));
+    (data.goals||[]).forEach(r=>addGoalRow(r.goal,r.target,r.current,r.owner,r.status));
+    [...(data.meetings||[])].reverse().forEach(m=>addMeeting(m));
+    [...(data.months||[])].reverse().forEach(m=>addMonth(m));
+    actionItems=(data.actionItems||[]).length?data.actionItems.map(a=>({...a,status:a.status||(a.done?'Done':'Not started')})):DEFAULT_ACTIONS;
+    renderActionItems();
+    if(data.savedAt){const d=new Date(data.savedAt);document.getElementById('last-saved').textContent=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
+  }catch(e){
+    sv('f-name','Nike, Inc.');sv('f-type','New Logo');sv('f-industry','Manufacturing / Consumer Goods');
+    sv('f-hq','Beaverton, OR');sv('f-web','nike.com');sv('f-ae','Kush Parikh');sv('f-bdr','Cole McCormack');
+    sv('f-abm','Lisa Amos');sv('f-content','Michelle Wong');sv('f-rvp','Anthony C');sv('f-partners','Accenture');
+    addInitRow('Win Now',WIN_NOW_NOTES,WIN_NOW_ALIGN,'High');
+    addOppRow('Nike Inc. - Release Orchestration RFP Sage 1','Discovery','$1,250,000','Madhura Indurkar','','Kush Parikh');
+    addBgRow('Economic Buyer','Finance / Procurement','High','');
+    addBgRow('Champion','Business Unit','High','');
+    addBgRow('Technical Buyer','IT / Engineering','Medium','');
+    addPersonaRow('Madhura Indurkar','','Champion','Unknown','Primary contact — Release Orchestration RFP');
+    addGoalRow('Qualified meetings set','','','BDR','On track');
+    addGoalRow('Pipeline generated ($)','','','AE','At risk');
+    addGoalRow('Contacts engaged','','','Marketing','On track');
+    addGoalRow('Deal close','','','AE','On track');
+    addMeeting({date:'2026-04-15',dateLabel:'Apr 15, 2026',mtype:'Internal sync',att:'Kush Parikh, Cole McCormack, Lisa Amos, Michelle Wong, Jarvis, Alec',actions:DEFAULT_ACTIONS});
+    addMonth();
+    actionItems=[...DEFAULT_ACTIONS];
+    renderActionItems();
+    document.getElementById('last-saved').textContent='no saved data';
+  }
+}
+loadAll();
+</script>
+</body>
+</html>
