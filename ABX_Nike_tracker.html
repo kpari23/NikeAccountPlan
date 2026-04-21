@@ -78,6 +78,14 @@ textarea.field-input{resize:vertical;min-height:60px;line-height:1.5}
 .action-tbl tr:hover td{background:#fafafa}
 .toast{position:fixed;bottom:20px;right:20px;font-size:12px;padding:8px 16px;background:#111;color:#fff;border-radius:8px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;font-weight:500}
 .toast.show{opacity:1}
+.toast.error-toast{background:#C8102E}
+.error-banner{display:none;background:#FEF0F0;border:1px solid rgba(200,16,46,0.25);border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:12px;color:#7a0a1a;line-height:1.6;align-items:flex-start;gap:10px}
+.error-banner.show{display:flex}
+.error-banner-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.error-banner-body{flex:1}
+.error-banner-title{font-weight:700;margin-bottom:2px}
+.error-banner-msg{color:#a01020;font-family:monospace;font-size:11px;word-break:break-all}
+.error-banner-dismiss{background:none;border:none;color:#a01020;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0}
 @media(max-width:700px){
   .ai-row,.ai-header{grid-template-columns:32px 1fr 80px 90px 30px}
   .hide-sm{display:none}
@@ -101,14 +109,19 @@ textarea.field-input{resize:vertical;min-height:60px;line-height:1.5}
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <button onclick="showGistSetup()" title="Sync settings" style="width:32px;height:32px;border:0.5px solid #e0e0e0;border-radius:8px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-    </button>
     <a class="plan-link" href="index.html" target="_blank">↗ Account Plan</a>
     <button class="save-btn" id="save-btn" onclick="saveAll()">Save</button>
   </div>
+</div>
+
+<!-- Persistent error banner -->
+<div class="error-banner" id="error-banner">
+  <div class="error-banner-icon">⚠️</div>
+  <div class="error-banner-body">
+    <div class="error-banner-title" id="error-banner-title">Error</div>
+    <div class="error-banner-msg" id="error-banner-msg"></div>
+  </div>
+  <button class="error-banner-dismiss" onclick="dismissError()" title="Dismiss">×</button>
 </div>
 
 <div class="nav">
@@ -241,132 +254,39 @@ textarea.field-input{resize:vertical;min-height:60px;line-height:1.5}
 </div>
 
 <script>
-const STORAGE_KEY='abx-nike-v1';
+const STORAGE_KEY = 'abx-nike-v1';
 
-// ── Shared credentials — fill these in once, works for the whole team ─────────
-// 1. Go to github.com/settings/tokens → Generate new token (classic) → tick "gist" only
-// 2. Paste the token below, leave SHARED_GIST_ID blank for now
-// 3. Open the tracker, click Save — a Gist is created automatically
-// 4. The Gist ID will appear in the ⚙ modal — copy it into SHARED_GIST_ID below
-// 5. Re-upload this file — everyone on the team gets live sync with no setup
-const SHARED_TOKEN   = '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';
-const SHARED_GIST_ID = '9dd1b906a23f006c77ccea985d47ffbe';
+// ── JSONBin storage — shared across all users, no setup required ──────────────
+const JSONBIN_BIN_ID    = '69e6bdc536566621a8d479d5';
+const JSONBIN_MASTER_KEY = '$2a$10$TV.ZD51km/3W9y03yYBUH.Kx4WRnHoge/cPP0DWy5mlL6Ttg3fgxO';
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
-// ── Gist config — uses hardcoded values first, falls back to localStorage ─────
-function getGistConfig(){
-  const local = (() => { try{ return JSON.parse(localStorage.getItem('abx-gist-config')||'{}'); }catch(e){ return {}; } })();
-  return {
-    token:  SHARED_TOKEN  || local.token  || '',
-    gistId: SHARED_GIST_ID || local.gistId || '',
-  };
-}
-function setGistConfig(cfg){
-  try{ localStorage.setItem('abx-gist-config', JSON.stringify(cfg)); }catch(e){}
-}
-const GIST_FILENAME = 'abx-nike-tracker.json';
-
-async function saveToGist(data){
-  const cfg = getGistConfig();
-  if(!cfg.token) return { ok: false, error: 'No token configured' };
-  const body = { files: { [GIST_FILENAME]: { content: JSON.stringify(data,null,2) } } };
-  try {
-    if(cfg.gistId){
-      const r = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
-        method:'PATCH', headers:{'Authorization':'token '+cfg.token,'Content-Type':'application/json'},
-        body:JSON.stringify(body)
-      });
-      if(!r.ok){ const j = await r.json().catch(()=>{}); return { ok:false, error:`GitHub ${r.status}: ${j?.message||r.statusText}` }; }
-      return { ok: true };
-    } else {
-      const r = await fetch('https://api.github.com/gists', {
-        method:'POST', headers:{'Authorization':'token '+cfg.token,'Content-Type':'application/json'},
-        body:JSON.stringify({...body, description:'ABX Nike Tracker', public:false})
-      });
-      if(!r.ok){ const j = await r.json().catch(()=>{}); return { ok:false, error:`GitHub ${r.status}: ${j?.message||r.statusText}` }; }
-      const j = await r.json();
-      setGistConfig({...cfg, gistId: j.id});
-      return { ok: true, newGistId: j.id };
-    }
-  } catch(e) {
-    return { ok: false, error: e.message };
-  }
-}
-
-async function loadFromGist(){
-  const cfg = getGistConfig();
-  if(!cfg.token || !cfg.gistId) return null;
-  const r = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
-    headers:{'Authorization':'token '+cfg.token}
+async function saveToCloud(data) {
+  const r = await fetch(JSONBIN_URL, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': JSONBIN_MASTER_KEY
+    },
+    body: JSON.stringify(data)
   });
-  if(!r.ok) return null;
+  if (!r.ok) {
+    const j = await r.json().catch(() => ({}));
+    throw new Error(`JSONBin ${r.status}: ${j.message || r.statusText}`);
+  }
+  return true;
+}
+
+async function loadFromCloud() {
+  const r = await fetch(JSONBIN_URL + '/latest', {
+    headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+  });
+  if (!r.ok) return null;
   const j = await r.json();
-  const content = j.files?.[GIST_FILENAME]?.content;
-  return content ? JSON.parse(content) : null;
+  return j.record || null;
 }
 
-function showGistSetup(){
-  const cfg = getGistConfig();
-  // Pre-fill from constant if not already saved locally
-  const gistIdValue = cfg.gistId || SHARED_GIST_ID || '';
-  const isShared = !cfg.gistId && !!SHARED_GIST_ID;
-  const existing = document.getElementById('gist-modal');
-  if(existing) existing.remove();
-  const m = document.createElement('div');
-  m.id = 'gist-modal';
-  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
-  m.innerHTML = `
-    <div style="background:#fff;border-radius:12px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,0.2)">
-      <div style="background:#111;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div style="font-size:13px;font-weight:700;color:#fff">Sync Setup</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">Saves tracker data to a shared GitHub Gist</div>
-        </div>
-        <button onclick="document.getElementById('gist-modal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer">×</button>
-      </div>
-      <div style="padding:20px">
-        ${gistIdValue
-          ? `<div style="background:#E8F5EE;border:1px solid rgba(45,106,79,0.25);border-radius:8px;padding:11px 14px;margin-bottom:16px;font-size:12px;color:#1a4a2e;line-height:1.6">
-               <strong>✓ Gist ID is pre-configured.</strong> You just need to add your own GitHub token below — the tracker data is shared automatically.
-             </div>`
-          : `<div style="background:#FFF8E6;border:1px solid rgba(198,146,20,0.25);border-radius:8px;padding:11px 14px;margin-bottom:16px;font-size:12px;color:#6b4c00;line-height:1.6">
-               <strong>First-time setup (owner only):</strong> Click Save — a Gist ID will be generated. Copy it into the <code>SHARED_GIST_ID</code> constant at the top of the file and re-upload so teammates get it pre-filled.
-             </div>`
-        }
-        <label style="display:block;font-size:11px;font-weight:600;color:#888;margin-bottom:4px;letter-spacing:0.05em;text-transform:uppercase">Your GitHub Personal Access Token</label>
-        <div style="font-size:11px;color:#aaa;margin-bottom:6px;line-height:1.5">
-          Create one at <a href="https://github.com/settings/tokens" target="_blank" style="color:#FA5400">github.com/settings/tokens</a> → Generate new token (classic) → tick <strong>gist</strong> only.
-        </div>
-        <input id="gist-token-input" type="password" value="${cfg.token||''}" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-          style="width:100%;font-size:12px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:7px;font-family:monospace;margin-bottom:14px;outline:none"
-          onfocus="this.style.borderColor='#FA5400'" onblur="this.style.borderColor='#e0e0e0'"/>
-        ${gistIdValue
-          ? `<div style="background:#fafafa;border:1px solid #e0e0e0;border-radius:7px;padding:8px 10px;margin-bottom:14px;font-size:11px;color:#888;display:flex;align-items:center;justify-content:space-between;">
-               <span>Gist ID: <code style="color:#111">${gistIdValue.slice(0,12)}…</code>${isShared ? ' <span style="color:#2d6a4f;font-weight:600">(shared)</span>' : ''}</span>
-               <a href="https://gist.github.com/${gistIdValue}" target="_blank" style="color:#FA5400;font-size:11px;">view ↗</a>
-             </div>`
-          : `<label style="display:block;font-size:11px;font-weight:600;color:#888;margin-bottom:4px;letter-spacing:0.05em;text-transform:uppercase">Gist ID <span style="font-weight:400;text-transform:none">(auto-created on first save if blank)</span></label>
-             <input id="gist-id-input" value="" placeholder="Leave blank — will be created automatically"
-               style="width:100%;font-size:12px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:7px;font-family:monospace;margin-bottom:14px;outline:none"
-               onfocus="this.style.borderColor='#FA5400'" onblur="this.style.borderColor='#e0e0e0'"/>`
-        }
-        <div style="display:flex;gap:8px">
-          <button onclick="document.getElementById('gist-modal').remove()" style="flex:1;padding:9px;border:1px solid #e0e0e0;border-radius:8px;background:#fff;font-size:12px;font-weight:600;color:#888;cursor:pointer;font-family:inherit">Cancel</button>
-          <button onclick="saveGistConfig('${gistIdValue}')" style="flex:2;padding:9px;border:none;border-radius:8px;background:#FA5400;font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit">Save & Enable Sync</button>
-        </div>
-      </div>
-    </div>`;
-  document.body.appendChild(m);
-}
 
-function saveGistConfig(prefilledGistId){
-  const token = document.getElementById('gist-token-input').value.trim();
-  const gistIdEl = document.getElementById('gist-id-input');
-  const gistId = prefilledGistId || (gistIdEl ? gistIdEl.value.trim() : '') || '';
-  if(!token){ alert('Please enter a GitHub token.'); return; }
-  setGistConfig({ token, gistId });
-  document.getElementById('gist-modal').remove();
-  toast('Sync enabled — click Save to push your data');
-}
 let currentFilter='all';
 let actionItems=[];
 
@@ -377,7 +297,22 @@ function showTab(i,el){
 }
 document.querySelectorAll('.section').forEach((s,j)=>s.style.display=j===0?'block':'none');
 
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function toast(msg, isError){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.toggle('error-toast', !!isError);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), isError ? 4000 : 2200);
+}
+function showError(title, detail){
+  document.getElementById('error-banner-title').textContent = title;
+  document.getElementById('error-banner-msg').textContent  = detail || '';
+  document.getElementById('error-banner').classList.add('show');
+  toast(title, true);
+}
+function dismissError(){
+  document.getElementById('error-banner').classList.remove('show');
+}
 function delRow(btn){btn.closest('tr').remove();}
 function makeDelBtn(){return`<button onclick="delRow(this)" style="border:none;background:none;color:#bbb;cursor:pointer;font-size:15px;padding:0 2px">×</button>`;}
 
@@ -592,6 +527,7 @@ function getMonths(){return Array.from(document.getElementById('monthly-wrap').q
 async function saveAll(){
   const btn=document.getElementById('save-btn');
   btn.textContent='Saving...';btn.classList.add('saving');
+  dismissError();
   const data={
     summary:{name:gv('f-name'),type:gv('f-type'),industry:gv('f-industry'),hq:gv('f-hq'),web:gv('f-web'),status:gv('f-status'),ae:gv('f-ae'),bdr:gv('f-bdr'),abm:gv('f-abm'),content:gv('f-content'),rvp:gv('f-rvp'),exec:gv('f-exec'),renewal:gv('f-renewal'),notes:gv('f-notes'),partners:gv('f-partners')},
     orglink:gv('f-orglink'),orgnotes:gv('f-orgnotes'),
@@ -603,30 +539,14 @@ async function saveAll(){
     meetings:getMeetings(),months:getMonths(),actionItems,
     savedAt:new Date().toISOString()
   };
-  // Always save to localStorage as instant local cache
   try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); }catch(e){}
-  // Also push to Gist if configured
-  const cfg = getGistConfig();
-  if(cfg.token){
-    try{
-      const result = await saveToGist(data);
-      const newCfg = getGistConfig();
-      if(result.ok){
-        const gistId = result.newGistId || newCfg.gistId;
-        document.getElementById('last-saved').textContent =
-          '☁ ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-        toast(result.newGistId ? `Gist created ✓ — copy ID from ⚙` : 'Saved to Gist ✓');
-      } else {
-        document.getElementById('last-saved').textContent='⚠ local only';
-        toast('Gist failed: ' + result.error);
-      }
-    }catch(e){
-      document.getElementById('last-saved').textContent='⚠ local only';
-      toast('Gist error: ' + e.message);
-    }
-  } else {
-    document.getElementById('last-saved').textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' (local only)';
-    toast('Saved locally ✓  —  click ⚙ to enable sync');
+  try{
+    await saveToCloud(data);
+    document.getElementById('last-saved').textContent='☁ '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    toast('Saved ✓');
+  }catch(e){
+    document.getElementById('last-saved').textContent='⚠ local only';
+    showError('Cloud save failed — your data was saved locally only', e.message);
   }
   btn.textContent='Save';btn.classList.remove('saving');
 }
@@ -648,19 +568,18 @@ const DEFAULT_ACTIONS=[
 ];
 
 async function loadAll(){
-  // Try Gist first, then localStorage, then defaults
   let data = null;
-  const cfg = getGistConfig();
-  if(cfg.token && cfg.gistId){
-    try{
-      data = await loadFromGist();
-      if(data) document.getElementById('last-saved').textContent = '☁ synced';
-    }catch(e){ data = null; }
+  try{
+    data = await loadFromCloud();
+    if(data) document.getElementById('last-saved').textContent='☁ synced';
+  }catch(e){
+    showError('Could not load from cloud — showing local data', e.message);
+    data = null;
   }
   if(!data){
     try{
       const raw=localStorage.getItem(STORAGE_KEY);
-      if(raw){ data=JSON.parse(raw); }
+      if(raw) data=JSON.parse(raw);
     }catch(e){}
   }
   if(data){
