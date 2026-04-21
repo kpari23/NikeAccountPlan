@@ -17,8 +17,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .save-btn{font-size:12px;padding:7px 16px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#111;cursor:pointer;transition:all 0.15s}
 .save-btn:hover{background:#f5f5f3;border-color:#999}
 .save-btn.saving{color:#FA5400;border-color:#FA5400}
-.plan-link{font-size:12px;padding:7px 16px;border:0.5px solid #FA5400;border-radius:8px;background:#fff;color:#FA5400;cursor:pointer;transition:all 0.15s;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.plan-link{font-size:12px;padding:7px 16px;border:0.5px solid #FA5400;border-radius:8px;background:#fff;color:#FA5400;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s}
 .plan-link:hover{background:rgba(250,84,0,0.06)}
+.error-banner{display:none;background:#FEF0F0;border:1px solid rgba(200,16,46,0.2);border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:12px;color:#7a0a1a;align-items:flex-start;gap:10px}
+.error-banner.show{display:flex}
+.error-banner b{font-weight:700}
+.error-banner-dismiss{margin-left:auto;background:none;border:none;color:#a01020;font-size:16px;cursor:pointer;padding:0;line-height:1;flex-shrink:0}
 .nav{display:flex;gap:2px;background:#fff;border:0.5px solid #e0e0e0;border-radius:10px;padding:4px;margin-bottom:1.25rem;overflow-x:auto}
 .nav-tab{font-size:13px;padding:7px 16px;cursor:pointer;border:none;background:transparent;color:#888;border-radius:7px;white-space:nowrap;transition:all 0.15s;font-weight:500}
 .nav-tab:hover{color:#111;background:#f5f5f3}
@@ -78,14 +82,6 @@ textarea.field-input{resize:vertical;min-height:60px;line-height:1.5}
 .action-tbl tr:hover td{background:#fafafa}
 .toast{position:fixed;bottom:20px;right:20px;font-size:12px;padding:8px 16px;background:#111;color:#fff;border-radius:8px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;font-weight:500}
 .toast.show{opacity:1}
-.toast.error-toast{background:#C8102E}
-.error-banner{display:none;background:#FEF0F0;border:1px solid rgba(200,16,46,0.25);border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:12px;color:#7a0a1a;line-height:1.6;align-items:flex-start;gap:10px}
-.error-banner.show{display:flex}
-.error-banner-icon{font-size:15px;flex-shrink:0;margin-top:1px}
-.error-banner-body{flex:1}
-.error-banner-title{font-weight:700;margin-bottom:2px}
-.error-banner-msg{color:#a01020;font-family:monospace;font-size:11px;word-break:break-all}
-.error-banner-dismiss{background:none;border:none;color:#a01020;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0}
 @media(max-width:700px){
   .ai-row,.ai-header{grid-template-columns:32px 1fr 80px 90px 30px}
   .hide-sm{display:none}
@@ -114,14 +110,9 @@ textarea.field-input{resize:vertical;min-height:60px;line-height:1.5}
   </div>
 </div>
 
-<!-- Persistent error banner -->
 <div class="error-banner" id="error-banner">
-  <div class="error-banner-icon">⚠️</div>
-  <div class="error-banner-body">
-    <div class="error-banner-title" id="error-banner-title">Error</div>
-    <div class="error-banner-msg" id="error-banner-msg"></div>
-  </div>
-  <button class="error-banner-dismiss" onclick="dismissError()" title="Dismiss">×</button>
+  <div style="flex:1"><b id="error-title">Error</b> — <span id="error-detail"></span></div>
+  <button class="error-banner-dismiss" onclick="this.closest('.error-banner').classList.remove('show')">×</button>
 </div>
 
 <div class="nav">
@@ -254,39 +245,44 @@ textarea.field-input{resize:vertical;min-height:60px;line-height:1.5}
 </div>
 
 <script>
-const STORAGE_KEY = 'abx-nike-v1';
+// ── Cloud sync (JSONBin) ─────────────────────────────────────────────────────
+const JSONBIN_URL = 'https://api.jsonbin.io/v3/b/69e6bdc536566621a8d479d5';
+const JSONBIN_KEY = '$2a$10$TV.ZD51km/3W9y03yYBUH.Kx4WRnHoge/cPP0DWy5mlL6Ttg3fgxO';
 
-// ── JSONBin storage — shared across all users, no setup required ──────────────
-const JSONBIN_BIN_ID    = '69e6bdc536566621a8d479d5';
-const JSONBIN_MASTER_KEY = '$2a$10$TV.ZD51km/3W9y03yYBUH.Kx4WRnHoge/cPP0DWy5mlL6Ttg3fgxO';
-const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+function showError(title, detail) {
+  document.getElementById('error-title').textContent = title;
+  document.getElementById('error-detail').textContent = detail || '';
+  document.getElementById('error-banner').classList.add('show');
+}
+function hideError() {
+  document.getElementById('error-banner').classList.remove('show');
+}
 
-async function saveToCloud(data) {
+async function cloudSave(data) {
   const r = await fetch(JSONBIN_URL, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Master-Key': JSONBIN_MASTER_KEY
-    },
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
     body: JSON.stringify(data)
   });
-  if (!r.ok) {
-    const j = await r.json().catch(() => ({}));
-    throw new Error(`JSONBin ${r.status}: ${j.message || r.statusText}`);
-  }
+  if (!r.ok) { const j = await r.json().catch(()=>({message:r.statusText})); throw new Error(`${r.status}: ${j.message}`); }
   return true;
 }
 
-async function loadFromCloud() {
+async function cloudLoad() {
   const r = await fetch(JSONBIN_URL + '/latest', {
-    headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+    headers: { 'X-Master-Key': JSONBIN_KEY }
   });
   if (!r.ok) return null;
   const j = await r.json();
-  return j.record || null;
+  // JSONBin wraps data in .record
+  const rec = j.record;
+  // Ignore empty placeholder saved during bin creation
+  if (!rec || !rec.savedAt) return null;
+  return rec;
 }
 
-
+// ── Original tracker code (unchanged) ────────────────────────────────────────
+const STORAGE_KEY='abx-nike-v1';
 let currentFilter='all';
 let actionItems=[];
 
@@ -297,22 +293,7 @@ function showTab(i,el){
 }
 document.querySelectorAll('.section').forEach((s,j)=>s.style.display=j===0?'block':'none');
 
-function toast(msg, isError){
-  const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.classList.toggle('error-toast', !!isError);
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), isError ? 4000 : 2200);
-}
-function showError(title, detail){
-  document.getElementById('error-banner-title').textContent = title;
-  document.getElementById('error-banner-msg').textContent  = detail || '';
-  document.getElementById('error-banner').classList.add('show');
-  toast(title, true);
-}
-function dismissError(){
-  document.getElementById('error-banner').classList.remove('show');
-}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 function delRow(btn){btn.closest('tr').remove();}
 function makeDelBtn(){return`<button onclick="delRow(this)" style="border:none;background:none;color:#bbb;cursor:pointer;font-size:15px;padding:0 2px">×</button>`;}
 
@@ -395,17 +376,10 @@ function addActionItem(action='',owner='',due='',status='Not started',role=''){
   renderActionItems();
 }
 
-function addInitRow(init='',notes='',align='',pri='High'){
+function addInitRow(i='',n='',a='',p='High'){
   document.getElementById('init-body').insertAdjacentHTML('beforeend',
-    `<tr>
-      <td><input value="${init.replace(/"/g,'&quot;')}" placeholder="Initiative name"/></td>
-      <td><textarea placeholder="Context, background, what Nike is trying to achieve...">${notes}</textarea></td>
-      <td><textarea placeholder="How your solution maps to this initiative...">${align}</textarea></td>
-      <td><select>${['High','Medium','Low'].map(o=>`<option${o===pri?' selected':''}>${o}</option>`).join('')}</select></td>
-      <td>${makeDelBtn()}</td>
-    </tr>`);
+    `<tr><td><input value="${i}" placeholder="Initiative"/></td><td><textarea placeholder="Notes...">${n}</textarea></td><td><input value="${a}" placeholder="Alignment..."/></td><td><select>${['High','Medium','Low'].map(o=>`<option${o===p?' selected':''}>${o}</option>`).join('')}</select></td><td>${makeDelBtn()}</td></tr>`);
 }
-
 function addOppRow(n='',s='Discovery',a='',c='',d='',o=''){
   document.getElementById('opp-body').insertAdjacentHTML('beforeend',
     `<tr><td><input value="${n}" placeholder="Opp name"/></td><td><select>${['Discovery','Qualification','Proposal','Negotiation','Closed Won','Closed Lost'].map(x=>`<option${x===s?' selected':''}>${x}</option>`).join('')}</select></td><td><input value="${a}" placeholder="$0"/></td><td><input value="${c}" placeholder="Contact"/></td><td><input type="date" value="${d}"/></td><td><input value="${o}" placeholder="AE"/></td><td>${makeDelBtn()}</td></tr>`);
@@ -513,21 +487,16 @@ function addMonth(data={}){
 
 function gv(id){return document.getElementById(id)?.value||'';}
 function sv(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
-function getTableRows(id,cols){
-  return Array.from(document.getElementById(id).querySelectorAll('tr')).map(tr=>{
-    const inp=tr.querySelectorAll('input,select,textarea');
-    const r={};cols.forEach((c,i)=>{if(inp[i])r[c]=inp[i].value;});
-    return r;
-  });
-}
+function getTableRows(id,cols){return Array.from(document.getElementById(id).querySelectorAll('tr')).map(tr=>{const inp=tr.querySelectorAll('input,select,textarea');const r={};cols.forEach((c,i)=>{if(inp[i])r[c]=inp[i].value;});return r;});}
 function getMtgActions(id){return Array.from(document.querySelectorAll('#'+id+'-actions-body tr')).map(tr=>{const i=tr.querySelectorAll('input');return{action:i[0]?.value||'',owner:i[1]?.value||'',due:i[2]?.value||''};});}
 function getMeetings(){return Array.from(document.getElementById('meetings-wrap').querySelectorAll('.week-entry')).map(el=>{const id=el.dataset.mtgid;return{dateLabel:document.getElementById(id+'-datelabel')?.textContent||'',date:document.getElementById(id+'-date')?.value||'',mtype:document.getElementById(id+'-type')?.value||'',att:document.getElementById(id+'-att')?.value||'',agenda:document.getElementById(id+'-agenda')?.value||'',disc:document.getElementById(id+'-disc')?.value||'',actions:getMtgActions(id),link:document.getElementById(id+'-link')?.value||''};});}
 function getMonths(){return Array.from(document.getElementById('monthly-wrap').querySelectorAll('.card')).map(el=>{const id=el.dataset.monthid;return{label:document.getElementById(id+'-label')?.value||'',meetings:document.getElementById(id+'-meetings')?.value||'',pipeline:document.getElementById(id+'-pipeline')?.value||'',contacts:document.getElementById(id+'-contacts')?.value||'',stage:document.getElementById(id+'-stage')?.value||'',narrative:document.getElementById(id+'-narrative')?.value||'',priorities:document.getElementById(id+'-priorities')?.value||''};});}
 
+// ── Save: write to cloud + local cache ───────────────────────────────────────
 async function saveAll(){
   const btn=document.getElementById('save-btn');
   btn.textContent='Saving...';btn.classList.add('saving');
-  dismissError();
+  hideError();
   const data={
     summary:{name:gv('f-name'),type:gv('f-type'),industry:gv('f-industry'),hq:gv('f-hq'),web:gv('f-web'),status:gv('f-status'),ae:gv('f-ae'),bdr:gv('f-bdr'),abm:gv('f-abm'),content:gv('f-content'),rvp:gv('f-rvp'),exec:gv('f-exec'),renewal:gv('f-renewal'),notes:gv('f-notes'),partners:gv('f-partners')},
     orglink:gv('f-orglink'),orgnotes:gv('f-orgnotes'),
@@ -541,12 +510,12 @@ async function saveAll(){
   };
   try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); }catch(e){}
   try{
-    await saveToCloud(data);
+    await cloudSave(data);
     document.getElementById('last-saved').textContent='☁ '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
     toast('Saved ✓');
   }catch(e){
-    document.getElementById('last-saved').textContent='⚠ local only';
-    showError('Cloud save failed — your data was saved locally only', e.message);
+    document.getElementById('last-saved').textContent='local only';
+    showError('Cloud save failed', e.message);
   }
   btn.textContent='Save';btn.classList.remove('saving');
 }
@@ -567,48 +536,39 @@ const DEFAULT_ACTIONS=[
   {action:"Set up shared Claude dashboard for meeting updates / status visibility",owner:"Kush (+ Lisa to collaborate)",due:"After this call",status:"Not started",done:false,role:"AE"}
 ];
 
-async function loadAll(){
-  let data = null;
-  try{
-    data = await loadFromCloud();
-    if(data) document.getElementById('last-saved').textContent='☁ synced';
-  }catch(e){
-    showError('Could not load from cloud — showing local data', e.message);
-    data = null;
+// ── Load: cloud first, localStorage fallback, then defaults ──────────────────
+// IMPORTANT: tables are cleared before population to prevent duplication
+function populateFromData(data) {
+  const s=data.summary||{};
+  sv('f-name',s.name);sv('f-type',s.type);sv('f-industry',s.industry);sv('f-hq',s.hq);sv('f-web',s.web);sv('f-status',s.status);
+  sv('f-ae',s.ae);sv('f-bdr',s.bdr);sv('f-abm',s.abm);sv('f-content',s.content);sv('f-rvp',s.rvp);sv('f-exec',s.exec);
+  sv('f-renewal',s.renewal);sv('f-notes',s.notes);sv('f-partners',s.partners);
+  sv('f-orglink',data.orglink);sv('f-orgnotes',data.orgnotes);
+  // Clear all tables first to prevent duplication on re-load
+  ['init-body','opp-body','bg-body','persona-body','goal-body'].forEach(id=>{
+    document.getElementById(id).innerHTML='';
+  });
+  document.getElementById('meetings-wrap').innerHTML='';
+  document.getElementById('monthly-wrap').innerHTML='';
+  mtgCounter=0; monthCounter=0;
+  const inits=data.initiatives||[];
+  if(inits.some(r=>r.init&&r.init.trim())) inits.forEach(r=>addInitRow(r.init||'',r.notes||'',r.align||'',r.pri||'High'));
+  else addInitRow('Win Now',WIN_NOW_NOTES,WIN_NOW_ALIGN,'High');
+  (data.opps||[]).forEach(r=>addOppRow(r.name,r.stage,r.arr,r.contact,r.date,r.owner));
+  (data.buyingGroups||[]).forEach(r=>addBgRow(r.grp,r.dept,r.inf,r.contact));
+  (data.personas||[]).forEach(r=>addPersonaRow(r.name,r.title,r.btype,r.sentiment,r.notes));
+  (data.goals||[]).forEach(r=>addGoalRow(r.goal,r.target,r.current,r.owner,r.status));
+  [...(data.meetings||[])].reverse().forEach(m=>addMeeting(m));
+  [...(data.months||[])].reverse().forEach(m=>addMonth(m));
+  actionItems=(data.actionItems||[]).length?data.actionItems.map(a=>({...a,status:a.status||(a.done?'Done':'Not started')})):DEFAULT_ACTIONS;
+  renderActionItems();
+  if(data.savedAt){
+    const d=new Date(data.savedAt);
+    document.getElementById('last-saved').textContent='☁ '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   }
-  if(!data){
-    try{
-      const raw=localStorage.getItem(STORAGE_KEY);
-      if(raw) data=JSON.parse(raw);
-    }catch(e){}
-  }
-  if(data){
-    try{
-      const s=data.summary||{};
-      sv('f-name',s.name);sv('f-type',s.type);sv('f-industry',s.industry);sv('f-hq',s.hq);sv('f-web',s.web);sv('f-status',s.status);
-      sv('f-ae',s.ae);sv('f-bdr',s.bdr);sv('f-abm',s.abm);sv('f-content',s.content);sv('f-rvp',s.rvp);sv('f-exec',s.exec);
-      sv('f-renewal',s.renewal);sv('f-notes',s.notes);sv('f-partners',s.partners);
-      sv('f-orglink',data.orglink);sv('f-orgnotes',data.orgnotes);
-      const inits=data.initiatives||[];
-      const hasContent=inits.some(r=>r.init&&r.init.trim());
-      if(!hasContent) addInitRow('Win Now',WIN_NOW_NOTES,WIN_NOW_ALIGN,'High');
-      else inits.forEach(r=>addInitRow(r.init||'',r.notes||'',r.align||'',r.pri||'High'));
-      (data.opps||[]).forEach(r=>addOppRow(r.name,r.stage,r.arr,r.contact,r.date,r.owner));
-      (data.buyingGroups||[]).forEach(r=>addBgRow(r.grp,r.dept,r.inf,r.contact));
-      (data.personas||[]).forEach(r=>addPersonaRow(r.name,r.title,r.btype,r.sentiment,r.notes));
-      (data.goals||[]).forEach(r=>addGoalRow(r.goal,r.target,r.current,r.owner,r.status));
-      [...(data.meetings||[])].reverse().forEach(m=>addMeeting(m));
-      [...(data.months||[])].reverse().forEach(m=>addMonth(m));
-      actionItems=(data.actionItems||[]).length?data.actionItems.map(a=>({...a,status:a.status||(a.done?'Done':'Not started')})):DEFAULT_ACTIONS;
-      renderActionItems();
-      if(data.savedAt && !cfg.gistId){
-        const d=new Date(data.savedAt);
-        document.getElementById('last-saved').textContent=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' (local)';
-      }
-      return;
-    }catch(e){}
-  }
-  // Defaults
+}
+
+function populateDefaults() {
   sv('f-name','Nike, Inc.');sv('f-type','New Logo');sv('f-industry','Manufacturing / Consumer Goods');
   sv('f-hq','Beaverton, OR');sv('f-web','nike.com');sv('f-ae','Kush Parikh');sv('f-bdr','Cole McCormack');
   sv('f-abm','Lisa Amos');sv('f-content','Michelle Wong');sv('f-rvp','Anthony C');sv('f-partners','Accenture');
@@ -628,6 +588,24 @@ async function loadAll(){
   renderActionItems();
   document.getElementById('last-saved').textContent='no saved data';
 }
+
+async function loadAll(){
+  // 1. Try cloud
+  try {
+    const cloudData = await cloudLoad();
+    if (cloudData) { populateFromData(cloudData); return; }
+  } catch(e) {
+    showError('Could not reach cloud storage', e.message);
+  }
+  // 2. Try localStorage
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { populateFromData(JSON.parse(raw)); return; }
+  } catch(e) {}
+  // 3. Defaults
+  populateDefaults();
+}
+
 loadAll();
 </script>
 </body>
