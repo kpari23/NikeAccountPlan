@@ -465,6 +465,46 @@ const ragState={};
 let filter='all';
 const open=new Set();
 
+// ── Persist ragState to JSONBin ───────────────────────────────────────────────
+const RAG_SAVE_KEY = 'orgchart_rag';
+let ragSaveTimer = null;
+
+function saveRagState() {
+  // Debounce — wait 800ms after last click before writing to avoid rapid API calls
+  clearTimeout(ragSaveTimer);
+  ragSaveTimer = setTimeout(async () => {
+    try {
+      const r = await fetch(VER_BIN_URL + '/latest', { headers: { 'X-Master-Key': VER_BIN_KEY } });
+      let rec = {};
+      if (r.ok) { const j = await r.json(); rec = j.record || {}; }
+      rec[RAG_SAVE_KEY] = ragState;
+      await fetch(VER_BIN_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': VER_BIN_KEY },
+        body: JSON.stringify(rec)
+      });
+    } catch(e) {
+      // Fail silently — state still works in-session even if save fails
+      console.warn('RAG state save failed:', e.message);
+    }
+  }, 800);
+}
+
+async function loadRagState() {
+  try {
+    const r = await fetch(VER_BIN_URL + '/latest', { headers: { 'X-Master-Key': VER_BIN_KEY } });
+    if (!r.ok) return;
+    const j = await r.json();
+    const saved = j.record?.[RAG_SAVE_KEY];
+    if (saved && typeof saved === 'object') {
+      Object.assign(ragState, saved);
+      render(); // re-render with restored state
+    }
+  } catch(e) {
+    console.warn('RAG state load failed:', e.message);
+  }
+}
+
 function leadsFor(nodeId){
   return LEADS.filter(l=>{
     if(l.node!==nodeId) return false;
@@ -482,6 +522,7 @@ function cycleRag(key){
   const idx=RAG_CYCLE.indexOf(cur);
   ragState[key]=RAG_CYCLE[(idx+1)%RAG_CYCLE.length];
   render();
+  saveRagState();
 }
 
 function sCls(s){return s==='vp'?'s-vp':s==='dir'?'s-dir':'s-mgr';}
@@ -995,10 +1036,11 @@ function revertToBase() {
 
 // Render immediately when DOM is ready — works reliably both standalone and inside an iframe
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function() { render(); loadVersions(); });
+  document.addEventListener('DOMContentLoaded', function() { render(); loadVersions(); loadRagState(); });
 } else {
   render();
   loadVersions();
+  loadRagState();
 }
 </script>
 </body>
