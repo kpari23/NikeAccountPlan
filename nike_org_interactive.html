@@ -175,13 +175,21 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
     <div class="t-title">Nike, Inc. — Org Chart</div>
     <div class="t-sub">Hover nodes for context · Caret expands leads · Click any person tile to set engagement status</div>
   </div>
-  <div class="filters" id="filters">
-    <button class="fb on" data-f="all">All</button>
-    <button class="fb" data-f="vp">VPs only</button>
-    <button class="fb" data-f="dir">Directors only</button>
-    <button class="fb" data-f="Innovation">Innovation</button>
-    <button class="fb" data-f="Portfolio">Portfolio</button>
-    <button class="fb" data-f="Strategy">Strategy</button>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <div class="filters" id="filters">
+      <button class="fb on" data-f="all">All</button>
+      <button class="fb" data-f="vp">VPs only</button>
+      <button class="fb" data-f="dir">Directors only</button>
+      <button class="fb" data-f="Innovation">Innovation</button>
+      <button class="fb" data-f="Portfolio">Portfolio</button>
+      <button class="fb" data-f="Strategy">Strategy</button>
+    </div>
+    <div style="width:1px;height:20px;background:var(--b2);flex-shrink:0"></div>
+    <div id="version-pill" style="display:none;font-size:11px;color:var(--ts);background:var(--surface);border:0.5px solid var(--b2);border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap" onclick="showVersions()">☁ <span id="version-label">Base</span> ▾</div>
+    <label style="font-size:11px;font-weight:600;padding:5px 12px;border:0.5px solid var(--accent);border-radius:100px;color:var(--accent);cursor:pointer;background:var(--surface);white-space:nowrap;line-height:1.4">
+      ↑ Import CSV
+      <input type="file" accept=".csv" id="csv-input" style="display:none" onchange="handleCSV(this)"/>
+    </label>
   </div>
 </div>
 
@@ -209,6 +217,41 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 </div>
 
 <div id="tooltip" class="tooltip"></div>
+
+<!-- ── Import modal ── -->
+<div id="import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border-radius:14px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.3)">
+    <div style="background:var(--tp);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--surface)">Import Lead List</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px" id="import-filename"></div>
+      </div>
+      <button onclick="closeImportModal()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;padding:2px 4px">×</button>
+    </div>
+    <div style="padding:20px">
+      <div id="import-status" style="font-size:13px;color:var(--tp);margin-bottom:14px;line-height:1.6"></div>
+      <div id="import-progress-bar" style="display:none;height:4px;background:var(--b1);border-radius:4px;margin-bottom:14px;overflow:hidden">
+        <div id="import-progress-fill" style="height:100%;background:var(--accent);border-radius:4px;transition:width 0.3s;width:0%"></div>
+      </div>
+      <div id="import-preview" style="display:none;max-height:240px;overflow-y:auto;border:0.5px solid var(--b1);border-radius:8px;font-size:11px"></div>
+      <div style="display:flex;gap:8px;margin-top:16px" id="import-actions">
+        <button onclick="closeImportModal()" style="flex:1;padding:9px;border:0.5px solid var(--b2);border-radius:8px;background:var(--surface);font-size:12px;font-weight:600;color:var(--ts);cursor:pointer;font-family:inherit">Cancel</button>
+        <button id="import-confirm-btn" onclick="confirmImport()" style="flex:2;padding:9px;border:none;border-radius:8px;background:var(--accent);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;display:none">Apply to Org Chart</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Version history modal ── -->
+<div id="version-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border-radius:14px;width:100%;max-width:460px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.3)">
+    <div style="background:var(--tp);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:13px;font-weight:700;color:var(--surface)">Version History</div>
+      <button onclick="document.getElementById('version-modal').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;padding:2px 4px">×</button>
+    </div>
+    <div style="padding:16px 20px;max-height:400px;overflow-y:auto" id="version-list"></div>
+  </div>
+</div>
 
 <script>
 /* ── EXEC DATA ─────────────────────────────────────────────────────────────── */
@@ -598,7 +641,360 @@ document.getElementById('filters').addEventListener('click',e=>{
   render();
 });
 
-render();
+
+/* ── CSV IMPORT + VERSION HISTORY ─────────────────────────────────────────── */
+
+// JSONBin for version storage — same bin as tracker for consistency
+const VER_BIN_URL = 'https://api.jsonbin.io/v3/b/69e6bdc536566621a8d479d5';
+const VER_BIN_KEY = '$2a$10$TV.ZD51km/3W9y03yYBUH.Kx4WRnHoge/cPP0DWy5mlL6Ttg3fgxO';
+const ORG_VER_KEY = 'orgchart_versions'; // key within the bin record
+
+// All known org node IDs with keywords for AI placement
+const NODE_KEYWORDS = {
+  sc:          ['supply chain','planning','logistics','operations','manufacturing','sourcing','procurement','continuity','resilience','inventory','distribution'],
+  tech:        ['technology','tech','software','engineering','digital','cloud','infrastructure','platform','data','ai','ml','api','devops','release','architect','it ','senior it','it director','systems'],
+  portfolio:   ['portfolio','transformation','pmo','program','project manager','enterprise portfolio','strategic portfolio'],
+  sustain:     ['sustainability','sustainable','environment','esg','climate','impact'],
+  cfo:         ['finance','financial','cfo','treasury','accounting','investor','revenue','budget','fiscal','controller','audit'],
+  cso:         ['strategy','strategic','chief strategy','corporate development'],
+  direct:      ['direct','dtc','nike.com','digital commerce','ecommerce','e-commerce','retail store','direct-to-consumer'],
+  sales:       ['sales','wholesale','marketplace','account','commercial','distribution partner','key account'],
+  growth:      ['growth','innovation initiative','new business','ventures','partnerships','bd','business development'],
+  cidp:        ['innovation','design','product','chief innovation','product officer'],
+  cio:         ['chief innovation officer','cio'],
+  perf:        ['performance','air','react','flyknit','materials','research','athlete tech','biomechanics'],
+  nsrl:        ['sports research','nsrl','lab','science','athlete science'],
+  design:      ['design','designer','creative','footwear design','apparel design','cmf','color material'],
+  prodcreation:['product creation','product development','product manager','npd','go-to-market','product launch','seasonal'],
+  cmo:         ['marketing','chief marketing','brand marketing','consumer marketing','cmo'],
+  brandmkt:    ['brand','campaign','storytelling','brand identity','content','creative','advertising'],
+  sportsmkt:   ['sports marketing','athlete','partnership','sponsorship','federation','nba','nfl','fifa','wnba','endorsement'],
+  comms:       ['communications','pr','public relations','media','press','corporate communications','employee communications'],
+  cpo:         ['people','hr','human resources','talent','recruiting','people officer'],
+  talent:      ['talent','recruiting','learning','development','l&d','organizational'],
+  rewards:     ['compensation','benefits','rewards','equity','people analytics','hris','payroll'],
+  clo:         ['legal','counsel','compliance','regulatory','litigation','ip','trademark','patent','privacy','attorney'],
+  legal:       ['legal','ip','intellectual property','trade compliance','trademark','patent','litigation'],
+  gov:         ['government','public affairs','lobbying','policy','trade','regulatory affairs'],
+  nikebrand:   ['nike brand','running','basketball','football','soccer','training','sportswear','nike sport'],
+  running:     ['running','runner','run','pegasus','vaporfly','vomero','structure'],
+  bball:       ['basketball','nba','lebron','kobe','jordan performance'],
+  football:    ['football','soccer','futbol','mercurial','phantom','world cup','national team'],
+  jordan:      ['jordan brand','jordan','jumpman','air jordan'],
+  ajperf:      ['jordan performance','jordan basketball'],
+  ajretro:     ['retro','heritage','classic','og colorway'],
+  converse:    ['converse','chuck taylor','all star'],
+  chuck:       ['chuck','all star','70s'],
+  convcomm:    ['converse commercial','converse retail','converse wholesale'],
+  na:          ['north america','usa','canada','united states','u.s.'],
+  emea:        ['emea','europe','middle east','africa','uk','germany','france'],
+  china:       ['china','greater china','apac','asia pacific','beijing','shanghai'],
+  apla:        ['apla','latin america','brazil','mexico','southeast asia','australia'],
+};
+
+let pendingLeads = [];
+let versions = [];
+let currentVersionIdx = -1;
+
+// ── CSV parsing ──────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim().toLowerCase());
+  return lines.slice(1).map(line => {
+    const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,))/g) || [];
+    const row = {};
+    headers.forEach((h, i) => {
+      row[h] = (vals[i] || '').replace(/^"|"$/g,'').trim();
+    });
+    return row;
+  }).filter(r => Object.values(r).some(v => v));
+}
+
+// ── Map a CSV row to the best org node ───────────────────────────────────────
+// Uses keyword matching on title + department fields — best-effort hypothesis
+function inferNode(row) {
+  const text = [
+    row.title || row.jobtitle || row['job title'] || row.position || '',
+    row.department || row.dept || row.team || row.function || '',
+    row.name || ''
+  ].join(' ').toLowerCase();
+
+  let bestNode = 'tech'; // default fallback
+  let bestScore = 0;
+
+  for (const [nodeId, keywords] of Object.entries(NODE_KEYWORDS)) {
+    let score = 0;
+    for (const kw of keywords) {
+      if (text.includes(kw)) score += kw.split(' ').length; // longer matches score higher
+    }
+    if (score > bestScore) { bestScore = score; bestNode = nodeId; }
+  }
+  return bestNode;
+}
+
+// ── Infer seniority from title ───────────────────────────────────────────────
+function inferSeniority(row) {
+  const t = (row.title || row.jobtitle || row['job title'] || row.position || '').toLowerCase();
+  if (/\bvp\b|vice president/.test(t)) return 'vp';
+  if (/\bdirector\b/.test(t)) return 'dir';
+  return 'mgr';
+}
+
+// ── Handle file selection ────────────────────────────────────────────────────
+function handleCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  const modal = document.getElementById('import-modal');
+  modal.style.display = 'flex';
+  document.getElementById('import-filename').textContent = file.name;
+  document.getElementById('import-status').textContent = 'Reading file…';
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('import-confirm-btn').style.display = 'none';
+  document.getElementById('import-progress-bar').style.display = 'none';
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const rows = parseCSV(e.target.result);
+    if (rows.length === 0) {
+      document.getElementById('import-status').textContent = '⚠ No rows found. Make sure the file has a header row and comma-separated values.';
+      return;
+    }
+    // Map each row to a lead object with hypothesized node
+    pendingLeads = rows.map(row => ({
+      name:  row.name || row['full name'] || row.fullname || (row['first name'] ? row['first name'] + ' ' + (row['last name'] || '') : '') || 'Unknown',
+      title: row.title || row.jobtitle || row['job title'] || row.position || '',
+      email: row.email || row['email address'] || row['work email'] || '',
+      li:    row.linkedin || row['linkedin url'] || row.linkedinurl || '',
+      tag:   row.department || row.dept || row.team || row.function || 'Imported',
+      s:     inferSeniority(row),
+      node:  inferNode(row),
+      _isImported: true,
+    })).filter(l => l.name && l.name.trim() && l.name !== 'Unknown' && l.name.trim() !== ' ');
+
+    // Pre-check duplicates against existing leads so preview can flag them
+    const existingKeys = new Set(LEADS.map(l => (l.name + l.email).toLowerCase()));
+    const dupeSet = new Set();
+    pendingLeads.forEach(l => {
+      const key = (l.name + l.email).toLowerCase();
+      if (existingKeys.has(key)) dupeSet.add(key);
+    });
+    const newCount  = pendingLeads.filter(l => !dupeSet.has((l.name + l.email).toLowerCase())).length;
+    const dupeCount = pendingLeads.length - newCount;
+
+    // Show preview — strikethrough + grey for dupes
+    const preview = document.getElementById('import-preview');
+    preview.style.display = 'block';
+    preview.innerHTML = `
+      <div style="padding:10px 12px;background:var(--surface2);border-bottom:0.5px solid var(--b1);font-size:10px;font-weight:700;color:var(--tt);letter-spacing:0.07em;text-transform:uppercase;display:grid;grid-template-columns:1fr 1fr 80px 80px;gap:8px">
+        <span>Name</span><span>Title</span><span>Placed in</span><span>Status</span>
+      </div>
+      ${pendingLeads.slice(0, 30).map(l => {
+        const isDupe = dupeSet.has((l.name + l.email).toLowerCase());
+        return `<div style="padding:8px 12px;border-bottom:0.5px solid var(--b1);display:grid;grid-template-columns:1fr 1fr 80px 80px;gap:8px;align-items:center;opacity:${isDupe ? '0.45' : '1'}">
+          <span style="font-size:11px;font-weight:600;color:var(--tp);${isDupe ? 'text-decoration:line-through' : ''}">${l.name}</span>
+          <span style="font-size:10px;color:var(--ts)">${l.title.slice(0,38)}${l.title.length>38?'…':''}</span>
+          <span style="font-size:10px;background:var(--surface2);border:0.5px solid var(--b1);border-radius:4px;padding:1px 5px;color:var(--ts);text-align:center">${isDupe ? '—' : l.node}</span>
+          <span style="font-size:10px;font-weight:600;color:${isDupe ? 'var(--tt)' : 'var(--rag-green)'}">${isDupe ? '✕ duplicate' : '✓ new'}</span>
+        </div>`;
+      }).join('')}
+      ${pendingLeads.length > 30 ? `<div style="padding:8px 12px;font-size:11px;color:var(--tt)">+ ${pendingLeads.length - 30} more</div>` : ''}`;
+
+    // Status summary
+    const dupeNote = dupeCount > 0
+      ? `<span style="color:var(--tt)"> · ${dupeCount} duplicate${dupeCount > 1 ? 's' : ''} will be skipped</span>`
+      : '';
+    document.getElementById('import-status').innerHTML = `
+      <strong style="color:var(--tp)">${newCount} new lead${newCount !== 1 ? 's' : ''} will be added</strong> from ${rows.length} rows.${dupeNote}<br>
+      <span style="color:var(--ts)">Each lead is automatically placed in the most likely org chart node based on their title and department.</span>`;
+
+    if (newCount === 0 && dupeCount > 0) {
+      document.getElementById('import-status').innerHTML = `<strong style="color:var(--tt)">All ${dupeCount} leads already exist</strong> — nothing new to import.`;
+      document.getElementById('import-confirm-btn').style.display = 'none';
+    } else {
+      document.getElementById('import-confirm-btn').style.display = 'block';
+      document.getElementById('import-confirm-btn').textContent = `Add ${newCount} Lead${newCount !== 1 ? 's' : ''} to Org Chart`;
+    }
+  };
+  reader.readAsText(file);
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').style.display = 'none';
+  pendingLeads = [];
+}
+
+// ── Apply import — adds only new leads, skips duplicates ─────────────────────
+async function confirmImport() {
+  const btn = document.getElementById('import-confirm-btn');
+  btn.textContent = 'Saving…';
+  btn.disabled = true;
+  document.getElementById('import-progress-bar').style.display = 'block';
+  document.getElementById('import-progress-fill').style.width = '30%';
+
+  // Only add leads that don't already exist (by name+email key)
+  const existingKeys = new Set(LEADS.map(l => (l.name + l.email).toLowerCase()));
+  let added = 0;
+  let skipped = 0;
+  for (const lead of pendingLeads) {
+    const key = (lead.name + lead.email).toLowerCase();
+    if (!existingKeys.has(key)) {
+      LEADS.push(lead);
+      existingKeys.add(key);
+      added++;
+    } else {
+      skipped++;
+    }
+  }
+
+  document.getElementById('import-progress-fill').style.width = '60%';
+
+  // Save version
+  const label = document.getElementById('import-filename').textContent;
+  await saveVersion(label, [...LEADS]);
+
+  document.getElementById('import-progress-fill').style.width = '100%';
+
+  setTimeout(() => {
+    closeImportModal();
+    render();
+    // Brief confirmation toast in the subtitle
+    const sub = document.querySelector('.t-sub');
+    if (sub) {
+      const original = sub.textContent;
+      sub.textContent = `✓ ${added} lead${added !== 1 ? 's' : ''} added${skipped ? ` · ${skipped} duplicate${skipped !== 1 ? 's' : ''} skipped` : ''}`;
+      setTimeout(() => { sub.textContent = original; }, 4000);
+    }
+  }, 400);
+}
+
+// ── Version storage ──────────────────────────────────────────────────────────
+async function loadVersions() {
+  try {
+    const r = await fetch(VER_BIN_URL + '/latest', { headers: { 'X-Master-Key': VER_BIN_KEY } });
+    if (!r.ok) return;
+    const j = await r.json();
+    const rec = j.record || {};
+    if (rec[ORG_VER_KEY]) {
+      versions = rec[ORG_VER_KEY];
+      currentVersionIdx = versions.length - 1;
+      updateVersionPill();
+    }
+  } catch(e) {}
+}
+
+async function saveVersion(filename, leads) {
+  try {
+    // Load current bin record
+    const r = await fetch(VER_BIN_URL + '/latest', { headers: { 'X-Master-Key': VER_BIN_KEY } });
+    let rec = {};
+    if (r.ok) { const j = await r.json(); rec = j.record || {}; }
+
+    const newVersion = {
+      id: Date.now(),
+      label: filename || 'Import',
+      date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit'}),
+      count: leads.length,
+      leads: leads.filter(l => l._isImported), // only store imported leads, not base set
+    };
+
+    const existing = rec[ORG_VER_KEY] || [];
+    existing.push(newVersion);
+    rec[ORG_VER_KEY] = existing;
+
+    await fetch(VER_BIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': VER_BIN_KEY },
+      body: JSON.stringify(rec)
+    });
+
+    versions = existing;
+    currentVersionIdx = versions.length - 1;
+    updateVersionPill();
+  } catch(e) {
+    console.error('Version save failed:', e);
+  }
+}
+
+function updateVersionPill() {
+  const pill = document.getElementById('version-pill');
+  if (versions.length === 0) { pill.style.display = 'none'; return; }
+  pill.style.display = 'inline-flex';
+  const v = versions[currentVersionIdx];
+  document.getElementById('version-label').textContent = v ? v.label.slice(0, 18) : 'Base';
+}
+
+function showVersions() {
+  const modal = document.getElementById('version-modal');
+  const list = document.getElementById('version-list');
+
+  if (versions.length === 0) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--ts);text-align:center;padding:20px">No imported versions yet.<br>Use ↑ Import CSV to add leads.</div>';
+  } else {
+    list.innerHTML = versions.slice().reverse().map((v, ri) => {
+      const idx = versions.length - 1 - ri;
+      const isCurrent = idx === currentVersionIdx;
+      return `<div style="padding:12px;border-radius:8px;border:0.5px solid ${isCurrent ? 'var(--accent)' : 'var(--b1)'};background:${isCurrent ? 'rgba(250,84,0,0.05)' : 'var(--surface2)'};margin-bottom:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-size:12px;font-weight:600;color:var(--tp)">${v.label}</div>
+          ${isCurrent ? '<span style="font-size:10px;font-weight:600;color:var(--accent);background:rgba(250,84,0,0.1);padding:2px 7px;border-radius:4px">Current</span>' : `<button onclick="revertToVersion(${idx})" style="font-size:11px;font-weight:600;color:var(--accent);background:none;border:0.5px solid var(--accent);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit">Revert</button>`}
+        </div>
+        <div style="font-size:11px;color:var(--ts)">${v.date} · ${v.count} total leads · ${v.leads ? v.leads.length : 0} imported</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Always show base version
+  list.innerHTML += `<div style="padding:12px;border-radius:8px;border:0.5px solid var(--b1);background:var(--surface2);margin-bottom:8px;opacity:0.6">
+    <div style="font-size:12px;font-weight:600;color:var(--tp);margin-bottom:2px">Base (Original)</div>
+    <div style="font-size:11px;color:var(--ts)">Original 64 leads · No imports</div>
+    <button onclick="revertToBase()" style="margin-top:6px;font-size:11px;font-weight:600;color:var(--ts);background:none;border:0.5px solid var(--b2);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit">Revert to Base</button>
+  </div>`;
+
+  modal.style.display = 'flex';
+}
+
+// ── Revert functions ─────────────────────────────────────────────────────────
+const BASE_LEADS = JSON.parse(JSON.stringify(LEADS)); // snapshot of original leads at load time
+
+function revertToVersion(idx) {
+  const v = versions[idx];
+  if (!v) return;
+
+  // Rebuild: base leads + all imported leads up to and including this version
+  const importedLeads = [];
+  const seen = new Set(BASE_LEADS.map(l => (l.name + l.email).toLowerCase()));
+
+  for (let i = 0; i <= idx; i++) {
+    const ver = versions[i];
+    if (ver.leads) {
+      for (const l of ver.leads) {
+        const key = (l.name + l.email).toLowerCase();
+        if (!seen.has(key)) { importedLeads.push(l); seen.add(key); }
+      }
+    }
+  }
+
+  LEADS.length = 0;
+  [...BASE_LEADS, ...importedLeads].forEach(l => LEADS.push(l));
+  currentVersionIdx = idx;
+  updateVersionPill();
+  document.getElementById('version-modal').style.display = 'none';
+  render();
+}
+
+function revertToBase() {
+  LEADS.length = 0;
+  BASE_LEADS.forEach(l => LEADS.push(l));
+  currentVersionIdx = -1;
+  updateVersionPill();
+  document.getElementById('version-modal').style.display = 'none';
+  render();
+}
+
+// Load existing versions on startup
+loadVersions();
 </script>
 </body>
 </html>
