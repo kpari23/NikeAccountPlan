@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nike Org Chart — Interactive</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;--surface:#ffffff;--surface2:#f7f6f3;
+  --tp:#1a1a18;--ts:#5f5e5a;--tt:#999891;
+  --b1:rgba(0,0,0,0.1);--b2:rgba(0,0,0,0.18);
+  --accent:#FA5400;--line:#d4d2cb;
+  --node-w:176px;--gap:12px;
+  --rag-green:#16a34a;--rag-green-bg:#dcfce7;--rag-green-bdr:#16a34a;
+  --rag-yellow:#ca8a04;--rag-yellow-bg:#fef9c3;--rag-yellow-bdr:#ca8a04;
+  --rag-red:#dc2626;--rag-red-bg:#fee2e2;--rag-red-bdr:#dc2626;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#141412;--surface:#1e1e1c;--surface2:#242422;
+  --tp:#e8e6df;--ts:#9c9a92;--tt:#6b6963;
+  --b1:rgba(255,255,255,0.08);--b2:rgba(255,255,255,0.15);--line:#3a3a36;
+  --rag-green:#22c55e;--rag-green-bg:#052e16;--rag-green-bdr:#22c55e;
+  --rag-yellow:#eab308;--rag-yellow-bg:#1c1a04;--rag-yellow-bdr:#eab308;
+  --rag-red:#f87171;--rag-red-bg:#2d0a0a;--rag-red-bdr:#f87171;
+}}
+html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tp)}
+.page{max-width:1700px;margin:0 auto;padding:24px 20px 60px}
+
+.toolbar{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.t-title{font-size:15px;font-weight:600;color:var(--tp)}
+.t-sub{font-size:11px;color:var(--tt);margin-top:2px}
+.filters{display:flex;gap:5px;flex-wrap:wrap}
+.fb{font-size:11px;padding:4px 11px;border:0.5px solid var(--b2);border-radius:100px;background:var(--surface);color:var(--ts);cursor:pointer;transition:all .15s;font-weight:500;line-height:1.4}
+.fb:hover{color:var(--tp);border-color:var(--tp)}
+.fb.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.legend-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.leg{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ts)}
+.ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.leg-divider{width:1px;height:16px;background:var(--b2);flex-shrink:0}
+.rag-leg{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500}
+.rag-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+.tree-wrap{overflow-x:auto;padding:28px 20px 40px;background:var(--surface2);border:0.5px solid var(--b1);border-radius:12px}
+.tree{display:flex;flex-direction:column;align-items:center;min-width:max-content}
+.vline{width:1px;height:16px;background:var(--line)}
+
+/* ── Org node card ── */
+.node{width:var(--node-w);border:0.5px solid var(--b1);border-radius:8px;padding:8px 10px;background:var(--surface);position:relative;transition:border-color .15s}
+.node:hover{border-color:var(--b2)}
+.node .nm{font-size:11.5px;font-weight:600;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node .rl{font-size:10px;color:var(--ts);margin-top:1px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nbadge{font-size:9px;font-weight:500;padding:2px 5px;border-radius:3px;display:inline-block;margin-top:3px;white-space:nowrap}
+.caret-btn{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:600;color:var(--accent);margin-top:4px;cursor:pointer;user-select:none;padding:2px 0}
+.caret-btn:hover{opacity:.75}
+.caret-btn-dot{width:5px;height:5px;background:var(--accent);border-radius:50%;flex-shrink:0}
+.caret-icon{font-size:9px;color:var(--tt);transition:transform .2s;display:inline-block;line-height:1}
+.caret-icon.open{transform:rotate(90deg)}
+
+/* Exec tile — same as ptile but inside the node card */
+.exec-tile{display:flex;align-items:flex-start;gap:6px;padding:6px 7px;border-radius:6px;border:0.5px solid var(--b1);background:var(--surface2);cursor:pointer;transition:background .12s,border-color .12s;user-select:none;margin-top:6px}
+.exec-tile:hover{border-color:var(--b2)}
+.exec-tile.rag-green{background:var(--rag-green-bg)!important;border-color:var(--rag-green-bdr)!important}
+.exec-tile.rag-yellow{background:var(--rag-yellow-bg)!important;border-color:var(--rag-yellow-bdr)!important}
+.exec-tile.rag-red{background:var(--rag-red-bg)!important;border-color:var(--rag-red-bdr)!important}
+.exec-status{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:3px;background:var(--b2)}
+.exec-tile.rag-green .exec-status{background:var(--rag-green)}
+.exec-tile.rag-yellow .exec-status{background:var(--rag-yellow)}
+.exec-tile.rag-red .exec-status{background:var(--rag-red)}
+.exec-body{flex:1;min-width:0}
+.exec-name{font-size:11px;font-weight:600;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exec-tile.rag-green .exec-name{color:var(--rag-green)}
+.exec-tile.rag-yellow .exec-name{color:var(--rag-yellow)}
+.exec-tile.rag-red .exec-name{color:var(--rag-red)}
+.exec-role{font-size:9.5px;color:var(--ts);margin-top:1px;line-height:1.3}
+.exec-email{font-size:9px;color:var(--accent);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exec-meta{display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap}
+.exec-badge{font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px}
+.eb-ceo{background:#EEEDFE;color:#3C3489}
+.eb-cfo{background:#E6F1FB;color:#0C447C}
+.eb-coo{background:#E1F5EE;color:#085041}
+.eb-cmo{background:#FAECE7;color:#712B13}
+.eb-cidp{background:#FAEEDA;color:#633806}
+.eb-cpo{background:#FBEAF0;color:#72243E}
+.eb-clo{background:#F1EFE8;color:#444441}
+.eb-geo{background:#EAF3DE;color:#27500A}
+.eb-brand{background:#F3EFFE;color:#5b21b6}
+.eb-evp{background:#f1efe8;color:#5f5e5a}
+@media(prefers-color-scheme:dark){
+  .eb-ceo{background:#26215C;color:#AFA9EC}.eb-cfo{background:#042C53;color:#85B7EB}
+  .eb-coo{background:#04342C;color:#5DCAA5}.eb-cmo{background:#4A1B0C;color:#F0997B}
+  .eb-cidp{background:#412402;color:#EF9F27}.eb-cpo{background:#4B1528;color:#ED93B1}
+  .eb-clo{background:#2C2C2A;color:#B4B2A9}.eb-geo{background:#173404;color:#97C459}
+  .eb-brand{background:#2e1065;color:#c4b5fd}.eb-evp{background:#2c2c2a;color:#9c9a92}
+}
+.exec-li{font-size:9px;color:var(--accent);text-decoration:none;font-weight:500;opacity:.8}
+.exec-li:hover{opacity:1;text-decoration:underline}
+
+/* Color themes */
+.c-ceo{border-color:#534AB7!important}.c-ceo .nbadge{background:#EEEDFE;color:#3C3489}
+.c-ops{border-color:#0F6E56!important}.c-ops .nbadge{background:#E1F5EE;color:#085041}
+.c-fin{border-color:#185FA5!important}.c-fin .nbadge{background:#E6F1FB;color:#0C447C}
+.c-idp{border-color:#854F0B!important}.c-idp .nbadge{background:#FAEEDA;color:#633806}
+.c-mkt{border-color:#993C1D!important}.c-mkt .nbadge{background:#FAECE7;color:#712B13}
+.c-ppl{border-color:#993556!important}.c-ppl .nbadge{background:#FBEAF0;color:#72243E}
+.c-geo{border-color:#3B6D11!important}.c-geo .nbadge{background:#EAF3DE;color:#27500A}
+.c-brand{border-color:#7c3aed!important}.c-brand .nbadge{background:#F3EFFE;color:#5b21b6}
+@media(prefers-color-scheme:dark){
+  .c-ceo .nbadge{background:#26215C;color:#AFA9EC}.c-ops .nbadge{background:#04342C;color:#5DCAA5}
+  .c-fin .nbadge{background:#042C53;color:#85B7EB}.c-idp .nbadge{background:#412402;color:#EF9F27}
+  .c-mkt .nbadge{background:#4A1B0C;color:#F0997B}.c-ppl .nbadge{background:#4B1528;color:#ED93B1}
+  .c-geo .nbadge{background:#173404;color:#97C459}.c-brand .nbadge{background:#2e1065;color:#c4b5fd}
+}
+
+/* ── Lead drawer ── */
+.drawer{width:var(--node-w);background:var(--surface);border:0.5px solid var(--accent);border-top:none;border-radius:0 0 8px 8px;padding:6px 8px;display:none}
+@media(prefers-color-scheme:dark){.drawer{background:#1a1208}}
+.drawer.open{display:block}
+.drawer-hdr{font-size:9px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;padding-bottom:4px;border-bottom:0.5px solid rgba(250,84,0,.2)}
+
+/* ── Prospect tile ── */
+.ptile{display:flex;align-items:flex-start;gap:6px;padding:4px 6px;border-radius:6px;margin-bottom:3px;border:0.5px solid var(--b1);background:var(--surface2);cursor:pointer;transition:background .12s,border-color .12s;user-select:none}
+.ptile:last-child{margin-bottom:0}
+.ptile:hover{border-color:var(--b2)}
+.ptile.rag-green{background:var(--rag-green-bg)!important;border-color:var(--rag-green-bdr)!important}
+.ptile.rag-yellow{background:var(--rag-yellow-bg)!important;border-color:var(--rag-yellow-bdr)!important}
+.ptile.rag-red{background:var(--rag-red-bg)!important;border-color:var(--rag-red-bdr)!important}
+.ptile-status{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px;background:var(--b2)}
+.ptile.rag-green .ptile-status{background:var(--rag-green)}
+.ptile.rag-yellow .ptile-status{background:var(--rag-yellow)}
+.ptile.rag-red .ptile-status{background:var(--rag-red)}
+.ptile-body{flex:1;min-width:0}
+.ptile-name{font-size:11px;font-weight:500;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptile.rag-green .ptile-name{color:var(--rag-green)}
+.ptile.rag-yellow .ptile-name{color:var(--rag-yellow)}
+.ptile.rag-red .ptile-name{color:var(--rag-red)}
+.ptile-title{font-size:9.5px;color:var(--ts);line-height:1.3;margin-top:1px}
+.ptile-email{font-size:9px;color:var(--accent);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptile-meta{display:flex;align-items:center;gap:5px;margin-top:2px;flex-wrap:wrap}
+.ptile-seniority{font-size:9px;font-weight:600;padding:1px 4px;border-radius:3px}
+.s-vp{background:#F3EFFE;color:#5b21b6}.s-dir{background:#E6F1FB;color:#0C447C}.s-mgr{background:#E1F5EE;color:#085041}
+@media(prefers-color-scheme:dark){
+  .s-vp{background:#2e1065;color:#c4b5fd}.s-dir{background:#042C53;color:#85B7EB}.s-mgr{background:#04342C;color:#5DCAA5}
+}
+.ptile-li{font-size:9px;color:var(--accent);text-decoration:none;font-weight:500;opacity:.8}
+.ptile-li:hover{opacity:1;text-decoration:underline}
+
+/* ── Tooltip ── */
+.tooltip{position:fixed;z-index:9999;width:264px;background:var(--surface);border:0.5px solid var(--b2);border-radius:12px;padding:13px 15px;pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 4px 24px rgba(0,0,0,0.13)}
+.tooltip.visible{opacity:1}
+.tt-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.tt-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0}
+.tt-nm{font-size:13px;font-weight:600;color:var(--tp);line-height:1.3}
+.tt-rl{font-size:11px;color:var(--ts);margin-top:2px;line-height:1.4}
+.tt-div{height:0.5px;background:var(--b1);margin:8px 0}
+.tt-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:5px}
+.tt-row:last-child{margin-bottom:0}
+.tt-lbl{font-size:10px;color:var(--tt);min-width:52px;flex-shrink:0;padding-top:1px}
+.tt-val{font-size:11px;color:var(--tp);line-height:1.4;flex:1}
+.tt-lhdr{font-size:9px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin:8px 0 5px}
+.tt-lrow{display:flex;align-items:flex-start;gap:5px;padding:2.5px 0;border-bottom:0.5px solid rgba(250,84,0,.1)}
+.tt-lrow:last-child{border-bottom:none}
+.tt-lnm{font-size:10.5px;font-weight:500;color:var(--tp)}
+.tt-ltitle{font-size:9.5px;color:var(--ts);margin-top:1px;line-height:1.3}
+
+.note{font-size:10.5px;color:var(--tt);font-style:italic;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="toolbar">
+  <div>
+    <div class="t-title">Nike, Inc. — Org Chart</div>
+    <div class="t-sub">Hover nodes for context · Caret expands leads · Click any person tile to set engagement status</div>
+  </div>
+  <div class="filters" id="filters">
+    <button class="fb on" data-f="all">All</button>
+    <button class="fb" data-f="vp">VPs only</button>
+    <button class="fb" data-f="dir">Directors only</button>
+    <button class="fb" data-f="Innovation">Innovation</button>
+    <button class="fb" data-f="Portfolio">Portfolio</button>
+    <button class="fb" data-f="Strategy">Strategy</button>
+  </div>
+</div>
+
+<div class="legend-row">
+  <div class="leg"><div class="ld" style="background:#534AB7"></div>CEO</div>
+  <div class="leg"><div class="ld" style="background:#0F6E56"></div>Ops/Tech</div>
+  <div class="leg"><div class="ld" style="background:#185FA5"></div>Finance/Strategy</div>
+  <div class="leg"><div class="ld" style="background:#854F0B"></div>Innovation</div>
+  <div class="leg"><div class="ld" style="background:#993C1D"></div>Marketing</div>
+  <div class="leg"><div class="ld" style="background:#993556"></div>People/Legal</div>
+  <div class="leg"><div class="ld" style="background:#3B6D11"></div>Geo</div>
+  <div class="leg"><div class="ld" style="background:#7c3aed"></div>Brands</div>
+  <div class="leg-divider"></div>
+  <span style="font-size:11px;color:var(--tt);font-weight:500">Status:</span>
+  <div class="rag-leg"><div class="rag-dot" style="background:var(--rag-green)"></div><span style="color:var(--rag-green)">Promoter</span></div>
+  <div class="rag-leg"><div class="rag-dot" style="background:var(--rag-yellow)"></div><span style="color:var(--rag-yellow)">No response</span></div>
+  <div class="rag-leg"><div class="rag-dot" style="background:var(--rag-red)"></div><span style="color:var(--rag-red)">Detractor</span></div>
+  <div class="rag-leg"><div class="rag-dot" style="background:var(--b2)"></div><span style="color:var(--tt)">Not engaged</span></div>
+</div>
+
+<div class="tree-wrap">
+  <div id="tree" class="tree"></div>
+</div>
+<div class="note">Hypothetical org chart · publicly available information · April 2026. Sub-function reporting lines are illustrative.</div>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+/* ── EXEC DATA ─────────────────────────────────────────────────────────────── */
+const EXECS={
+  ceo:{name:'Elliott Hill',role:'President & CEO',email:'elliott.hill@nike.com',badge:'CEO',badgeCls:'eb-ceo',li:'https://www.linkedin.com/in/elliotthill/'},
+  board_parker:{name:'Mark Parker',role:'Executive Chairman',email:'',badge:'Exec Chairman',badgeCls:'eb-evp',li:'https://www.linkedin.com/in/markparker/'},
+  board_knight:{name:'Philip H. Knight',role:'Chairman Emeritus & Co-Founder',email:'',badge:'Founder',badgeCls:'eb-evp',li:'https://www.linkedin.com/in/philknight/'},
+  coo:{name:'Venky Alagirisamy',role:'EVP, Chief Operating Officer',email:'venky.alagirisamy@nike.com',badge:'COO',badgeCls:'eb-coo',li:'https://www.linkedin.com/in/venkatramanalagirisamy/'},
+  cfo:{name:'Matt Friend',role:'EVP, Chief Financial Officer',email:'matt.friend@nike.com',badge:'CFO',badgeCls:'eb-cfo',li:'https://www.linkedin.com/in/mattfriend/'},
+  cso:{name:'Jennifer Hartley',role:'Chief Strategy Officer',email:'jennifer.hartley@nike.com',badge:'CSO',badgeCls:'eb-cfo',li:'https://www.linkedin.com/in/jenniferhartley/'},
+  cidp:{name:'Phil McCartney',role:'EVP, Chief Innovation, Design & Product',email:'phil.mccartney@nike.com',badge:'CIDP',badgeCls:'eb-cidp',li:'https://www.linkedin.com/in/philmccartney/'},
+  cio:{name:'Andy Caine',role:'Chief Innovation Officer',email:'andy.caine@nike.com',badge:'CIO',badgeCls:'eb-cidp',li:'https://www.linkedin.com/in/andycaine/'},
+  cmo:{name:'Nicole Graham',role:'EVP, Chief Marketing Officer',email:'nicole.graham@nike.com',badge:'CMO',badgeCls:'eb-cmo',li:'https://www.linkedin.com/in/nicolegraham/'},
+  sportsmkt:{name:'Ann Miller',role:'EVP, Global Sports Marketing',email:'ann.miller@nike.com',badge:'EVP Sports Mkt',badgeCls:'eb-evp',li:'https://www.linkedin.com/in/annmiller/'},
+  comms:{name:'Michael Gonda',role:'EVP, Chief Communications Officer',email:'michael.gonda@nike.com',badge:'CCO',badgeCls:'eb-cmo',li:'https://www.linkedin.com/in/michaelgonda/'},
+  cpo:{name:'Treasure Heinle',role:'EVP, Chief People Officer',email:'treasure.heinle@nike.com',badge:'CPO',badgeCls:'eb-cpo',li:'https://www.linkedin.com/in/treasureheinle/'},
+  clo:{name:'Rob Leinwand',role:'EVP, Chief Legal Officer',email:'rob.leinwand@nike.com',badge:'CLO',badgeCls:'eb-clo',li:'https://www.linkedin.com/in/robleinwand/'},
+  growth:{name:'Dr. Thomas Clarke',role:'Chief Growth Initiatives Officer',email:'thomas.clarke@nike.com',badge:'Growth Officer',badgeCls:'eb-cfo',li:'https://www.linkedin.com/in/thomasclarke/'},
+  sustain:{name:'Cimarron Nix',role:'Chief Sustainability Officer',email:'cimarron.nix@nike.com',badge:'CSuO',badgeCls:'eb-coo',li:'https://www.linkedin.com/in/cimarronnix/'},
+  nikebrand:{name:'Amy Montagne',role:'President, Nike Brand',email:'amy.montagne@nike.com',badge:'President',badgeCls:'eb-brand',li:'https://www.linkedin.com/in/amymontagne/'},
+  jordan:{name:'Sarah Mensah',role:'President, Jordan Brand',email:'sarah.mensah@nike.com',badge:'President',badgeCls:'eb-brand',li:'https://www.linkedin.com/in/sarahmensah/'},
+  converse:{name:'Aaron Cain',role:'President & CEO, Converse',email:'aaron.cain@nike.com',badge:'President & CEO',badgeCls:'eb-brand',li:'https://www.linkedin.com/in/aaroncain/'},
+  na:{name:'Tom Peddie',role:'VP & GM, North America',email:'tom.peddie@nike.com',badge:'VP & GM',badgeCls:'eb-geo',li:'https://www.linkedin.com/in/tompeddie/'},
+  emea:{name:'César García',role:'VP & GM, EMEA',email:'cesar.garcia@nike.com',badge:'VP & GM',badgeCls:'eb-geo',li:'https://www.linkedin.com/in/cesargarcianike/'},
+  china:{name:'Cathy Sparks',role:'VP & GM, Greater China',email:'cathy.sparks@nike.com',badge:'VP & GM',badgeCls:'eb-geo',li:'https://www.linkedin.com/in/cathysparks/'},
+  apla:{name:'Cristin Campbell',role:'Interim VP & GM, APLA',email:'cristin.campbell@nike.com',badge:'Interim VP & GM',badgeCls:'eb-geo',li:'https://www.linkedin.com/in/cristincampbell/'},
+};
+
+/* ── LEADS DATA ─────────────────────────────────────────────────────────────── */
+const LEADS=[
+  {name:'Mike Overson',title:'VP, Global Central Planning, Supply & Innovation',email:'moverson@nike.com',s:'vp',tag:'Supply Chain',node:'sc',li:'https://www.linkedin.com/in/ACwAAAALHK8By48DAxbnflwAjk9Vzu6DvcDoaTs'},
+  {name:'Jeff Katz',title:'Global Director, Supply Chain, Transportation & Procurement Strategy',email:'jeff.katz@nike.com',s:'dir',tag:'Supply Chain',node:'sc',li:'https://www.linkedin.com/in/ACwAAAbxLYEBQqpgWd1iiM4epzSdBRG-wPIEDFg'},
+  {name:'Christie Blomster',title:'VP, Strategy, Enterprise, Geographies, Marketplace, Technology & Supply Chain',email:'christie.blomster@nike.com',s:'vp',tag:'Supply Chain',node:'sc',li:'https://www.linkedin.com/in/ACwAAADUqsgBLP14E1rbNVIM8u-SgV68rJYJ29k'},
+  {name:'Stacey Brinkman-Stuck',title:'Director of Resilience Portfolio & Operations',email:'stacey.brinkman@nike.com',s:'dir',tag:'Supply Chain',node:'sc',li:'https://www.linkedin.com/in/ACwAABiQDmcB0dWjePuoJd0t8413_EbpccGvm6Q'},
+  {name:'Nazanin Rahnama',title:'Director, Portfolio & Strategy, Global Continuity & Resilience',email:'nazanin.rahnama@nike.com',s:'dir',tag:'Supply Chain',node:'sc',li:'https://www.linkedin.com/in/ACwAAAW5s-4BjROYsefyZbHRIAEI4115WyfSO58'},
+  {name:'Jay Chandrashekaran',title:'Global VP, Enterprise Architecture, Tech Modernization & Developer Platforms',email:'jay.chandrashekaran@nike.com',s:'vp',tag:'Technology',node:'tech',li:'https://www.linkedin.com/in/ACwAAAGbYGQBrgXQJpc8DQ2TfPQsIQn_J8fXlQs'},
+  {name:'Ananda Shenoy',title:'VP of Technology',email:'ananda.shenoy@nike.com',s:'vp',tag:'Technology',node:'tech',li:'https://www.linkedin.com/in/ACwAAAAIlPkBz911SQpgiHkJQ6gXSIBG9kJ-dmk'},
+  {name:'Drew Tennenbaum',title:'VP of Technology, Geos & Marketplace Experiences',email:'drew.tennenbaum@nike.com',s:'vp',tag:'Technology',node:'tech',li:'https://www.linkedin.com/in/ACwAAAE2JWoBUnFongieaLRxugxxIyONG9TwTTQ'},
+  {name:'Varun Rao',title:'Director, Technology Strategy',email:'varun.rao@nike.com',s:'dir',tag:'Technology',node:'tech',li:'https://www.linkedin.com/in/ACwAABWX9jYBy9wyWmN61lvRCnChMIrLvzTP9UM'},
+  {name:'Heather Lovell',title:'Director, Global Technology Strategy',email:'heather.lovell@nike.com',s:'dir',tag:'Technology',node:'tech',li:'https://www.linkedin.com/in/ACwAAAEcK-UBdI97gKQkbjM0qtiFdLSYZdhUJ9Q'},
+  {name:'Katie Voth',title:'Sr. IT Director',email:'katie.voth@nike.com',s:'dir',tag:'Technology',node:'tech',li:'https://www.linkedin.com/in/ACwAAAAP9dABzgIy2qJZX6VJG2MkkJ7lQvEwFvM'},
+  {name:'Chip Harmon',title:'Sr. Director, Technology Business & Lifecycle Management',email:'chip.harmon@nike.com',s:'dir',tag:'Technology',node:'tech',li:'https://www.linkedin.com/in/ACwAAACIoFYBmGKURSDGepbNZ2IdRNTTWr8EGok'},
+  {name:'Ulrike Weiler',title:'Sr. Director, Technology — Digital Employee Experience',email:'ulrike.weiler@nike.com',s:'dir',tag:'Technology',node:'tech',li:'https://www.linkedin.com/in/ACwAAADjxXIBvfwVMH4gNWeTJ8ZJI8SrYKBCdJs'},
+  {name:'Jordan Rice',title:'VP, Innovation Portfolio, Partnerships & Engagement',email:'jordan.rice@nike.com',s:'vp',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAAADT8lIBx23AI8_Twko5YoFA3q4iLN8lmTc'},
+  {name:'Josh Bruxer',title:'Director, Global Technology Enterprise Portfolio',email:'josh.bruxer@nike.com',s:'dir',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAAALAQmQBHm_rO-F34EqJZN6JkN_bwJQI6OI'},
+  {name:'Amy Fabian-Crump',title:'Sr. Director, Portfolio & Program Operations & Territory Technology',email:'amy.fabian-crump@nike.com',s:'dir',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAAAHtXEABbwHWtgv21tEsFCrotgG39xeYNZQ'},
+  {name:'Monica Kondos',title:'Director, Strategic Portfolio & Programs',email:'monica.kondos2@nike.com',s:'dir',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAAA02EywB53B666btdeSaxSDkWACTARF0Qkg'},
+  {name:'Tracy Gregory',title:'Sr. Director, Portfolio & PM — Corporate Functions Technology',email:'tracy.gregory@nike.com',s:'dir',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAAAE7b5oBTaB0P-cuBaVs-A4MAibL1YuklGI'},
+  {name:'Eric Hagens',title:'Director, Portfolio Management & Business Ops — EMEA Technology',email:'eric.hagens@nike.com',s:'dir',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAAAhQ4ZYB2GM3ZkoiToEMr0y-Rf90qPSSBhA'},
+  {name:'Gena Williams',title:'Digital Transformation Director, Enterprise Portfolio',email:'gena.williams@nike.com',s:'dir',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAAAFoECIBs8EzY-_5HXHwJhj6OLeYCZehpak'},
+  {name:'Scott Kelley',title:'Sr. Director — Digital Transformation Portfolio',email:'scott.kelley@nike.com',s:'dir',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAAACtFSgBUZ6o6Lmi6OaZs_rFbUbs74JReAU'},
+  {name:'Austin Pederson',title:'Director — Portfolio Management & Transformation',email:'austin.pederson@nike.com',s:'dir',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAAAqnM0cBnA8uQ95xMlqKLnSDTNm7nQomIHM'},
+  {name:'Douglas Martin',title:'Director, Portfolio Management — NA Enterprise Data & Analytics',email:'douglas.martin@nike.com',s:'dir',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAAABHUBwBBdv0D-MbDwRbCoDnSe6kXo1dupc'},
+  {name:'Aaron Co',title:'Director, Portfolio & Program Management Office',email:'',s:'dir',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAACCytYMBBX3Xqxp27bjk2fWHFhVu85U3cII'},
+  {name:'Camila Snider',title:'Principal Portfolio Manager',email:'camila.snider@nike.com',s:'mgr',tag:'Portfolio',node:'portfolio',li:'https://www.linkedin.com/in/ACwAABC4d2UBx7EnYNP2zIa50NW4whpv0wFznp0'},
+  {name:'Bee Animashaun',title:'Global Strategy & Ops / Chief of Staff to CSO',email:'bee.animashaun@nike.com',s:'mgr',tag:'Supply Chain',node:'sustain',li:'https://www.linkedin.com/in/ACwAAAAv5oUBdOBao_bPyrbVgCGud-mEerMhYSA'},
+  {name:'Paul Landrum',title:'Director, Business Operations — Office of the CFO',email:'paul.landrum@nike.com',s:'dir',tag:'Strategy',node:'cso',li:'https://www.linkedin.com/in/ACwAAANHlugBy8aQubMlL1Twa77xPe4qB_bJK7w'},
+  {name:'Brittany Jones',title:'Sr. Director, Enterprise Strategy & Transformation',email:'brittany.jones2@nike.com',s:'dir',tag:'Strategy',node:'cso',li:'https://www.linkedin.com/in/ACwAAA3NfKcBAr2Iy7WhlzK-aP8KnEjTjI7nED0'},
+  {name:'Hank Pierce',title:'Director of Strategy & Planning',email:'hank.pierce@nike.com',s:'dir',tag:'Strategy',node:'cso',li:'https://www.linkedin.com/in/ACwAAAxD1QkBFM9gc_kETHgPlIYVDnT_tbkScRw'},
+  {name:'Francisco Arantes',title:'Director of Strategy & Transformation (Amsterdam)',email:'francisco.arantes@nike.com',s:'dir',tag:'Strategy',node:'cso',li:'https://www.linkedin.com/in/ACwAAARE8-cBIQ7BYfwwfI_il_T7oCK33odTN0A'},
+  {name:'Andres Thomsen',title:'Finance Director, Business Planning & Strategy — Japan',email:'andres.thomsen@nike.com',s:'dir',tag:'Strategy',node:'cso',li:'https://www.linkedin.com/in/ACwAAArM1KQB60CItrIi2U32syHGKDXVt-m9N60'},
+  {name:'Katie Heindel Filkins',title:'Sr. Director, Transformation, Org Strategy & Culture',email:'katie.filkins@nike.com',s:'dir',tag:'Strategy',node:'cso',li:'https://www.linkedin.com/in/ACwAAABHErUBMk1SjcCFbcE4QiCzJP6qM_yC09k'},
+  {name:'Derek Henderson',title:'Global Director (GM) — Store Development & Innovation Lab',email:'derek.henderson@nike.com',s:'dir',tag:'Strategy',node:'direct',li:'https://www.linkedin.com/in/ACwAAAVjfyUBUVb0Qsl0b-QNGMjBvCWGL6XV1EI'},
+  {name:'Courtney Bonzer',title:'Sr. Director, Global Store Development & Innovation Labs',email:'courtney.bonzer@nike.com',s:'dir',tag:'Strategy',node:'direct',li:'https://www.linkedin.com/in/ACwAAAGFAfABcUz2LglqwsCprJBG3JQXdBzVu6A'},
+  {name:'Jackie Vanderzanden',title:'Digital Innovation Director, Operations / Program Management',email:'jackie.vanderzanden@nike.com',s:'dir',tag:'Strategy',node:'direct',li:'https://www.linkedin.com/in/ACwAAAK-h24Bs5hBGDNxmYBlFZd-eeCov-aeJAw'},
+  {name:'Diane Lee',title:'Head of Innovation Strategy',email:'diane.lee@nike.com',s:'vp',tag:'Innovation',node:'cio',li:'https://www.linkedin.com/in/ACwAACIvcxwBmR7YmkJal0i2nUlLMSmBTh7hx5s'},
+  {name:'Sajo Jacob',title:'SVP, Consumer, Product & Innovation',email:'sajo.jacob@nike.com',s:'vp',tag:'Innovation',node:'cio',li:'https://www.linkedin.com/in/ACwAAABm-GEBsa4Q161IBB_HOEN-BzBwq6drHGE'},
+  {name:'Anna Baek',title:'Director, Global Innovation, Design & Product Strategy',email:'anna.baek@nike.com',s:'dir',tag:'Innovation',node:'cio',li:'https://www.linkedin.com/in/ACwAAAWuBmYBlaD1JfdJugsj8-iLvWUoCeMqqs0'},
+  {name:'Catharina Walker Eure',title:'Expert Innovation Strategist — Director, Athlete of the Future',email:'catharina.eure@nike.com',s:'dir',tag:'Innovation',node:'cio',li:'https://www.linkedin.com/in/ACwAAAF2XhwB3OWqLNVRFNvzmGFujd1xuNTuUfc'},
+  {name:'Kevin Dodson',title:'Global VP, Footwear Innovation',email:'kevin.dodson@nike.com',s:'vp',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAAKiazsBHUgC3I7T3Vpq58f2dmTm2JwQCZo'},
+  {name:'Kathy Gomez',title:'VP, Footwear Innovation',email:'kgomez@nike.com',s:'vp',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAAD-CWMBYQsLyUupwU1av0918NsYbzXnonM'},
+  {name:'Amy Jones Vaterlaus',title:'VP, Sport Innovation Studio',email:'amy.jonesvaterlaus@nike.com',s:'vp',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAAAkuUYBQFh7_MvFC2iHqq45jKRAeTDS3xI'},
+  {name:'Roger Chen',title:'VP, Nike Innovation — Advanced Digital Creation Studio',email:'roger.chen@nike.com',s:'vp',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAAILCdEBgRg6m-tgtvoblLcHoxwybo7r8GA'},
+  {name:'David Bellenghi',title:'Footwear Product Director — Innovation',email:'david.bellenghi@nike.com',s:'dir',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAABlhmWwBLAiljocs2bryH7sFd7b1eyheDz4'},
+  {name:'Lucas Hartman',title:'Director of Innovation Engineering',email:'lucas.hartman@nike.com',s:'dir',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAAM9fygBLdsoJu_pJsLoJMw-9NZX17PbWeU'},
+  {name:'Rory Blanche',title:'Product Engineering Director — Nike Innovation',email:'rory.blanche@nike.com',s:'dir',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAAmAcmEB7YrYCY1jPx_mJBGTRBCqCEJlbWc'},
+  {name:'Steve Park',title:'Innovation Director',email:'steve.park@nike.com',s:'dir',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAABd3KSgBczxbCddP5elnw9kQoeKXfn7haBo'},
+  {name:'Bryan Farris',title:'Director, Program Management — Innovation',email:'bryan.farris@nike.com',s:'dir',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAAH21J8BciKHLHhE7WOoTJCyzDH_N-ltaFE'},
+  {name:'Casey Stark',title:'Director, Innovation Portfolio Integration, NSRL & Space',email:'casey.stark@nike.com',s:'dir',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAABERc4oBhjzDPljXTFFuPP7XVieSiMjKY50'},
+  {name:'Dyanna Garcia',title:'Director, Innovation Portfolio Integration (Apparel/Space/ADCS)',email:'dyanna.garcia@nike.com',s:'dir',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAADDYiQB3tHZXEtdVFYORh4Sku78QX0zVOQ'},
+  {name:'Krissy Yetman',title:'Program Director — Footwear Innovation',email:'krissy.yetman@nike.com',s:'dir',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAAXKHXUBvPFKU23TRxVE4DF7fCIV8VGp5-Q'},
+  {name:'Greg Bass',title:'Director of Product Innovation — Global Accessories',email:'greg.bass@nike.com',s:'dir',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAAFBWh0B6RC_Rewh-1YSl5Tn1_WTO9IHQoY'},
+  {name:'Linai Vaz',title:'Sr. Director, Applied Apparel Research (NSRL) Innovation',email:'linai.vaz@nike.com',s:'dir',tag:'Innovation',node:'perf',li:'https://www.linkedin.com/in/ACwAAA0cD1kBIj3RJtwDdF5PxxL5lhv6rd5T33o'},
+  {name:'Ali Stewart',title:'Head of Design Strategy (VP-level)',email:'ali.stewart@nike.com',s:'vp',tag:'Innovation',node:'design',li:'https://www.linkedin.com/in/ACwAAASWeDsBQVfh_bEvBIt8o3t4F8yFx9o-qHY'},
+  {name:'Brad Johnson',title:'Sr. Director, Consumer & Product Innovation Technology',email:'bjohnson@nike.com',s:'dir',tag:'Innovation',node:'design',li:'https://www.linkedin.com/in/ACwAAAAhP14BujbXpATn6KugV_knw77YNRT7v0A'},
+  {name:'Jeff Keil',title:'Sr. Director of Software Engineering — Innovation',email:'jeff.keil@nike.com',s:'dir',tag:'Innovation',node:'design',li:'https://www.linkedin.com/in/ACwAAAAzNZ8BUAoVvhlZGomSb5lhT1v4eABsrsQ'},
+  {name:'Alan Kwok',title:'Director of Product — Product Creation Innovation',email:'alankw@nike.com',s:'dir',tag:'Innovation',node:'design',li:'https://www.linkedin.com/in/ACwAAARAxQMBwiqPbgPV33BIPQicckKMT9Xhi9g'},
+  {name:'Lori Knight',title:'Sr. Director, Technical PM — Product Innovation & Consumer Creation',email:'lori.knight@nike.com',s:'dir',tag:'Innovation',node:'design',li:'https://www.linkedin.com/in/ACwAAAA6wIcBgxZf7GBvPf5U9bXB20g7_cyhbTg'},
+  {name:'Kathy Simpson',title:'Change Management Portfolio Director — Global Product Creation',email:'kathy.simpson@nike.com',s:'dir',tag:'Innovation',node:'design',li:'https://www.linkedin.com/in/ACwAAACcxtwB5KMv1VERXJYTlp9MMAvjvZzOOJM'},
+  {name:'Marcus Arman',title:'Global Director of Brand Concepts & Innovation — Jordan Brand',email:'marcus.arman@nike.com',s:'dir',tag:'Innovation',node:'jordan',li:'https://www.linkedin.com/in/ACwAAA95nuYBzYSZOebAp3FN-KUt-xD0yUwIsF0'},
+  {name:'Mayowa Laniran',title:'Strategy Director — Jordan Brand',email:'mayowa.laniran@nike.com',s:'dir',tag:'Strategy',node:'jordan',li:'https://www.linkedin.com/in/ACwAAAv_96IBN64TD2ffMyh9PzuPP8Zvty1kKBQ'},
+  {name:'Linnea Dinatale',title:'Sr. Director of Strategy & Operations — Jordan Footwear',email:'linnea.dinatale@nike.com',s:'dir',tag:'Strategy',node:'jordan',li:'https://www.linkedin.com/in/ACwAAAPfRIkBAAJfoSdYqyu6MV4dJ0_QQYAgm98'},
+  {name:'Joni Marsch',title:'Director & Chief of Staff, Global Sport Planning Enablement',email:'joni.marsch@nike.com',s:'dir',tag:'Strategy',node:'cpo',li:'https://www.linkedin.com/in/ACwAAACj00UBtqKVGeJvKJtXdv84JqeT1GJzBco'},
+];
+
+const NODE_META={
+  ceo:{detail:'Returned as CEO Oct 2024 after 30-year Nike career. Driving "Win Now" turnaround: sports-led innovation, operational efficiency, and reconnecting with athletes.',reports:'Full C-suite + 4 geo leaders',hq:'Beaverton, OR'},
+  board:{detail:'Mark Parker served as CEO 2006-2020. Philip Knight co-founded Nike in 1964. Both serve advisory and governance roles.',hq:'Beaverton, OR'},
+  coo:{detail:'Joined Dec 2025. Mandate: integrate technology end-to-end across create-plan-make-deliver-sell. Former CTO role eliminated and folded into COO remit.',reports:'Supply Chain, Technology, Sustainability',hq:'Beaverton, OR'},
+  sc:{detail:'Manages global manufacturing partnerships (primarily Asia), demand/supply planning, DCs, and last-mile logistics across 190+ countries.',hq:'Beaverton, OR'},
+  tech:{detail:'Enterprise technology absorbed from former CTO role Dec 2025. Covers ERP, Nike.com, Nike App, SNKRS, and connected fitness platforms.',hq:'Beaverton, OR'},
+  portfolio:{detail:'Cross-functional enterprise portfolio PMO. Owns digital transformation governance and program management across all tech initiatives. Key Planview opportunity.',hq:'Beaverton, OR'},
+  sustain:{detail:'Cimarron Nix elevated to CSO March 2026. Oversees Move to Zero carbon/waste program, recycled materials, and Nike Foundation.',hq:'Beaverton, OR'},
+  cfo:{detail:'CFO since 2020. Now also owns NIKE Direct and global commercial strategy. Key economic buyer for portfolio visibility and financial planning tools.',reports:'CSO, Nike Direct, Global Sales, Finance',hq:'Beaverton, OR'},
+  cso:{detail:'Jennifer Hartley appointed Aug 2025. 14-year Nike veteran. Reports to CFO, works directly with CEO on Win Now agenda.',hq:'Beaverton, OR'},
+  direct:{detail:'NIKE Direct: Nike.com, Nike App, SNKRS, and owned retail. Repositioned as premium channel after record Black Friday 2025.',hq:'Beaverton, OR'},
+  sales:{detail:'Global wholesale and marketplace management. Relationship repair with retail partners is a key FY26 priority.',hq:'Beaverton, OR'},
+  growth:{detail:'Dr. Thomas Clarke leads cross-functional growth programs, coordinating Win Now agenda and emerging business models including NikeSKIMS.',hq:'Beaverton, OR'},
+  cidp:{detail:'Phil McCartney oversees all innovation, design, and product creation across Nike, Jordan, and Converse. CEO right hand for the product-first turnaround.',reports:'CIO Andy Caine, Global Design, Product Creation',hq:'Beaverton, OR'},
+  cio:{detail:'Andy Caine appointed Apr 12, 2026 — the 4th CIO change in 3 years. 20-year Nike veteran. Led Mercurial, Air VaporMax, Air Max 1000.',hq:'Beaverton, OR'},
+  perf:{detail:'Core innovation engine. Air, React, and Flyknit platforms. Driving Nike Mind and Project Amplify. Key Planview PD target.',hq:'Beaverton, OR'},
+  nsrl:{detail:'Nike Sports Research Lab — advanced biomechanics, materials science, and athlete data research.',hq:'Beaverton, OR'},
+  design:{detail:'Global design covering footwear, apparel, equipment, and CMF across all brands and sports categories.',hq:'Beaverton, OR'},
+  prodcreation:{detail:'End-to-end product creation from design brief to manufacturing spec across Nike, Jordan, and Converse.',hq:'Beaverton, OR'},
+  cmo:{detail:'Nicole Graham leads global brand and consumer marketing. Rebuilding cultural relevance after years of lifestyle drift.',hq:'Beaverton, OR'},
+  brandmkt:{detail:'Global campaign management, brand positioning, and seasonal storytelling.',hq:'Beaverton, OR'},
+  sportsmkt:{detail:'Ann Miller leads elite athlete partnerships and federation/league deals. Manages NBA, NFL, FIFA portfolios.',hq:'Beaverton, OR'},
+  comms:{detail:'Michael Gonda oversees PR, media relations, executive communications, and employee messaging.',hq:'Beaverton, OR'},
+  cpo:{detail:'Treasure Heinle leads people strategy during restructuring. Managing significant org changes from Dec 2025 overhaul.',hq:'Beaverton, OR'},
+  talent:{detail:'Global recruiting, leadership development, and L&D programs.',hq:'Beaverton, OR'},
+  rewards:{detail:'Global compensation, benefits, equity programs, and people analytics.',hq:'Beaverton, OR'},
+  clo:{detail:'Rob Leinwand oversees legal, compliance, government affairs, and social/community impact.',hq:'Beaverton, OR'},
+  legal:{detail:'IP protection (patents, trademarks), commercial contracts, trade compliance, and litigation.',hq:'Beaverton, OR'},
+  gov:{detail:'Government relations, lobbying, and public policy. Active on trade and tariff issues.',hq:'Beaverton, OR'},
+  brands:{detail:'Three brand presidents each lead full P&Ls: Nike Brand, Jordan Brand, Converse.',hq:'Beaverton, OR'},
+  nikebrand:{detail:'Amy Montagne leads the flagship Nike brand. Running is the growth engine (+20% two consecutive quarters).',hq:'Beaverton, OR'},
+  running:{detail:'Strongest performing category. Pegasus, Vomero, Vaporfly. Project Amplify targets mass-market performance.',hq:'Beaverton, OR'},
+  bball:{detail:'LeBron, KD, and Kobe franchises. Rebuilding performance credibility.',hq:'Beaverton, OR'},
+  football:{detail:'Key 2026 World Cup opportunity. Mercurial and Phantom lines across 190 countries.',hq:'Beaverton, OR'},
+  jordan:{detail:'Sarah Mensah leads Jordan Brand. Shifting back toward basketball performance and away from lifestyle oversaturation.',hq:'Beaverton, OR / New York, NY'},
+  ajperf:{detail:'Current NBA performance line — AJ38/39. Active athletes include Ja Morant and Luka Doncic.',hq:'Beaverton, OR'},
+  ajretro:{detail:'Heritage Jordan retro business remains a massive revenue driver.',hq:'Beaverton, OR'},
+  converse:{detail:'Aaron Cain took over in 2025 — new leadership standing up digital governance from scratch. Chuck Taylor remains a top-10 global footwear brand.',hq:'Boston, MA'},
+  chuck:{detail:'Chuck Taylor All Star is one of the best-selling shoes in history.',hq:'Boston, MA'},
+  convcomm:{detail:'DTC via Converse.com and flagship stores, plus wholesale globally.',hq:'Boston, MA'},
+  geos:{detail:'Four geography GMs elevated to Senior Leadership Team in Dec 2025, reporting directly to CEO.',hq:'Beaverton, OR'},
+  na:{detail:'Tom Peddie leads North America — Nike largest market. NA is recovery leader with +9% revenue growth.',hq:'Beaverton, OR'},
+  emea:{detail:'Cesar Garcia appointed Feb 2026. EMEA activated Sport Offense. Strong football and running categories.',hq:'Amsterdam, Netherlands'},
+  china:{detail:'Cathy Sparks appointed Mar 2026. Greater China on "the longest reset road." Key recovery market.',hq:'Shanghai, China'},
+  apla:{detail:'Cristin Campbell serving as Interim VP & GM. High-growth developing market region.',hq:'Beaverton, OR'},
+};
+
+const ORG=[{id:'ceo',nm:'Elliott Hill',rl:'President & CEO',color:'c-ceo',badge:'CEO · Oct 2024',execKey:'ceo',children:[
+  {id:'board',nm:'M. Parker & P. Knight',rl:'Executive Chairman · Chairman Emeritus',color:'c-ceo',badge:'Board',execKeys:['board_parker','board_knight'],children:[]},
+  {id:'coo',nm:'Venky Alagirisamy',rl:'EVP, Chief Operating Officer',color:'c-ops',badge:'COO',execKey:'coo',children:[
+    {id:'sc',nm:'Supply Chain & Planning',rl:'Global ops, manufacturing, logistics',color:'c-ops',badge:'Supply Chain',children:[]},
+    {id:'tech',nm:'Technology',rl:'Enterprise tech, digital products, infra',color:'c-ops',badge:'Technology',children:[
+      {id:'portfolio',nm:'Enterprise Portfolio & Transformation',rl:'Digital transformation, portfolio PMO',color:'c-ops',badge:'Portfolio',children:[]}
+    ]},
+    {id:'sustain',nm:'Sustainability',rl:'Cimarron Nix · CSO',color:'c-ops',badge:'Sustainability',execKey:'sustain',children:[]},
+  ]},
+  {id:'cfo',nm:'Matt Friend',rl:'EVP, Chief Financial Officer',color:'c-fin',badge:'CFO',execKey:'cfo',children:[
+    {id:'cso',nm:'Jennifer Hartley',rl:'Chief Strategy Officer',color:'c-fin',badge:'Strategy',execKey:'cso',children:[]},
+    {id:'direct',nm:'Nike Direct',rl:'DTC digital + retail stores',color:'c-fin',badge:'DTC',children:[]},
+    {id:'sales',nm:'Global Sales',rl:'Wholesale & marketplace',color:'c-fin',badge:'Commercial',children:[]},
+    {id:'growth',nm:'Growth Initiatives',rl:'Dr. Thomas Clarke',color:'c-fin',badge:'Growth',execKey:'growth',children:[]},
+  ]},
+  {id:'cidp',nm:'Phil McCartney',rl:'EVP, Chief Innovation, Design & Product',color:'c-idp',badge:'CIDP',execKey:'cidp',children:[
+    {id:'cio',nm:'Andy Caine',rl:'Chief Innovation Officer (Apr 2026)',color:'c-idp',badge:'CIO',execKey:'cio',children:[
+      {id:'perf',nm:'Performance Innovation',rl:'Air, React, Flyknit; athlete tech',color:'c-idp',badge:'Perf Innov',children:[]},
+      {id:'nsrl',nm:'Nike Sports Research Lab',rl:'Advanced research & athlete science',color:'c-idp',badge:'NSRL',children:[]},
+    ]},
+    {id:'design',nm:'Global Design',rl:'Footwear, apparel & equipment design',color:'c-idp',badge:'Design',children:[]},
+    {id:'prodcreation',nm:'Product Creation',rl:'End-to-end: Nike, Jordan, Converse',color:'c-idp',badge:'Product',children:[]},
+  ]},
+  {id:'cmo',nm:'Nicole Graham',rl:'EVP, Chief Marketing Officer',color:'c-mkt',badge:'CMO',execKey:'cmo',children:[
+    {id:'brandmkt',nm:'Brand Marketing',rl:'Global campaigns, brand identity',color:'c-mkt',badge:'Brand Mkt',children:[]},
+    {id:'sportsmkt',nm:'Ann Miller',rl:'EVP, Global Sports Marketing',color:'c-mkt',badge:'Sports Mkt',execKey:'sportsmkt',children:[]},
+    {id:'comms',nm:'Michael Gonda',rl:'EVP, Chief Communications Officer',color:'c-mkt',badge:'Comms',execKey:'comms',children:[]},
+  ]},
+  {id:'cpo',nm:'Treasure Heinle',rl:'EVP, Chief People Officer',color:'c-ppl',badge:'CPO',execKey:'cpo',children:[
+    {id:'talent',nm:'Talent & Development',rl:'Recruiting, L&D',color:'c-ppl',badge:'Talent',children:[]},
+    {id:'rewards',nm:'Total Rewards',rl:'Comp, benefits, people analytics',color:'c-ppl',badge:'HR Ops',children:[]},
+  ]},
+  {id:'clo',nm:'Rob Leinwand',rl:'EVP, Chief Legal Officer',color:'c-ppl',badge:'CLO',execKey:'clo',children:[
+    {id:'legal',nm:'Legal & Compliance',rl:'IP, litigation, regulatory',color:'c-ppl',badge:'Legal',children:[]},
+    {id:'gov',nm:'Govt & Public Affairs',rl:'Lobbying, policy, trade',color:'c-ppl',badge:'Gov Affairs',children:[]},
+  ]},
+  {id:'brands',nm:'Brand Presidents',rl:'Nike · Jordan · Converse',color:'c-brand',badge:'Brands',children:[
+    {id:'nikebrand',nm:'Amy Montagne',rl:'President, Nike Brand',color:'c-brand',badge:'Nike Brand',execKey:'nikebrand',children:[
+      {id:'running',nm:'Running',rl:'Pegasus, Vaporfly, Project Amplify',color:'c-brand',badge:'Running',children:[]},
+      {id:'bball',nm:'Basketball',rl:'LeBron, KD, Kobe',color:'c-brand',badge:'Basketball',children:[]},
+      {id:'football',nm:'Football (Soccer)',rl:'Mercurial, Phantom, kits',color:'c-brand',badge:'Football',children:[]},
+    ]},
+    {id:'jordan',nm:'Sarah Mensah',rl:'President, Jordan Brand',color:'c-brand',badge:'Jordan Brand',execKey:'jordan',children:[
+      {id:'ajperf',nm:'Jordan Performance',rl:'AJ 38/39, NBA athletes',color:'c-brand',badge:'Performance',children:[]},
+      {id:'ajretro',nm:'Jordan Heritage & Retro',rl:'Retro 1-14, OG colorways',color:'c-brand',badge:'Retro',children:[]},
+    ]},
+    {id:'converse',nm:'Aaron Cain',rl:'President & CEO, Converse',color:'c-brand',badge:'Converse',execKey:'converse',children:[
+      {id:'chuck',nm:'Chuck Taylor',rl:'All Star, 70s, platform',color:'c-brand',badge:'Chuck Taylor',children:[]},
+      {id:'convcomm',nm:'Converse Commercial',rl:'DTC + wholesale globally',color:'c-brand',badge:'Commercial',children:[]},
+    ]},
+  ]},
+  {id:'geos',nm:'Geography Leaders',rl:'CEO-direct · elevated Dec 2025',color:'c-geo',badge:'Geographies',children:[
+    {id:'na',nm:'Tom Peddie',rl:'VP & GM, North America',color:'c-geo',badge:'N. America',execKey:'na',children:[]},
+    {id:'emea',nm:'Cesar Garcia',rl:'VP & GM, EMEA (Feb 2026)',color:'c-geo',badge:'EMEA',execKey:'emea',children:[]},
+    {id:'china',nm:'Cathy Sparks',rl:'VP & GM, Greater China (Mar 2026)',color:'c-geo',badge:'Greater China',execKey:'china',children:[]},
+    {id:'apla',nm:'Cristin Campbell',rl:'Interim VP & GM, APLA',color:'c-geo',badge:'APLA',execKey:'apla',children:[]},
+  ]},
+]}];
+
+const AVATAR_COLORS={
+  'c-ceo':['#EEEDFE','#534AB7'],'c-ops':['#E1F5EE','#0F6E56'],
+  'c-fin':['#E6F1FB','#185FA5'],'c-idp':['#FAEEDA','#854F0B'],
+  'c-mkt':['#FAECE7','#993C1D'],'c-ppl':['#FBEAF0','#993556'],
+  'c-geo':['#EAF3DE','#3B6D11'],'c-brand':['#F3EFFE','#7c3aed'],
+};
+
+const RAG_CYCLE=['','rag-green','rag-yellow','rag-red'];
+const ragState={};
+let filter='all';
+const open=new Set();
+
+function leadsFor(nodeId){
+  return LEADS.filter(l=>{
+    if(l.node!==nodeId) return false;
+    if(filter==='all') return true;
+    if(filter==='vp') return l.s==='vp';
+    if(filter==='dir') return l.s==='dir';
+    return l.tag===filter;
+  });
+}
+
+function ragKey(person){ return (person.email||person.name||'').replace(/'/g,"\\'"); }
+
+function cycleRag(key){
+  const cur=ragState[key]||'';
+  const idx=RAG_CYCLE.indexOf(cur);
+  ragState[key]=RAG_CYCLE[(idx+1)%RAG_CYCLE.length];
+  render();
+}
+
+function sCls(s){return s==='vp'?'s-vp':s==='dir'?'s-dir':'s-mgr';}
+function sLabel(s){return s==='vp'?'VP':s==='dir'?'Dir':'Mgr';}
+function initials(nm){return nm.split(/[\s&·]+/).filter(Boolean).slice(0,2).map(w=>w[0]?w[0].toUpperCase():'').join('');}
+
+function execTileHtml(execKey){
+  const e=EXECS[execKey];
+  if(!e) return '';
+  const key=ragKey(e);
+  const rag=ragState[key]||'';
+  return `<div class="exec-tile${rag?' '+rag:''}" onclick="event.stopPropagation();cycleRag('${key}')">
+    <div class="exec-status"></div>
+    <div class="exec-body">
+      <div class="exec-name">${e.name}</div>
+      <div class="exec-role">${e.role}</div>
+      ${e.email?`<div class="exec-email">${e.email}</div>`:''}
+      <div class="exec-meta">
+        <span class="exec-badge ${e.badgeCls}">${e.badge}</span>
+        ${e.li?`<a class="exec-li" href="${e.li}" target="_blank" onclick="event.stopPropagation()">LinkedIn</a>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function nodeEl(n){
+  const leads=leadsFor(n.id);
+  const isOpen=open.has(n.id);
+  const hasL=leads.length>0;
+  const meta=NODE_META[n.id]||{};
+  const execKeys=n.execKeys||(n.execKey?[n.execKey]:[]);
+  const tooltipData=JSON.stringify({
+    id:n.id,nm:n.nm,rl:n.rl,badge:n.badge,
+    detail:meta.detail||'',reports:meta.reports||'',hq:meta.hq||'',
+    color:n.color,leadCount:leads.length
+  }).replace(/"/g,'&quot;');
+
+  const execTilesHtml=execKeys.map(k=>execTileHtml(k)).join('');
+
+  const drawerHtml=hasL?`<div class="drawer${isOpen?' open':''}">
+    <div class="drawer-hdr">${leads.length} contact${leads.length>1?'s':''}</div>
+    ${leads.map(l=>{
+      const key=ragKey(l);
+      const rag=ragState[key]||'';
+      return `<div class="ptile${rag?' '+rag:''}" onclick="cycleRag('${key}')">
+        <div class="ptile-status"></div>
+        <div class="ptile-body">
+          <div class="ptile-name">${l.name}</div>
+          <div class="ptile-title">${l.title}</div>
+          ${l.email?`<div class="ptile-email">${l.email}</div>`:''}
+          <div class="ptile-meta">
+            <span class="ptile-seniority ${sCls(l.s)}">${sLabel(l.s)}</span>
+            ${l.li?`<a class="ptile-li" href="${l.li}" target="_blank" onclick="event.stopPropagation()">LinkedIn</a>`:''}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`:'';
+
+  const nodeOpenCls=isOpen&&hasL?' style="border-radius:8px 8px 0 0;border-color:var(--accent)"':'';
+
+  return `<div style="display:flex;flex-direction:column;align-items:center">
+    <div class="node ${n.color}"${nodeOpenCls}
+      data-tip="${tooltipData}"
+      onmouseenter="showTip(event,this)"
+      onmouseleave="hideTip()">
+      <div class="nm">${n.nm}</div>
+      <div class="rl">${n.rl}</div>
+      <span class="nbadge">${n.badge}</span>
+      ${execTilesHtml}
+      ${hasL?`<div class="caret-btn" onclick="event.stopPropagation();toggleDrawer('${n.id}')">
+        <div class="caret-btn-dot"></div>
+        ${leads.length} lead${leads.length>1?'s':''}
+        <span class="caret-icon${isOpen?' open':''}">&#9654;</span>
+      </div>`:''}
+    </div>
+    ${drawerHtml}
+  </div>`;
+}
+
+function buildBranch(node){
+  const children=node.children||[];
+  const vlineH=children.length?'<div class="vline"></div>':'';
+  const childSection=children.length?`
+    <div style="position:relative;display:flex;gap:var(--gap);justify-content:center;align-items:flex-start">
+      ${children.length>1?`<div style="position:absolute;top:0;left:calc(var(--node-w)/2 + var(--gap)/2);right:calc(var(--node-w)/2 + var(--gap)/2);height:1px;background:var(--line)"></div>`:''}
+      ${children.map(c=>`<div style="display:flex;flex-direction:column;align-items:center">
+        <div class="vline"></div>
+        ${buildBranch(c)}
+      </div>`).join('')}
+    </div>`:'';
+  return `<div style="display:flex;flex-direction:column;align-items:center">
+    ${nodeEl(node)}
+    ${vlineH}
+    ${childSection}
+  </div>`;
+}
+
+function toggleDrawer(id){open.has(id)?open.delete(id):open.add(id);render();}
+
+const tip=document.getElementById('tooltip');
+let tipTimeout;
+
+function showTip(e,el){
+  clearTimeout(tipTimeout);
+  const raw=el.dataset.tip;
+  if(!raw) return;
+  let d;
+  try{d=JSON.parse(raw.replace(/&quot;/g,'"'));}catch(ex){return;}
+  const [abg,afg]=AVATAR_COLORS[d.color]||['#f1efe8','#888'];
+  const leads=leadsFor(d.id).slice(0,4);
+  const totalLeads=leadsFor(d.id).length;
+  tip.innerHTML=`
+    <div class="tt-hdr">
+      <div class="tt-av" style="background:${abg};color:${afg}">${initials(d.nm)}</div>
+      <div><div class="tt-nm">${d.nm}</div><div class="tt-rl">${d.rl}</div></div>
+    </div>
+    <span class="nbadge ${d.color}">${d.badge}</span>
+    ${d.detail?`<div class="tt-div"></div><div class="tt-row"><div class="tt-val" style="font-size:11px;line-height:1.5;color:var(--ts)">${d.detail}</div></div>`:''}
+    ${d.reports?`<div class="tt-row" style="margin-top:6px"><div class="tt-lbl">Reports</div><div class="tt-val">${d.reports}</div></div>`:''}
+    ${d.hq?`<div class="tt-row"><div class="tt-lbl">Location</div><div class="tt-val">${d.hq}</div></div>`:''}
+    ${totalLeads>0?`<div class="tt-lhdr">${totalLeads} lead${totalLeads>1?'s':''} in your list</div>
+    ${leads.map(l=>{
+      const rag=ragState[ragKey(l)]||'';
+      const rc=rag==='rag-green'?'var(--rag-green)':rag==='rag-yellow'?'var(--rag-yellow)':rag==='rag-red'?'var(--rag-red)':'var(--b2)';
+      return `<div class="tt-lrow">
+        <div style="width:6px;height:6px;border-radius:50%;background:${rc};flex-shrink:0;margin-top:3px"></div>
+        <div><div class="tt-lnm">${l.name}</div><div class="tt-ltitle">${l.title}</div></div>
+      </div>`;}).join('')}
+    ${totalLeads>4?`<div style="font-size:10px;color:var(--tt);margin-top:4px">+${totalLeads-4} more</div>`:''}`:''}`;
+  positionTip(e);
+  tip.classList.add('visible');
+}
+
+function positionTip(e){
+  const tw=270,th=tip.offsetHeight||300;
+  const vw=window.innerWidth,vh=window.innerHeight;
+  let x=e.clientX+16,y=e.clientY-20;
+  if(x+tw>vw-8) x=e.clientX-tw-16;
+  if(y+th>vh-8) y=vh-th-8;
+  if(y<8) y=8;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+}
+function hideTip(){tipTimeout=setTimeout(()=>tip.classList.remove('visible'),120);}
+document.addEventListener('mousemove',e=>{
+  if(tip.classList.contains('visible')&&e.target.closest('[data-tip]')) positionTip(e);
+});
+
+function render(){document.getElementById('tree').innerHTML=ORG.map(n=>buildBranch(n)).join('');}
+
+document.getElementById('filters').addEventListener('click',e=>{
+  const btn=e.target.closest('.fb');
+  if(!btn) return;
+  filter=btn.dataset.f;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
