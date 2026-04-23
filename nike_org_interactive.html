@@ -993,9 +993,13 @@ function revertToBase() {
   render();
 }
 
-// Load existing versions on startup
-render();
-loadVersions();
+// Render immediately when DOM is ready — works reliably both standalone and inside an iframe
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() { render(); loadVersions(); });
+} else {
+  render();
+  loadVersions();
+}
 </script>
 </body>
 </html>
