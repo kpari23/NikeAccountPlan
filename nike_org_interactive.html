@@ -495,8 +495,13 @@ const ORG_BIN_KEY = '$2a$10$TV.ZD51km/3W9y03yYBUH.Kx4WRnHoge/cPP0DWy5mlL6Ttg3fgx
 const ORG_BIN_LOCAL_KEY = 'nike_orgchart_bin_id';
 const JSONBIN_API = 'https://api.jsonbin.io/v3/b';
 
+// Hardcoded fallback bin ID — set this after your first successful save
+// so every device uses the same bin without needing localStorage
+const HARDCODED_BIN_ID = ''; // fill in after first save e.g. '69e6bdc536566621a8d479d5'
+
 function getOrgBinId() {
-  try { return localStorage.getItem(ORG_BIN_LOCAL_KEY) || ''; } catch(e) { return ''; }
+  try { return localStorage.getItem(ORG_BIN_LOCAL_KEY) || HARDCODED_BIN_ID || ''; }
+  catch(e) { return HARDCODED_BIN_ID || ''; }
 }
 function setOrgBinId(id) {
   try { localStorage.setItem(ORG_BIN_LOCAL_KEY, id); } catch(e) {}
@@ -518,16 +523,20 @@ async function orgLoad() {
 async function orgSave(state) {
   let binId = getOrgBinId();
   if (binId) {
-    // Direct PUT — one call, no read needed
     const r = await fetch(`${JSONBIN_API}/${binId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': ORG_BIN_KEY },
       body: JSON.stringify(state)
     });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (!r.ok) {
+      // Surface the actual JSONBin error message
+      let msg = `HTTP ${r.status}`;
+      try { const j = await r.json(); msg = j.message || msg; } catch(e) {}
+      throw new Error(msg);
+    }
     return;
   }
-  // First save ever — create the bin
+  // First save — create the bin
   const r = await fetch(JSONBIN_API, {
     method: 'POST',
     headers: {
@@ -538,9 +547,15 @@ async function orgSave(state) {
     },
     body: JSON.stringify(state)
   });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
+  if (!r.ok) {
+    let msg = `HTTP ${r.status}`;
+    try { const j = await r.json(); msg = j.message || msg; } catch(e) {}
+    throw new Error(msg);
+  }
   const j = await r.json();
-  setOrgBinId(j.metadata.id);
+  const newId = j.metadata?.id;
+  if (!newId) throw new Error('No bin ID returned from JSONBin');
+  setOrgBinId(newId);
 }
 
 // ── In-memory state ──────────────────────────────────────────────────────────
@@ -612,6 +627,13 @@ async function saveOrgState() {
     btn.textContent = 'Save';
     btn.disabled = false;
     console.warn('Org save failed:', e.message);
+    // Show error detail in subtitle so user knows what went wrong
+    const sub = document.getElementById('org-sub');
+    if (sub) {
+      const orig = sub.innerHTML;
+      sub.innerHTML = `<span style="color:#dc2626">⚠ Save failed: ${e.message} — check console for details</span>`;
+      setTimeout(() => { sub.innerHTML = orig; }, 6000);
+    }
   }
 }
 
