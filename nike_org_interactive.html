@@ -566,24 +566,19 @@ const RAG_SAVE_KEY = 'ragState'; // key within the bin record
 async function saveOrgState() {
   const btn = document.getElementById('org-save-btn');
   const lbl = document.getElementById('org-last-saved');
-  btn.textContent = 'Saving...';
-  btn.disabled = true;
+  if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
   try {
     const now = new Date();
     const ts  = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     const dateLabel = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + ts;
 
-    // ── Capture all lead changes ──────────────────────────────────────────────
-    // For base leads: only save fields that differ from BASE_LEADS (mutations)
-    // For imported leads: save the full object
     const baseKeySet = new Set(BASE_LEADS.map(l => ragKey(l)));
-    const leadMutations = {}; // keyed by ragKey — tracks node, s, reportsTo changes
+    const leadMutations = {};
     const importedLeads = [];
 
     LEADS.forEach(l => {
       const key = ragKey(l);
       if (baseKeySet.has(key)) {
-        // Base lead — save any mutations
         const base = BASE_LEADS.find(b => ragKey(b) === key);
         const mutation = {};
         if (l.node      !== base.node)      mutation.node      = l.node;
@@ -591,7 +586,6 @@ async function saveOrgState() {
         if (l.reportsTo !== base.reportsTo) mutation.reportsTo = l.reportsTo || null;
         if (Object.keys(mutation).length)   leadMutations[key] = mutation;
       } else {
-        // Imported lead — save full object
         importedLeads.push(l);
       }
     });
@@ -609,35 +603,24 @@ async function saveOrgState() {
     currentVersionIdx = versions.length - 1;
     updateVersionPill();
 
-    await orgSave({
-      ragState,
-      leadMutations,
-      importedLeads,
-      versions,
-      savedAt: now.toISOString()
-    });
+    await orgSave({ ragState, leadMutations, importedLeads, versions, savedAt: now.toISOString() });
 
-    lbl.textContent = '☁ ' + ts;
-    btn.textContent = 'Saved ✓';
-    setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 1500);
+    if (lbl) lbl.textContent = '☁ ' + ts;
+    if (btn) { btn.textContent = 'Saved ✓'; setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 1500); }
+
   } catch(e) {
     versions.pop();
     currentVersionIdx = versions.length - 1;
     updateVersionPill();
-    lbl.textContent = 'save failed';
-    btn.textContent = 'Save';
-    btn.disabled = false;
+    if (lbl) lbl.textContent = 'save failed';
+    if (btn) { btn.textContent = 'Save'; btn.disabled = false; }
     console.error('Org save failed:', e.message);
-    // Show the real error — null-safe
-    try {
-      const sub = document.getElementById('org-sub');
-      if (sub) {
-        const orig = sub.innerHTML;
-        sub.innerHTML = `<span style="color:#dc2626">⚠ Save failed: ${e.message}</span>`;
-        setTimeout(() => { sub.innerHTML = orig; }, 8000);
-      }
-    } catch(displayErr) {
-      console.error('Error display failed:', displayErr);
+    // Show real error in subtitle
+    const sub = document.getElementById('org-sub');
+    if (sub) {
+      const orig = sub.innerHTML;
+      sub.innerHTML = `<span style="color:#dc2626">⚠ Save failed: ${e.message}</span>`;
+      setTimeout(() => { sub.innerHTML = orig; }, 8000);
     }
   }
 }
