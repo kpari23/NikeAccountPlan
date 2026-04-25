@@ -522,6 +522,7 @@ async function orgLoad() {
 // Single call — writes the whole org state at once
 async function orgSave(state) {
   let binId = getOrgBinId();
+  console.log('orgSave — binId:', binId || '(none — will create new bin)');
   if (binId) {
     const r = await fetch(`${JSONBIN_API}/${binId}`, {
       method: 'PUT',
@@ -626,13 +627,17 @@ async function saveOrgState() {
     lbl.textContent = 'save failed';
     btn.textContent = 'Save';
     btn.disabled = false;
-    console.warn('Org save failed:', e.message);
-    // Show error detail in subtitle so user knows what went wrong
-    const sub = document.getElementById('org-sub');
-    if (sub) {
-      const orig = sub.innerHTML;
-      sub.innerHTML = `<span style="color:#dc2626">⚠ Save failed: ${e.message} — check console for details</span>`;
-      setTimeout(() => { sub.innerHTML = orig; }, 6000);
+    console.error('Org save failed:', e.message);
+    // Show the real error — null-safe
+    try {
+      const sub = document.getElementById('org-sub');
+      if (sub) {
+        const orig = sub.innerHTML;
+        sub.innerHTML = `<span style="color:#dc2626">⚠ Save failed: ${e.message}</span>`;
+        setTimeout(() => { sub.innerHTML = orig; }, 8000);
+      }
+    } catch(displayErr) {
+      console.error('Error display failed:', displayErr);
     }
   }
 }
