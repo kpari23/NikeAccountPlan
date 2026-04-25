@@ -52,9 +52,6 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 .node .nm{font-size:11.5px;font-weight:600;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .node .rl{font-size:10px;color:var(--ts);margin-top:1px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nbadge{font-size:9px;font-weight:500;padding:2px 5px;border-radius:3px;display:inline-block;margin-top:3px;white-space:nowrap}
-.caret-btn{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:600;color:var(--accent);margin-top:4px;cursor:pointer;user-select:none;padding:2px 0}
-.caret-btn:hover{opacity:.75}
-.caret-btn-dot{width:5px;height:5px;background:var(--accent);border-radius:50%;flex-shrink:0}
 .caret-icon{font-size:9px;color:var(--tt);transition:transform .2s;display:inline-block;line-height:1}
 .caret-icon.open{transform:rotate(90deg)}
 
@@ -113,11 +110,27 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
   .c-geo .nbadge{background:#173404;color:#97C459}.c-brand .nbadge{background:#2e1065;color:#c4b5fd}
 }
 
-/* ── Lead drawer ── */
-.drawer{width:var(--node-w);background:var(--surface);border:0.5px solid var(--accent);border-top:none;border-radius:0 0 8px 8px;padding:6px 8px;display:none}
-@media(prefers-color-scheme:dark){.drawer{background:#1a1208}}
-.drawer.open{display:block}
-.drawer-hdr{font-size:9px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;padding-bottom:4px;border-bottom:0.5px solid rgba(250,84,0,.2)}
+/* ── Lead tiles — connected line view (same style as exec tiles) ── */
+.leads-section{width:var(--node-w);margin-top:0}
+.leads-hdr{font-size:9px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;padding:5px 8px 4px;border-left:0.5px solid var(--accent);border-right:0.5px solid var(--accent);background:var(--surface);display:flex;align-items:center;justify-content:space-between}
+.leads-body{border:0.5px solid var(--accent);border-top:none;border-radius:0 0 8px 8px;background:var(--surface);padding:5px 7px 7px;display:block;box-sizing:border-box;overflow:hidden}
+.leads-body.collapsed{display:none}
+@media(prefers-color-scheme:dark){.leads-body{background:#1a1208}.leads-hdr{background:#1a1208}}
+
+/* ── Lead mini-tree (reportsTo hierarchy) ── */
+.lead-tree{display:flex;flex-direction:column;align-items:stretch;width:100%;box-sizing:border-box}
+.lead-branch{display:flex;flex-direction:column;align-items:stretch;width:100%;box-sizing:border-box}
+.lead-branch-children{margin-left:8px;border-left:1px solid var(--b2);padding-left:6px;margin-top:2px;box-sizing:border-box}
+.ptile{position:relative;display:flex;align-items:flex-start;gap:6px;padding:4px 6px;border-radius:6px;margin-bottom:3px;border:0.5px solid var(--b1);background:var(--surface2);cursor:pointer;transition:background .12s,border-color .12s;user-select:none;width:100%;box-sizing:border-box;min-width:0}
+.ptile:last-child{margin-bottom:0}
+.ptile:hover{border-color:var(--b2)}
+
+/* ── Collapse/expand ── */
+.node-wrap{display:flex;flex-direction:column;align-items:center}
+.node-collapse-btn{width:20px;height:20px;border-radius:50%;background:var(--surface);border:0.5px solid var(--b2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:var(--ts);flex-shrink:0;transition:all .15s;user-select:none}
+.node-collapse-btn:hover{border-color:var(--accent);color:var(--accent)}
+.children-section{display:flex;flex-direction:column;align-items:center}
+.children-section.collapsed{display:none}
 
 /* ── Prospect tile ── */
 .ptile{display:flex;align-items:flex-start;gap:6px;padding:4px 6px;border-radius:6px;margin-bottom:3px;border:0.5px solid var(--b1);background:var(--surface2);cursor:pointer;transition:background .12s,border-color .12s;user-select:none}
@@ -130,7 +143,7 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 .ptile.rag-green .ptile-status{background:var(--rag-green)}
 .ptile.rag-yellow .ptile-status{background:var(--rag-yellow)}
 .ptile.rag-red .ptile-status{background:var(--rag-red)}
-.ptile-body{flex:1;min-width:0}
+.ptile-body{flex:1;min-width:0;overflow:hidden}
 .ptile-name{font-size:11px;font-weight:500;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ptile.rag-green .ptile-name{color:var(--rag-green)}
 .ptile.rag-yellow .ptile-name{color:var(--rag-yellow)}
@@ -185,11 +198,14 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
       <button class="fb" data-f="Strategy">Strategy</button>
     </div>
     <div style="width:1px;height:20px;background:var(--b2);flex-shrink:0"></div>
-    <div id="version-pill" style="display:none;font-size:11px;color:var(--ts);background:var(--surface);border:0.5px solid var(--b2);border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap" onclick="showVersions()">☁ <span id="version-label">Base</span> ▾</div>
+    <button onclick="toggleAllCollapse()" id="collapse-all-btn" style="font-size:11px;font-weight:600;padding:5px 12px;border:0.5px solid var(--b2);border-radius:100px;background:var(--surface);color:var(--ts);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s">⊖ Collapse All</button>
+    <div style="width:1px;height:20px;background:var(--b2);flex-shrink:0"></div>
+    <div id="version-pill" style="display:none" aria-hidden="true"></div><!-- hidden — kept for JS refs -->
     <label style="font-size:11px;font-weight:600;padding:5px 12px;border:0.5px solid var(--accent);border-radius:100px;color:var(--accent);cursor:pointer;background:var(--surface);white-space:nowrap;line-height:1.4">
       ↑ Import CSV
       <input type="file" accept=".csv" id="csv-input" style="display:none" onchange="handleCSV(this)"/>
     </label>
+    <button onclick="showVersions()" style="font-size:11px;font-weight:600;padding:5px 14px;border:0.5px solid var(--b2);border-radius:100px;background:var(--surface);color:var(--ts);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--b2)';this.style.color='var(--ts)'">⏱ Load Version</button>
     <button id="org-save-btn" onclick="saveOrgState()" style="font-size:11px;font-weight:600;padding:5px 14px;border:0.5px solid var(--b2);border-radius:100px;background:var(--surface);color:var(--tp);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.15s">Save</button>
   </div>
 </div>
@@ -244,13 +260,16 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 </div>
 
 <!-- ── Version history modal ── -->
-<div id="version-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--surface);border-radius:14px;width:100%;max-width:460px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.3)">
-    <div style="background:var(--tp);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:13px;font-weight:700;color:var(--surface)">Version History</div>
-      <button onclick="document.getElementById('version-modal').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;padding:2px 4px">×</button>
+<div id="version-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border-radius:14px;width:100%;max-width:540px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.3);display:flex;flex-direction:column;max-height:90vh">
+    <div style="background:var(--tp);padding:16px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0">
+      <div style="min-width:0">
+        <div style="font-size:13px;font-weight:700;color:var(--surface)">Version History</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">Each Save creates a snapshot · click Load to restore any version</div>
+      </div>
+      <button onclick="document.getElementById('version-modal').style.display='none'" style="background:none;border:none;color:var(--surface);font-size:22px;cursor:pointer;line-height:1;padding:0 0 0 4px;flex-shrink:0;margin-top:-2px;opacity:0.85" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.85'">×</button>
     </div>
-    <div style="padding:16px 20px;max-height:400px;overflow-y:auto" id="version-list"></div>
+    <div style="overflow-y:auto;flex:1;padding:16px 20px" id="version-list"></div>
   </div>
 </div>
 
@@ -464,62 +483,192 @@ const AVATAR_COLORS={
 const RAG_CYCLE=['','rag-green','rag-yellow','rag-red'];
 const ragState={};
 let filter='all';
-const open=new Set();
+// Collapse/expand state
+const collapsedNodes = new Set();
+const collapsedLeads = new Set();
+let allCollapsed = false;
 
-// ── Persist ragState to JSONBin — explicit save on demand ────────────────────
-const RAG_SAVE_KEY = 'orgchart_rag';
+// ── Dedicated org chart bin — single GET to load, single PUT to save ─────────
+// Bin is self-creating: on first save it creates its own bin and stores the ID
+// in localStorage so all future calls go directly to it. No shared bin.
+const ORG_BIN_KEY = '$2a$10$TV.ZD51km/3W9y03yYBUH.Kx4WRnHoge/cPP0DWy5mlL6Ttg3fgxO';
+const ORG_BIN_LOCAL_KEY = 'nike_orgchart_bin_id';
+const JSONBIN_API = 'https://api.jsonbin.io/v3/b';
 
+function getOrgBinId() {
+  try { return localStorage.getItem(ORG_BIN_LOCAL_KEY) || ''; } catch(e) { return ''; }
+}
+function setOrgBinId(id) {
+  try { localStorage.setItem(ORG_BIN_LOCAL_KEY, id); } catch(e) {}
+}
+
+// Single call — reads the whole org state at once
+async function orgLoad() {
+  const binId = getOrgBinId();
+  if (!binId) return null;
+  const r = await fetch(`${JSONBIN_API}/${binId}/latest`, {
+    headers: { 'X-Master-Key': ORG_BIN_KEY }
+  });
+  if (!r.ok) return null;
+  const j = await r.json();
+  return j.record || null;
+}
+
+// Single call — writes the whole org state at once
+async function orgSave(state) {
+  let binId = getOrgBinId();
+  if (binId) {
+    // Direct PUT — one call, no read needed
+    const r = await fetch(`${JSONBIN_API}/${binId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': ORG_BIN_KEY },
+      body: JSON.stringify(state)
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return;
+  }
+  // First save ever — create the bin
+  const r = await fetch(JSONBIN_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': ORG_BIN_KEY,
+      'X-Bin-Name': 'Nike-OrgChart',
+      'X-Bin-Private': 'false'
+    },
+    body: JSON.stringify(state)
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  setOrgBinId(j.metadata.id);
+}
+
+// ── In-memory state ──────────────────────────────────────────────────────────
+const RAG_SAVE_KEY = 'ragState'; // key within the bin record
+
+// ── Save button handler — snapshots current state as a new version ────────────
 async function saveOrgState() {
   const btn = document.getElementById('org-save-btn');
   const lbl = document.getElementById('org-last-saved');
   btn.textContent = 'Saving...';
   btn.disabled = true;
   try {
-    const r = await fetch(VER_BIN_URL + '/latest', { headers: { 'X-Master-Key': VER_BIN_KEY } });
-    let rec = {};
-    if (r.ok) { const j = await r.json(); rec = j.record || {}; }
-    rec[RAG_SAVE_KEY] = ragState;
-    const w = await fetch(VER_BIN_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': VER_BIN_KEY },
-      body: JSON.stringify(rec)
+    const now = new Date();
+    const ts  = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const dateLabel = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + ts;
+
+    // ── Capture all lead changes ──────────────────────────────────────────────
+    // For base leads: only save fields that differ from BASE_LEADS (mutations)
+    // For imported leads: save the full object
+    const baseKeySet = new Set(BASE_LEADS.map(l => ragKey(l)));
+    const leadMutations = {}; // keyed by ragKey — tracks node, s, reportsTo changes
+    const importedLeads = [];
+
+    LEADS.forEach(l => {
+      const key = ragKey(l);
+      if (baseKeySet.has(key)) {
+        // Base lead — save any mutations
+        const base = BASE_LEADS.find(b => ragKey(b) === key);
+        const mutation = {};
+        if (l.node      !== base.node)      mutation.node      = l.node;
+        if (l.s         !== base.s)         mutation.s         = l.s;
+        if (l.reportsTo !== base.reportsTo) mutation.reportsTo = l.reportsTo || null;
+        if (Object.keys(mutation).length)   leadMutations[key] = mutation;
+      } else {
+        // Imported lead — save full object
+        importedLeads.push(l);
+      }
     });
-    if (w.ok) {
-      const ts = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-      lbl.textContent = '☁ ' + ts;
-      btn.textContent = 'Saved ✓';
-      setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 1500);
-    } else {
-      throw new Error('HTTP ' + w.status);
-    }
+
+    const newVersion = {
+      id:     now.getTime(),
+      label:  dateLabel,
+      date:   dateLabel,
+      count:  LEADS.length,
+      leads:  importedLeads,
+      leadMutations: {...leadMutations},
+      ragState: {...ragState},
+    };
+    versions.push(newVersion);
+    currentVersionIdx = versions.length - 1;
+    updateVersionPill();
+
+    await orgSave({
+      ragState,
+      leadMutations,
+      importedLeads,
+      versions,
+      savedAt: now.toISOString()
+    });
+
+    lbl.textContent = '☁ ' + ts;
+    btn.textContent = 'Saved ✓';
+    setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 1500);
   } catch(e) {
+    versions.pop();
+    currentVersionIdx = versions.length - 1;
+    updateVersionPill();
     lbl.textContent = 'save failed';
     btn.textContent = 'Save';
     btn.disabled = false;
-    console.warn('Org state save failed:', e.message);
+    console.warn('Org save failed:', e.message);
   }
 }
 
+// ── Load on startup — single GET, restores everything at once ─────────────────
 async function loadRagState() {
   try {
-    const r = await fetch(VER_BIN_URL + '/latest', { headers: { 'X-Master-Key': VER_BIN_KEY } });
-    if (!r.ok) return;
-    const j = await r.json();
-    const saved = j.record?.[RAG_SAVE_KEY];
-    if (saved && typeof saved === 'object') {
-      Object.assign(ragState, saved);
-      render();
-      // Show when it was last saved
-      const rec = j.record || {};
-      if (rec.savedAt || j.metadata?.createdAt) {
-        const d = new Date(rec.savedAt || j.metadata.createdAt);
-        document.getElementById('org-last-saved').textContent =
-          '☁ ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
-          ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-      }
+    const state = await orgLoad();
+    if (!state) return;
+
+    // ── Restore lead mutations (node moves, seniority changes, manager assignments)
+    if (state.leadMutations && typeof state.leadMutations === 'object') {
+      LEADS.forEach(l => {
+        const key = ragKey(l);
+        const mutation = state.leadMutations[key];
+        if (mutation) {
+          if (mutation.node      !== undefined) l.node      = mutation.node;
+          if (mutation.s         !== undefined) l.s         = mutation.s;
+          if (mutation.reportsTo !== undefined) l.reportsTo = mutation.reportsTo || undefined;
+        }
+      });
     }
+
+    // ── Restore imported leads (deduped against base)
+    if (state.importedLeads && state.importedLeads.length) {
+      const existingKeys = new Set(LEADS.map(l => (l.name + l.email).toLowerCase()));
+      state.importedLeads.forEach(l => {
+        const key = (l.name + l.email).toLowerCase();
+        if (!existingKeys.has(key)) {
+          LEADS.push(l);
+          existingKeys.add(key);
+        }
+      });
+    }
+
+    // ── Restore rag state (engagement colours)
+    if (state.ragState && typeof state.ragState === 'object') {
+      Object.assign(ragState, state.ragState);
+    }
+
+    // ── Restore versions
+    if (state.versions && state.versions.length) {
+      versions = state.versions;
+      currentVersionIdx = versions.length - 1;
+      updateVersionPill();
+    }
+
+    // ── Show last saved time
+    if (state.savedAt) {
+      const d = new Date(state.savedAt);
+      document.getElementById('org-last-saved').textContent =
+        '☁ ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+        ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+
+    render();
   } catch(e) {
-    console.warn('RAG state load failed:', e.message);
+    console.warn('Org load failed:', e.message);
   }
 }
 
@@ -567,7 +716,6 @@ function execTileHtml(execKey){
 
 function nodeEl(n){
   const leads=leadsFor(n.id);
-  const isOpen=open.has(n.id);
   const hasL=leads.length>0;
   const meta=NODE_META[n.id]||{};
   const execKeys=n.execKeys||(n.execKey?[n.execKey]:[]);
@@ -579,30 +727,80 @@ function nodeEl(n){
 
   const execTilesHtml=execKeys.map(k=>execTileHtml(k)).join('');
 
-  const drawerHtml=hasL?`<div class="drawer${isOpen?' open':''}">
-    <div class="drawer-hdr">${leads.length} contact${leads.length>1?'s':''}</div>
-    ${leads.map(l=>{
-      const key=ragKey(l);
-      const rag=ragState[key]||'';
-      return `<div class="ptile${rag?' '+rag:''}" onclick="cycleRag('${key}')">
-        <div class="ptile-status"></div>
-        <div class="ptile-body">
-          <div class="ptile-name">${l.name}</div>
-          <div class="ptile-title">${l.title}</div>
-          ${l.email?`<div class="ptile-email">${l.email}</div>`:''}
-          <div class="ptile-meta">
-            <span class="ptile-seniority ${sCls(l.s)}">${sLabel(l.s)}</span>
-            ${l.li?`<a class="ptile-li" href="${l.li}" target="_blank" onclick="event.stopPropagation()">LinkedIn</a>`:''}
-          </div>
+  // ── Build lead mini-tree from reportsTo ──────────────────────────────────────
+  // Leads rendered as a connected hierarchy using the same line pattern as the main org
+
+  function leadTileHtml(l) {
+    const key = ragKey(l);
+    const rag = ragState[key] || '';
+    return `<div class="ptile${rag ? ' ' + rag : ''}" onclick="cycleRag('${key.replace(/'/g,"\\'")}')">
+      <div class="ptile-status"></div>
+      <div class="ptile-body">
+        <div class="ptile-name">${l.name}</div>
+        <div class="ptile-title">${l.title}</div>
+        ${l.email ? `<div class="ptile-email">${l.email}</div>` : ''}
+        <div class="ptile-meta">
+          <span class="ptile-seniority ${sCls(l.s)}">${sLabel(l.s)}</span>
+          ${l.reportsTo ? `<span style="font-size:9px;color:var(--tt);background:var(--surface);border:0.5px solid var(--b1);padding:1px 4px;border-radius:3px">↑ ${l.reportsTo.split('|')[0]}</span>` : ''}
+          ${l.li ? `<a class="ptile-li" href="${l.li}" target="_blank" onclick="event.stopPropagation()">LinkedIn</a>` : ''}
         </div>
-      </div>`;
-    }).join('')}
-  </div>`:'';
+      </div>
+    </div>`;
+  }
 
-  const nodeOpenCls=isOpen&&hasL?' style="border-radius:8px 8px 0 0;border-color:var(--accent)"':'';
+  function buildLeadBranch(lead, childMap) {
+    const children = (childMap[ragKey(lead)] || []);
+    const childrenHtml = children.length ? `
+      <div class="lead-branch-children">
+        ${children.map(c => buildLeadBranch(c, childMap)).join('')}
+      </div>` : '';
+    return `<div class="lead-branch">
+      ${leadTileHtml(lead)}
+      ${childrenHtml}
+    </div>`;
+  }
 
-  return `<div style="display:flex;flex-direction:column;align-items:center">
-    <div class="node ${n.color}"${nodeOpenCls}
+  const leadsCollapsed = collapsedLeads.has(n.id);
+
+  const leadsHtml = hasL ? (() => {
+    // Build parent-child map using reportsTo key
+    const keyMap = {};
+    leads.forEach(l => { keyMap[ragKey(l)] = l; });
+    const childMap = {};
+    const hasParent = new Set();
+    leads.forEach(l => {
+      if (l.reportsTo) {
+        const parentKey = l.reportsTo;
+        // reportsTo stores the ragKey of the manager
+        if (keyMap[parentKey]) {
+          if (!childMap[parentKey]) childMap[parentKey] = [];
+          childMap[parentKey].push(l);
+          hasParent.add(ragKey(l));
+        }
+      }
+    });
+    // Roots = leads with no parent in this node
+    const roots = leads.filter(l => !hasParent.has(ragKey(l)));
+
+    return `<div class="leads-section">
+      <div class="leads-hdr" onclick="toggleLeads('${n.id}')" style="cursor:pointer;border-radius:0;border-top:0.5px solid rgba(250,84,0,.2)">
+        <span>${leads.length} lead${leads.length > 1 ? 's' : ''}</span>
+        <span style="font-size:10px;font-weight:400;color:var(--accent);letter-spacing:0">${leadsCollapsed ? '▶' : '▼'}</span>
+      </div>
+      <div class="leads-body${leadsCollapsed ? ' collapsed' : ''}">
+        <div class="lead-tree">
+          ${roots.map(r => buildLeadBranch(r, childMap)).join('')}
+        </div>
+      </div>
+    </div>`;
+  })() : '';
+
+
+  // Node border-radius: square bottom if leads are attached and visible
+  const nodeRadius = hasL && !leadsCollapsed ? 'border-radius:8px 8px 0 0;border-bottom-color:var(--accent)' : '';
+
+  return `<div class="node-wrap">
+    <div class="node ${n.color}" style="${nodeRadius}"
       data-tip="${tooltipData}"
       onmouseenter="showTip(event,this)"
       onmouseleave="hideTip()">
@@ -610,35 +808,285 @@ function nodeEl(n){
       <div class="rl">${n.rl}</div>
       <span class="nbadge">${n.badge}</span>
       ${execTilesHtml}
-      ${hasL?`<div class="caret-btn" onclick="event.stopPropagation();toggleDrawer('${n.id}')">
-        <div class="caret-btn-dot"></div>
-        ${leads.length} lead${leads.length>1?'s':''}
-        <span class="caret-icon${isOpen?' open':''}">&#9654;</span>
-      </div>`:''}
     </div>
-    ${drawerHtml}
+    ${leadsHtml}
   </div>`;
 }
 
 function buildBranch(node){
   const children=node.children||[];
-  const vlineH=children.length?'<div class="vline"></div>':'';
-  const childSection=children.length?`
-    <div style="position:relative;display:flex;gap:var(--gap);justify-content:center;align-items:flex-start">
-      ${children.length>1?`<div style="position:absolute;top:0;left:calc(var(--node-w)/2 + var(--gap)/2);right:calc(var(--node-w)/2 + var(--gap)/2);height:1px;background:var(--line)"></div>`:''}
-      ${children.map(c=>`<div style="display:flex;flex-direction:column;align-items:center">
-        <div class="vline"></div>
-        ${buildBranch(c)}
-      </div>`).join('')}
-    </div>`:'';
+  const isCollapsed = collapsedNodes.has(node.id);
+  const hasChildren = children.length > 0;
+
+  // Collapse toggle button — only shown if node has children
+  const collapseBtn = hasChildren ? `
+    <div class="node-collapse-btn" onclick="toggleNode('${node.id}')" title="${isCollapsed?'Expand':'Collapse'} subtree">
+      ${isCollapsed?'+':'−'}
+    </div>` : '<div class="vline"></div>';
+
+  const childSection = hasChildren && !isCollapsed ? `
+    <div class="children-section">
+      <div style="position:relative;display:flex;gap:var(--gap);justify-content:center;align-items:flex-start">
+        ${children.length>1?`<div style="position:absolute;top:0;left:calc(var(--node-w)/2 + var(--gap)/2);right:calc(var(--node-w)/2 + var(--gap)/2);height:1px;background:var(--line)"></div>`:''}
+        ${children.map(c=>`<div style="display:flex;flex-direction:column;align-items:center">
+          <div class="vline"></div>
+          ${buildBranch(c)}
+        </div>`).join('')}
+      </div>
+    </div>` : '';
+
   return `<div style="display:flex;flex-direction:column;align-items:center">
     ${nodeEl(node)}
-    ${vlineH}
+    ${collapseBtn}
     ${childSection}
   </div>`;
 }
 
-function toggleDrawer(id){open.has(id)?open.delete(id):open.add(id);render();}
+// toggleDrawer kept for any legacy calls
+function toggleDrawer(id){ toggleLeads(id); }
+
+function toggleNode(id){
+  collapsedNodes.has(id) ? collapsedNodes.delete(id) : collapsedNodes.add(id);
+  render();
+}
+function toggleLeads(id){
+  collapsedLeads.has(id) ? collapsedLeads.delete(id) : collapsedLeads.add(id);
+  render();
+}
+function getAllNodeIds(tree, out=[]){
+  for(const n of tree){ out.push(n.id); if(n.children) getAllNodeIds(n.children,out); }
+  return out;
+}
+function toggleAllCollapse(){
+  const allIds = getAllNodeIds(ORG);
+  const btn = document.getElementById('collapse-all-btn');
+  if(allCollapsed){
+    collapsedNodes.clear(); collapsedLeads.clear();
+    allCollapsed = false; btn.textContent = '⊖ Collapse All';
+  } else {
+    allIds.forEach(id => { collapsedNodes.add(id); collapsedLeads.add(id); });
+    collapsedNodes.delete('ceo');
+    allCollapsed = true; btn.textContent = '⊕ Expand All';
+  }
+  render();
+}
+
+// ── Move lead tile — right-click context menu ─────────────────────────────────
+// The org chart renders as innerHTML so we use event delegation on the tree root
+
+// Flat list of all nodes for the move picker
+function allNodes(tree, out=[]) {
+  for (const n of tree) {
+    out.push({ id: n.id, nm: n.nm, rl: n.rl, badge: n.badge });
+    if (n.children) allNodes(n.children, out);
+  }
+  return out;
+}
+
+// Context menu state
+let ctxLead = null;
+let ctxMenu = null;
+
+function showMoveMenu(e, leadKey) {
+  e.preventDefault();
+  e.stopPropagation();
+  hideMoveMenu();
+
+  const lead = LEADS.find(l => ragKey(l) === leadKey);
+  if (!lead) return;
+  ctxLead = lead;
+
+  const nodes = allNodes(ORG);
+  const curNode = nodes.find(n => n.id === lead.node);
+
+  // Other leads in the same node for manager assignment
+  const sameNodeLeads = LEADS.filter(l => l.node === lead.node && ragKey(l) !== leadKey);
+
+  const menu = document.createElement('div');
+  ctxMenu = menu;
+  menu.id = 'move-ctx-menu';
+  menu.style.cssText = `position:fixed;z-index:9998;background:var(--surface);border:0.5px solid var(--b2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.2);min-width:260px;max-height:420px;overflow:hidden;font-family:inherit;`;
+
+  menu.innerHTML = `
+    <div style="padding:10px 14px 8px;border-bottom:0.5px solid var(--b1)">
+      <div style="font-size:11px;font-weight:700;color:var(--tp)">${lead.name}</div>
+      <div style="font-size:10px;color:var(--ts);margin-top:1px">${lead.title || 'No title'}</div>
+      <div style="font-size:10px;color:var(--tt);margin-top:3px">
+        Node: <strong style="color:var(--accent)">${curNode ? curNode.nm : lead.node}</strong>
+        ${lead.reportsTo ? ` · Reports to: <strong style="color:var(--accent)">${(LEADS.find(l=>ragKey(l)===lead.reportsTo)||{name:lead.reportsTo}).name}</strong>` : ''}
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;border-bottom:0.5px solid var(--b1)">
+      <button id="ctx-tab-move" onclick="ctxSwitchTab('move')"
+        style="flex:1;padding:7px 0;font-size:11px;font-weight:600;border:none;background:rgba(250,84,0,0.07);color:var(--accent);cursor:pointer;font-family:inherit;border-bottom:2px solid var(--accent)">
+        Move Node
+      </button>
+      <button id="ctx-tab-mgr" onclick="ctxSwitchTab('mgr')"
+        style="flex:1;padding:7px 0;font-size:11px;font-weight:600;border:none;background:transparent;color:var(--ts);cursor:pointer;font-family:inherit;border-bottom:2px solid transparent">
+        Set Manager
+      </button>
+    </div>
+
+    <!-- Move tab -->
+    <div id="ctx-panel-move">
+      <div style="padding:6px 8px 4px;border-bottom:0.5px solid var(--b1)">
+        <input id="move-search" placeholder="Search nodes…" autocomplete="off"
+          style="width:100%;font-size:11px;padding:5px 8px;border:0.5px solid var(--b1);border-radius:6px;background:var(--surface2);color:var(--tp);font-family:inherit;outline:none"
+          oninput="filterMoveNodes(this.value)"/>
+      </div>
+      <div id="move-node-list" style="overflow-y:auto;max-height:200px;padding:4px 0">
+        ${nodes.map(n => `
+          <div class="move-node-item" data-node-id="${n.id}"
+            onclick="moveLead('${leadKey}','${n.id}')"
+            style="padding:7px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px;color:${n.id===lead.node?'var(--accent)':'var(--tp)'};background:${n.id===lead.node?'rgba(250,84,0,0.05)':'transparent'}"
+            onmouseenter="this.style.background='var(--surface2)'"
+            onmouseleave="this.style.background='${n.id===lead.node?'rgba(250,84,0,0.05)':'transparent'}'">
+            ${n.id===lead.node?'<span style="font-size:9px;color:var(--accent)">●</span>':'<span style="font-size:9px;color:transparent">●</span>'}
+            <div>
+              <div style="font-weight:${n.id===lead.node?'600':'400'}">${n.nm}</div>
+              <div style="font-size:10px;color:var(--tt)">${n.rl}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Manager tab (hidden by default) -->
+    <div id="ctx-panel-mgr" style="display:none">
+      <div style="padding:6px 8px 4px;border-bottom:0.5px solid var(--b1)">
+        <input id="mgr-search" placeholder="Search leads in this node…" autocomplete="off"
+          style="width:100%;font-size:11px;padding:5px 8px;border:0.5px solid var(--b1);border-radius:6px;background:var(--surface2);color:var(--tp);font-family:inherit;outline:none"
+          oninput="filterMgrList(this.value)"/>
+      </div>
+      <div id="mgr-list" style="overflow-y:auto;max-height:200px;padding:4px 0">
+        <div class="mgr-item" data-key=""
+          onclick="setManager('${leadKey}','')"
+          style="padding:7px 14px;cursor:pointer;font-size:12px;color:${!lead.reportsTo?'var(--accent)':'var(--ts)'};background:${!lead.reportsTo?'rgba(250,84,0,0.05)':'transparent'};display:flex;align-items:center;gap:8px"
+          onmouseenter="this.style.background='var(--surface2)'"
+          onmouseleave="this.style.background='${!lead.reportsTo?'rgba(250,84,0,0.05)':'transparent'}'">
+          ${!lead.reportsTo?'<span style="font-size:9px;color:var(--accent)">●</span>':'<span style="font-size:9px;color:transparent">●</span>'}
+          <div>
+            <div style="font-weight:${!lead.reportsTo?'600':'400'}">No manager (root)</div>
+            <div style="font-size:10px;color:var(--tt)">Top-level in this node</div>
+          </div>
+        </div>
+        ${sameNodeLeads.map(m => {
+          const mKey = ragKey(m);
+          const isCur = lead.reportsTo === mKey;
+          return `<div class="mgr-item" data-key="${mKey}"
+            onclick="setManager('${leadKey}','${mKey}')"
+            style="padding:7px 14px;cursor:pointer;font-size:12px;color:${isCur?'var(--accent)':'var(--tp)'};background:${isCur?'rgba(250,84,0,0.05)':'transparent'};display:flex;align-items:center;gap:8px"
+            onmouseenter="this.style.background='var(--surface2)'"
+            onmouseleave="this.style.background='${isCur?'rgba(250,84,0,0.05)':'transparent'}'">
+            ${isCur?'<span style="font-size:9px;color:var(--accent)">●</span>':'<span style="font-size:9px;color:transparent">●</span>'}
+            <div>
+              <div style="font-weight:${isCur?'600':'400'}">${m.name}</div>
+              <div style="font-size:10px;color:var(--tt)">${m.title.slice(0,40)}${m.title.length>40?'…':''}</div>
+            </div>
+          </div>`;
+        }).join('')}
+        ${sameNodeLeads.length === 0 ? '<div style="padding:12px 14px;font-size:11px;color:var(--tt)">No other leads in this node yet.</div>' : ''}
+      </div>
+    </div>
+
+    <div style="padding:6px 8px;border-top:0.5px solid var(--b1)">
+      <button onclick="hideMoveMenu()" style="width:100%;padding:6px;font-size:11px;font-weight:600;color:var(--ts);background:var(--surface2);border:0.5px solid var(--b1);border-radius:6px;cursor:pointer;font-family:inherit">Close</button>
+    </div>`;
+
+  document.body.appendChild(menu);
+
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const mw = 270, mh = 420;
+  let x = e.clientX + 8, y = e.clientY + 8;
+  if (x + mw > vw) x = e.clientX - mw - 4;
+  if (y + mh > vh) y = e.clientY - mh - 4;
+  menu.style.left = Math.max(4, x) + 'px';
+  menu.style.top  = Math.max(4, y) + 'px';
+
+  setTimeout(() => { const s = document.getElementById('move-search'); if(s) s.focus(); }, 50);
+}
+
+function ctxSwitchTab(tab) {
+  const movePanel = document.getElementById('ctx-panel-move');
+  const mgrPanel  = document.getElementById('ctx-panel-mgr');
+  const moveBtn   = document.getElementById('ctx-tab-move');
+  const mgrBtn    = document.getElementById('ctx-tab-mgr');
+  if (tab === 'move') {
+    movePanel.style.display = ''; mgrPanel.style.display = 'none';
+    moveBtn.style.background = 'rgba(250,84,0,0.07)'; moveBtn.style.color = 'var(--accent)'; moveBtn.style.borderBottom = '2px solid var(--accent)';
+    mgrBtn.style.background = 'transparent'; mgrBtn.style.color = 'var(--ts)'; mgrBtn.style.borderBottom = '2px solid transparent';
+    setTimeout(() => { const s = document.getElementById('move-search'); if(s) s.focus(); }, 50);
+  } else {
+    mgrPanel.style.display = ''; movePanel.style.display = 'none';
+    mgrBtn.style.background = 'rgba(250,84,0,0.07)'; mgrBtn.style.color = 'var(--accent)'; mgrBtn.style.borderBottom = '2px solid var(--accent)';
+    moveBtn.style.background = 'transparent'; moveBtn.style.color = 'var(--ts)'; moveBtn.style.borderBottom = '2px solid transparent';
+    setTimeout(() => { const s = document.getElementById('mgr-search'); if(s) s.focus(); }, 50);
+  }
+}
+
+function filterMgrList(q) {
+  const query = q.toLowerCase();
+  document.querySelectorAll('.mgr-item').forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(query) ? '' : 'none';
+  });
+}
+
+function setManager(leadKey, managerKey) {
+  const lead = LEADS.find(l => ragKey(l) === leadKey);
+  if (!lead) return;
+  lead.reportsTo = managerKey || undefined;
+  hideMoveMenu();
+  render();
+}
+
+function filterMoveNodes(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.move-node-item').forEach(el => {
+    const text = el.textContent.toLowerCase();
+    el.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+
+function moveLead(leadKey, newNodeId) {
+  const lead = LEADS.find(l => ragKey(l) === leadKey);
+  if (lead) {
+    lead.node = newNodeId;
+    // Auto-expand the target node so the moved lead is visible
+    collapsedNodes.delete(newNodeId);
+    collapsedLeads.delete(newNodeId);
+  }
+  hideMoveMenu();
+  render();
+}
+
+function hideMoveMenu() {
+  if (ctxMenu) { ctxMenu.remove(); ctxMenu = null; }
+  ctxLead = null;
+}
+
+// Delegate right-click on the tree — catches all ptile and exec-tile clicks
+document.addEventListener('contextmenu', function(e) {
+  const ptile = e.target.closest('.ptile');
+  const etile = e.target.closest('.exec-tile');
+  if (ptile || etile) {
+    // Find which lead this tile belongs to by its onclick attr
+    const tile = ptile || etile;
+    const onclick = tile.getAttribute('onclick') || '';
+    const m = onclick.match(/cycleRag\('([^']+)'\)/);
+    if (m) showMoveMenu(e, m[1]);
+    return;
+  }
+  hideMoveMenu();
+});
+
+// Close on click outside
+document.addEventListener('click', function(e) {
+  if (ctxMenu && !ctxMenu.contains(e.target)) hideMoveMenu();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') hideMoveMenu();
+});
 
 const tip=document.getElementById('tooltip');
 let tipTimeout;
@@ -700,12 +1148,7 @@ document.getElementById('filters').addEventListener('click',e=>{
 });
 
 
-/* ── CSV IMPORT + VERSION HISTORY ─────────────────────────────────────────── */
-
-// JSONBin for version storage — same bin as tracker for consistency
-const VER_BIN_URL = 'https://api.jsonbin.io/v3/b/69e6bdc536566621a8d479d5';
-const VER_BIN_KEY = '$2a$10$TV.ZD51km/3W9y03yYBUH.Kx4WRnHoge/cPP0DWy5mlL6Ttg3fgxO';
-const ORG_VER_KEY = 'orgchart_versions'; // key within the bin record
+// ── CSV IMPORT + VERSION HISTORY ─────────────────────────────────────────────
 
 // All known org node IDs with keywords for AI placement
 const NODE_KEYWORDS = {
@@ -907,72 +1350,18 @@ async function confirmImport() {
   }
 
   document.getElementById('import-progress-fill').style.width = '60%';
-
-  // Save version
-  const label = document.getElementById('import-filename').textContent;
-  await saveVersion(label, [...LEADS]);
-
   document.getElementById('import-progress-fill').style.width = '100%';
 
   setTimeout(() => {
     closeImportModal();
     render();
-    // Brief confirmation toast in the subtitle
     const sub = document.querySelector('.t-sub');
     if (sub) {
       const original = sub.textContent;
-      sub.textContent = `✓ ${added} lead${added !== 1 ? 's' : ''} added${skipped ? ` · ${skipped} duplicate${skipped !== 1 ? 's' : ''} skipped` : ''}`;
-      setTimeout(() => { sub.textContent = original; }, 4000);
+      sub.textContent = `✓ ${added} lead${added !== 1 ? 's' : ''} added${skipped ? ` · ${skipped} duplicate${skipped !== 1 ? 's' : ''} skipped` : ''} — click Save to persist`;
+      setTimeout(() => { sub.textContent = original; }, 5000);
     }
   }, 400);
-}
-
-// ── Version storage ──────────────────────────────────────────────────────────
-async function loadVersions() {
-  try {
-    const r = await fetch(VER_BIN_URL + '/latest', { headers: { 'X-Master-Key': VER_BIN_KEY } });
-    if (!r.ok) return;
-    const j = await r.json();
-    const rec = j.record || {};
-    if (rec[ORG_VER_KEY]) {
-      versions = rec[ORG_VER_KEY];
-      currentVersionIdx = versions.length - 1;
-      updateVersionPill();
-    }
-  } catch(e) {}
-}
-
-async function saveVersion(filename, leads) {
-  try {
-    // Load current bin record
-    const r = await fetch(VER_BIN_URL + '/latest', { headers: { 'X-Master-Key': VER_BIN_KEY } });
-    let rec = {};
-    if (r.ok) { const j = await r.json(); rec = j.record || {}; }
-
-    const newVersion = {
-      id: Date.now(),
-      label: filename || 'Import',
-      date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit'}),
-      count: leads.length,
-      leads: leads.filter(l => l._isImported), // only store imported leads, not base set
-    };
-
-    const existing = rec[ORG_VER_KEY] || [];
-    existing.push(newVersion);
-    rec[ORG_VER_KEY] = existing;
-
-    await fetch(VER_BIN_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': VER_BIN_KEY },
-      body: JSON.stringify(rec)
-    });
-
-    versions = existing;
-    currentVersionIdx = versions.length - 1;
-    updateVersionPill();
-  } catch(e) {
-    console.error('Version save failed:', e);
-  }
 }
 
 function updateVersionPill() {
@@ -985,32 +1374,80 @@ function updateVersionPill() {
 
 function showVersions() {
   const modal = document.getElementById('version-modal');
-  const list = document.getElementById('version-list');
+  const list  = document.getElementById('version-list');
+  modal.style.display = 'flex';
 
   if (versions.length === 0) {
-    list.innerHTML = '<div style="font-size:13px;color:var(--ts);text-align:center;padding:20px">No imported versions yet.<br>Use ↑ Import CSV to add leads.</div>';
-  } else {
-    list.innerHTML = versions.slice().reverse().map((v, ri) => {
-      const idx = versions.length - 1 - ri;
-      const isCurrent = idx === currentVersionIdx;
-      return `<div style="padding:12px;border-radius:8px;border:0.5px solid ${isCurrent ? 'var(--accent)' : 'var(--b1)'};background:${isCurrent ? 'rgba(250,84,0,0.05)' : 'var(--surface2)'};margin-bottom:8px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-          <div style="font-size:12px;font-weight:600;color:var(--tp)">${v.label}</div>
-          ${isCurrent ? '<span style="font-size:10px;font-weight:600;color:var(--accent);background:rgba(250,84,0,0.1);padding:2px 7px;border-radius:4px">Current</span>' : `<button onclick="revertToVersion(${idx})" style="font-size:11px;font-weight:600;color:var(--accent);background:none;border:0.5px solid var(--accent);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit">Revert</button>`}
-        </div>
-        <div style="font-size:11px;color:var(--ts)">${v.date} · ${v.count} total leads · ${v.leads ? v.leads.length : 0} imported</div>
+    list.innerHTML = `
+      <div style="text-align:center;padding:32px 20px">
+        <div style="font-size:24px;margin-bottom:10px">⏱</div>
+        <div style="font-size:13px;font-weight:600;color:var(--tp);margin-bottom:6px">No saved versions yet</div>
+        <div style="font-size:12px;color:var(--ts)">Every time you click <strong>Save</strong>, a full snapshot is created here — including all lead positions, manager assignments, engagement statuses, and imported contacts.</div>
+      </div>
+      <div style="border-top:0.5px solid var(--b1);padding-top:14px;margin-top:4px">
+        ${baseVersionHtml(-1)}
       </div>`;
-    }).join('');
+    return;
   }
 
-  // Always show base version
-  list.innerHTML += `<div style="padding:12px;border-radius:8px;border:0.5px solid var(--b1);background:var(--surface2);margin-bottom:8px;opacity:0.6">
-    <div style="font-size:12px;font-weight:600;color:var(--tp);margin-bottom:2px">Base (Original)</div>
-    <div style="font-size:11px;color:var(--ts)">Original 64 leads · No imports</div>
-    <button onclick="revertToBase()" style="margin-top:6px;font-size:11px;font-weight:600;color:var(--ts);background:none;border:0.5px solid var(--b2);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit">Revert to Base</button>
-  </div>`;
+  // Saved versions — newest first
+  const versionCards = versions.slice().reverse().map((v, ri) => {
+    const idx = versions.length - 1 - ri;
+    const isCurrent = idx === currentVersionIdx;
+    const mutCount = v.leadMutations ? Object.keys(v.leadMutations).length : 0;
+    const importCount = v.leads ? v.leads.length : 0;
 
-  modal.style.display = 'flex';
+    const badges = [];
+    if (importCount > 0) badges.push(`<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(250,84,0,0.1);color:var(--accent)">${importCount} imported</span>`);
+    if (mutCount > 0)   badges.push(`<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(21,101,192,0.1);color:#1565C0">${mutCount} moved/updated</span>`);
+
+    return `
+      <div style="border-radius:10px;border:1px solid ${isCurrent ? 'var(--accent)' : 'var(--b1)'};background:${isCurrent ? 'rgba(250,84,0,0.04)' : 'var(--surface2)'};padding:14px 16px;margin-bottom:10px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;flex-wrap:wrap">
+              <div style="font-size:12px;font-weight:700;color:var(--tp)">${v.label}</div>
+              ${isCurrent ? '<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(250,84,0,0.12);color:var(--accent)">● Current</span>' : ''}
+            </div>
+            <div style="font-size:11px;color:var(--ts);margin-bottom:6px">${v.count} total leads</div>
+            ${badges.length ? `<div style="display:flex;gap:5px;flex-wrap:wrap">${badges.join('')}</div>` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+            ${isCurrent
+              ? `<span style="font-size:11px;color:var(--tt);padding:6px 12px;text-align:center">Loaded</span>`
+              : `<button onclick="revertToVersion(${idx})" style="font-size:11px;font-weight:700;color:#fff;background:var(--accent);border:none;border-radius:7px;padding:7px 16px;cursor:pointer;font-family:inherit;white-space:nowrap">↓ Load</button>`
+            }
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  list.innerHTML = `
+    ${versionCards}
+    <div style="border-top:0.5px solid var(--b1);padding-top:14px;margin-top:4px">
+      ${baseVersionHtml(currentVersionIdx)}
+    </div>`;
+}
+
+function baseVersionHtml(currentIdx) {
+  const isCurrent = currentIdx === -1;
+  return `
+    <div style="border-radius:10px;border:1px solid ${isCurrent ? 'var(--accent)' : 'var(--b1)'};background:${isCurrent ? 'rgba(250,84,0,0.04)' : 'var(--surface2)'};padding:14px 16px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+            <div style="font-size:12px;font-weight:700;color:var(--tp)">Base (Original)</div>
+            ${isCurrent ? '<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(250,84,0,0.12);color:var(--accent)">● Current</span>' : ''}
+          </div>
+          <div style="font-size:11px;color:var(--ts)">64 original leads · no imports · factory settings</div>
+        </div>
+        ${isCurrent
+          ? `<span style="font-size:11px;color:var(--tt);padding:6px 12px">Loaded</span>`
+          : `<button onclick="revertToBase()" style="font-size:11px;font-weight:700;color:var(--ts);background:var(--surface);border:1px solid var(--b2);border-radius:7px;padding:7px 14px;cursor:pointer;font-family:inherit;white-space:nowrap">↓ Load Base</button>`
+        }
+      </div>
+    </div>`
+;
 }
 
 // ── Revert functions ─────────────────────────────────────────────────────────
@@ -1020,22 +1457,39 @@ function revertToVersion(idx) {
   const v = versions[idx];
   if (!v) return;
 
-  // Rebuild: base leads + all imported leads up to and including this version
-  const importedLeads = [];
-  const seen = new Set(BASE_LEADS.map(l => (l.name + l.email).toLowerCase()));
+  // Reset to base leads with deep copy
+  LEADS.length = 0;
+  BASE_LEADS.forEach(l => LEADS.push(JSON.parse(JSON.stringify(l))));
 
+  // Re-apply imported leads from all versions up to this one
+  const seen = new Set(BASE_LEADS.map(l => (l.name + l.email).toLowerCase()));
   for (let i = 0; i <= idx; i++) {
     const ver = versions[i];
     if (ver.leads) {
       for (const l of ver.leads) {
         const key = (l.name + l.email).toLowerCase();
-        if (!seen.has(key)) { importedLeads.push(l); seen.add(key); }
+        if (!seen.has(key)) { LEADS.push(JSON.parse(JSON.stringify(l))); seen.add(key); }
       }
     }
   }
 
-  LEADS.length = 0;
-  [...BASE_LEADS, ...importedLeads].forEach(l => LEADS.push(l));
+  // Re-apply lead mutations from this version
+  if (v.leadMutations) {
+    LEADS.forEach(l => {
+      const key = ragKey(l);
+      const m = v.leadMutations[key];
+      if (m) {
+        if (m.node      !== undefined) l.node      = m.node;
+        if (m.s         !== undefined) l.s         = m.s;
+        if (m.reportsTo !== undefined) l.reportsTo = m.reportsTo || undefined;
+      }
+    });
+  }
+
+  // Restore rag state from this version
+  Object.keys(ragState).forEach(k => delete ragState[k]);
+  if (v.ragState) Object.assign(ragState, v.ragState);
+
   currentVersionIdx = idx;
   updateVersionPill();
   document.getElementById('version-modal').style.display = 'none';
@@ -1044,7 +1498,8 @@ function revertToVersion(idx) {
 
 function revertToBase() {
   LEADS.length = 0;
-  BASE_LEADS.forEach(l => LEADS.push(l));
+  BASE_LEADS.forEach(l => LEADS.push(JSON.parse(JSON.stringify(l))));
+  Object.keys(ragState).forEach(k => delete ragState[k]);
   currentVersionIdx = -1;
   updateVersionPill();
   document.getElementById('version-modal').style.display = 'none';
@@ -1053,10 +1508,9 @@ function revertToBase() {
 
 // Render immediately when DOM is ready — works reliably both standalone and inside an iframe
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function() { render(); loadVersions(); loadRagState(); });
+  document.addEventListener('DOMContentLoaded', function() { render(); loadRagState(); });
 } else {
   render();
-  loadVersions();
   loadRagState();
 }
 </script>
