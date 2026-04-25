@@ -1266,9 +1266,12 @@ function handleCSV(input) {
   const stEl = document.getElementById('import-status');
   if (fnEl) fnEl.textContent = file.name;
   if (stEl) stEl.textContent = 'Reading file…';
-  document.getElementById('import-preview').style.display = 'none';
-  document.getElementById('import-confirm-btn').style.display = 'none';
-  document.getElementById('import-progress-bar').style.display = 'none';
+  const previewEl  = document.getElementById('import-preview');
+  const confirmEl2 = document.getElementById('import-confirm-btn');
+  const progressEl = document.getElementById('import-progress-bar');
+  if (previewEl)  previewEl.style.display  = 'none';
+  if (confirmEl2) confirmEl2.style.display = 'none';
+  if (progressEl) progressEl.style.display = 'none';
 
   const reader = new FileReader();
   reader.onload = e => {
@@ -1322,16 +1325,18 @@ function handleCSV(input) {
     const dupeNote = dupeCount > 0
       ? `<span style="color:var(--tt)"> · ${dupeCount} duplicate${dupeCount > 1 ? 's' : ''} will be skipped</span>`
       : '';
-    document.getElementById('import-status').innerHTML = `
+    const importStatusEl = document.getElementById('import-status');
+    if (importStatusEl) importStatusEl.innerHTML = `
       <strong style="color:var(--tp)">${newCount} new lead${newCount !== 1 ? 's' : ''} will be added</strong> from ${rows.length} rows.${dupeNote}<br>
       <span style="color:var(--ts)">Each lead is automatically placed in the most likely org chart node based on their title and department.</span>`;
 
+    const statusEl  = document.getElementById('import-status');
+    const confirmEl = document.getElementById('import-confirm-btn');
     if (newCount === 0 && dupeCount > 0) {
-      document.getElementById('import-status').innerHTML = `<strong style="color:var(--tt)">All ${dupeCount} leads already exist</strong> — nothing new to import.`;
-      document.getElementById('import-confirm-btn').style.display = 'none';
+      if (statusEl)  statusEl.innerHTML = `<strong style="color:var(--tt)">All ${dupeCount} leads already exist</strong> — nothing new to import.`;
+      if (confirmEl) confirmEl.style.display = 'none';
     } else {
-      document.getElementById('import-confirm-btn').style.display = 'block';
-      document.getElementById('import-confirm-btn').textContent = `Add ${newCount} Lead${newCount !== 1 ? 's' : ''} to Org Chart`;
+      if (confirmEl) { confirmEl.style.display = 'block'; confirmEl.textContent = `Add ${newCount} Lead${newCount !== 1 ? 's' : ''} to Org Chart`; }
     }
   };
   reader.readAsText(file);
@@ -1346,8 +1351,10 @@ function closeImportModal() {
 async function confirmImport() {
   const btn = document.getElementById('import-confirm-btn');
   if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
-  document.getElementById('import-progress-bar').style.display = 'block';
-  document.getElementById('import-progress-fill').style.width = '30%';
+  const progBar  = document.getElementById('import-progress-bar');
+  const progFill = document.getElementById('import-progress-fill');
+  if (progBar)  progBar.style.display = 'block';
+  if (progFill) progFill.style.width  = '30%';
 
   // Only add leads that don't already exist (by name+email key)
   const existingKeys = new Set(LEADS.map(l => (l.name + l.email).toLowerCase()));
@@ -1364,8 +1371,8 @@ async function confirmImport() {
     }
   }
 
-  document.getElementById('import-progress-fill').style.width = '60%';
-  document.getElementById('import-progress-fill').style.width = '100%';
+  if (progFill) progFill.style.width = '60%';
+  if (progFill) progFill.style.width = '100%';
 
   setTimeout(() => {
     closeImportModal();
@@ -1381,15 +1388,18 @@ async function confirmImport() {
 
 function updateVersionPill() {
   const pill = document.getElementById('version-pill');
+  if (!pill) return;
   if (versions.length === 0) { pill.style.display = 'none'; return; }
   pill.style.display = 'inline-flex';
   const v = versions[currentVersionIdx];
-  document.getElementById('version-label').textContent = v ? v.label.slice(0, 18) : 'Base';
+  const lbl = document.getElementById('version-label');
+  if (lbl) lbl.textContent = v ? v.label.slice(0, 18) : 'Base';
 }
 
 function showVersions() {
   const modal = document.getElementById('version-modal');
   const list  = document.getElementById('version-list');
+  if (!modal || !list) return;
   modal.style.display = 'flex';
 
   if (versions.length === 0) {
