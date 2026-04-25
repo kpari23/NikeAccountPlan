@@ -173,7 +173,7 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 <div class="toolbar">
   <div>
     <div class="t-title">Nike, Inc. — Org Chart</div>
-    <div class="t-sub">Hover nodes for context · Caret expands leads · Click any person tile to set engagement status</div>
+    <div class="t-sub" id="org-sub">Hover nodes for context · Caret expands leads · Click any person tile to set engagement status · Last saved: <span id="org-last-saved">not yet saved</span></div>
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div class="filters" id="filters">
@@ -190,6 +190,7 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
       ↑ Import CSV
       <input type="file" accept=".csv" id="csv-input" style="display:none" onchange="handleCSV(this)"/>
     </label>
+    <button id="org-save-btn" onclick="saveOrgState()" style="font-size:11px;font-weight:600;padding:5px 14px;border:0.5px solid var(--b2);border-radius:100px;background:var(--surface);color:var(--tp);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.15s">Save</button>
   </div>
 </div>
 
@@ -465,29 +466,38 @@ const ragState={};
 let filter='all';
 const open=new Set();
 
-// ── Persist ragState to JSONBin ───────────────────────────────────────────────
+// ── Persist ragState to JSONBin — explicit save on demand ────────────────────
 const RAG_SAVE_KEY = 'orgchart_rag';
-let ragSaveTimer = null;
 
-function saveRagState() {
-  // Debounce — wait 800ms after last click before writing to avoid rapid API calls
-  clearTimeout(ragSaveTimer);
-  ragSaveTimer = setTimeout(async () => {
-    try {
-      const r = await fetch(VER_BIN_URL + '/latest', { headers: { 'X-Master-Key': VER_BIN_KEY } });
-      let rec = {};
-      if (r.ok) { const j = await r.json(); rec = j.record || {}; }
-      rec[RAG_SAVE_KEY] = ragState;
-      await fetch(VER_BIN_URL, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'X-Master-Key': VER_BIN_KEY },
-        body: JSON.stringify(rec)
-      });
-    } catch(e) {
-      // Fail silently — state still works in-session even if save fails
-      console.warn('RAG state save failed:', e.message);
+async function saveOrgState() {
+  const btn = document.getElementById('org-save-btn');
+  const lbl = document.getElementById('org-last-saved');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+  try {
+    const r = await fetch(VER_BIN_URL + '/latest', { headers: { 'X-Master-Key': VER_BIN_KEY } });
+    let rec = {};
+    if (r.ok) { const j = await r.json(); rec = j.record || {}; }
+    rec[RAG_SAVE_KEY] = ragState;
+    const w = await fetch(VER_BIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': VER_BIN_KEY },
+      body: JSON.stringify(rec)
+    });
+    if (w.ok) {
+      const ts = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      lbl.textContent = '☁ ' + ts;
+      btn.textContent = 'Saved ✓';
+      setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 1500);
+    } else {
+      throw new Error('HTTP ' + w.status);
     }
-  }, 800);
+  } catch(e) {
+    lbl.textContent = 'save failed';
+    btn.textContent = 'Save';
+    btn.disabled = false;
+    console.warn('Org state save failed:', e.message);
+  }
 }
 
 async function loadRagState() {
@@ -498,7 +508,15 @@ async function loadRagState() {
     const saved = j.record?.[RAG_SAVE_KEY];
     if (saved && typeof saved === 'object') {
       Object.assign(ragState, saved);
-      render(); // re-render with restored state
+      render();
+      // Show when it was last saved
+      const rec = j.record || {};
+      if (rec.savedAt || j.metadata?.createdAt) {
+        const d = new Date(rec.savedAt || j.metadata.createdAt);
+        document.getElementById('org-last-saved').textContent =
+          '☁ ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+          ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      }
     }
   } catch(e) {
     console.warn('RAG state load failed:', e.message);
@@ -522,7 +540,6 @@ function cycleRag(key){
   const idx=RAG_CYCLE.indexOf(cur);
   ragState[key]=RAG_CYCLE[(idx+1)%RAG_CYCLE.length];
   render();
-  saveRagState();
 }
 
 function sCls(s){return s==='vp'?'s-vp':s==='dir'?'s-dir':'s-mgr';}
