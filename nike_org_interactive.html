@@ -671,7 +671,8 @@ async function loadRagState() {
     // ── Show last saved time
     if (state.savedAt) {
       const d = new Date(state.savedAt);
-      document.getElementById('org-last-saved').textContent =
+      const el = document.getElementById('org-last-saved');
+      if (el) el.textContent =
         '☁ ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
         ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     }
@@ -872,11 +873,13 @@ function toggleAllCollapse(){
   const btn = document.getElementById('collapse-all-btn');
   if(allCollapsed){
     collapsedNodes.clear(); collapsedLeads.clear();
-    allCollapsed = false; btn.textContent = '⊖ Collapse All';
+    allCollapsed = false;
+    if(btn) btn.textContent = '⊖ Collapse All';
   } else {
     allIds.forEach(id => { collapsedNodes.add(id); collapsedLeads.add(id); });
     collapsedNodes.delete('ceo');
-    allCollapsed = true; btn.textContent = '⊕ Expand All';
+    allCollapsed = true;
+    if(btn) btn.textContent = '⊕ Expand All';
   }
   render();
 }
@@ -1259,8 +1262,10 @@ function handleCSV(input) {
   input.value = '';
   const modal = document.getElementById('import-modal');
   modal.style.display = 'flex';
-  document.getElementById('import-filename').textContent = file.name;
-  document.getElementById('import-status').textContent = 'Reading file…';
+  const fnEl = document.getElementById('import-filename');
+  const stEl = document.getElementById('import-status');
+  if (fnEl) fnEl.textContent = file.name;
+  if (stEl) stEl.textContent = 'Reading file…';
   document.getElementById('import-preview').style.display = 'none';
   document.getElementById('import-confirm-btn').style.display = 'none';
   document.getElementById('import-progress-bar').style.display = 'none';
@@ -1269,7 +1274,8 @@ function handleCSV(input) {
   reader.onload = e => {
     const rows = parseCSV(e.target.result);
     if (rows.length === 0) {
-      document.getElementById('import-status').textContent = '⚠ No rows found. Make sure the file has a header row and comma-separated values.';
+      const stEl2 = document.getElementById('import-status');
+      if (stEl2) stEl2.textContent = '⚠ No rows found. Make sure the file has a header row and comma-separated values.';
       return;
     }
     // Map each row to a lead object with hypothesized node
@@ -1339,8 +1345,7 @@ function closeImportModal() {
 // ── Apply import — adds only new leads, skips duplicates ─────────────────────
 async function confirmImport() {
   const btn = document.getElementById('import-confirm-btn');
-  btn.textContent = 'Saving…';
-  btn.disabled = true;
+  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
   document.getElementById('import-progress-bar').style.display = 'block';
   document.getElementById('import-progress-fill').style.width = '30%';
 
